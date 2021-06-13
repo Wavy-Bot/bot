@@ -9,7 +9,6 @@ EMB_COLOUR = int(os.getenv("COLOUR"), 16)
 
 class General(commands.Cog):
     """Cog that contains all general commands."""
-
     def __init__(self, bot):
         self.bot = bot
 
