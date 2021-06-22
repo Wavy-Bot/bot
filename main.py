@@ -11,17 +11,35 @@ TOKEN = os.getenv("TOKEN")
 intents = discord.Intents.default()
 intents.members = True
 
-bot = commands.Bot(command_prefix="%",
-                   case_insensitive=True,
-                   intents=intents,
-                   status=discord.Status.online,
-                   activity=discord.Game('https://wavybot.com'))
+bot = commands.AutoShardedBot(command_prefix=commands.when_mentioned_or("%"),
+                              case_insensitive=True,
+                              intents=intents,
+                              status=discord.Status.online,
+                              activity=discord.Game('https://wavybot.com'))
 
 
-@bot.event
-async def on_ready():
-    """Called when the bot is done preparing the data received from Discord."""
-    print(f'Logged in as\n{bot.user.name}\n{bot.user.id}')
+@bot.command(hidden=True)
+@commands.is_owner()
+async def load(ctx, extension):
+    """Loads a cog."""
+    bot.load_extension(f'cogs.{extension}')
+    await ctx.send(f"Loaded `{extension}`.")
+
+
+@bot.command(hidden=True)
+@commands.is_owner()
+async def unload(ctx, extension):
+    """Unloads a cog."""
+    bot.unload_extension(f'cogs.{extension}')
+    await ctx.send(f"Unloaded `{extension}`.")
+
+
+@bot.command(hidden=True)
+@commands.is_owner()
+async def reload(ctx, extension):
+    """Reloads a cog."""
+    bot.reload_extension(f'cogs.{extension}')
+    await ctx.send(f"Reloaded `{extension}`.")
 
 
 for cog in os.listdir("./cogs"):
