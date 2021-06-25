@@ -58,11 +58,11 @@ Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
         - [x] Meme
         - [x] Dank meme
         - [x] Reddit
-    - [ ] Randomizers
-        - [ ] Ship
-        - [ ] Howgay
-        - [ ] 8ball
-        - [ ] pp
+    - [x] Randomizers
+        - [x] Ship
+        - [x] Howgay
+        - [x] pp
+        - [x] 8ball
     - [ ] Random images
         - [ ] Cat
         - [ ] Dog

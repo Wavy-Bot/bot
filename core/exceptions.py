@@ -3,7 +3,6 @@ from discord.ext import commands
 
 class NSFWChannelRequired(commands.CommandError):
     """Error raised when channel isn't an NSFW channel."""
-    pass
 
 
 class APIError(commands.CommandError):

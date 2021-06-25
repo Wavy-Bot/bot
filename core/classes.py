@@ -93,3 +93,16 @@ class Reddit:
         self.image_url = image_url
         self.upvotes = upvotes
         self.comments = comments
+
+
+class ProgressBar:
+    """
+    Class that represents a progress bar.
+
+    Takes the following arguments:
+        bar = The progress bar itself.
+        percentage = The percentage used for the progress bar.
+    """
+    def __init__(self, bar: str, percentage: int):
+        self.bar = bar
+        self.percentage = percentage
