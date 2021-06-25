@@ -123,7 +123,7 @@ class General(commands.Cog):
 
         # Make a list of roles and remove the @everyone role
 
-        roles = [role for role in member.roles]
+        roles = list(member.roles)
         roles.pop(0)
 
         # Create the embed and add all fields
