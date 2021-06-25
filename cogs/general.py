@@ -29,8 +29,8 @@ class General(commands.Cog):
     @commands.command(aliases=['stats'])
     async def botinfo(self, ctx):
         """Sends info about the bot."""
-        server_stats = await utils.fetch_server_stats()
-        uptime = await utils.fetch_uptime()
+        server_stats = await utils.server_stats()
+        uptime = await utils.uptime()
 
         embed = discord.Embed(title="Wavy", colour=EMB_COLOUR)
 

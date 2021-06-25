@@ -2,3 +2,4 @@ discord.py
 python-dotenv
 psutil
 distro
+aiohttp

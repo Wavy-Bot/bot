@@ -45,3 +45,38 @@ class Uptime(object):
         self.hours = hours
         self.minutes = minutes
         self.seconds = seconds
+
+
+class Minecraft(object):
+    """
+    Class that represents a Minecraft user.
+
+    Takes the following arguments:
+        name => The user's name.
+        uuid => The user's UUID.
+    """
+    def __init__(self, name: str, uuid: str):
+        self.name = name
+        self.uuid = uuid
+
+
+class Reddit(object):
+    """
+    Class that represents a post in a subreddit.
+
+    Takes the following arguments:
+        subreddit => Subreddit the post is from.
+        title => Post's title.
+        link => Post's permalink.
+        image_url => Post's image url.
+        upvotes => Post's upvotes.
+        comments => Post's comments.
+    """
+    def __init__(self, subreddit: str, title: str, link: str, image_url: str,
+                 upvotes: int, comments: int):
+        self.subreddit = subreddit
+        self.title = title
+        self.link = "https://reddit.com" + link
+        self.image_url = image_url
+        self.upvotes = upvotes
+        self.comments = comments
