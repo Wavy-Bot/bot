@@ -191,8 +191,7 @@ class General(commands.Cog):
     @commands.command()
     async def invite(self, ctx):
         """Sends URLs to invite the bot, join the support server, etc."""
-
-        embed = discord.Embed(title=f"Useful links", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Useful links", colour=EMB_COLOUR)
 
         embed.add_field(name="Invite",
                         value="[Click Here](https://invite.wavybot.com)",

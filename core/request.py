@@ -23,7 +23,7 @@ async def reddit(subreddit: str, category: str, channel):
                     raise exceptions.APIError(
                         message=
                         "The requested subreddit has no posts. Please make sure your spelling is correct, otherwise "
-                        "try again later.")
+                        "try again later. ")
 
                 post = data['data']['children'][random.randint(
                     0, children)]['data']
@@ -43,8 +43,8 @@ async def reddit(subreddit: str, category: str, channel):
 
             raise exceptions.APIError(
                 message=
-                "Reddit's API returned an error. Please make sure your spelling is correct, "
-                "otherwise try again leter.")
+                "Reddit's API returned an error. Please make sure your spelling is correct, otherwise try again leter."
+            )
 
 
 async def minecraft_uuid(username: str):
@@ -63,3 +63,14 @@ async def minecraft_uuid(username: str):
                 return mc_class
 
             raise exceptions.APIError(message=data['errorMessage'])
+
+
+async def crafatar(username: str, endpoint: str):
+    """Fetches a render from Crafatar."""
+    data = await minecraft_uuid(username)
+
+    url = f"https://crafatar.com/renders/{endpoint}/{data.uuid}?overlay=true"
+
+    crafatar_class = classes.Crafatar(url=url, uuid_class=data)
+
+    return crafatar_class

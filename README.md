@@ -54,10 +54,10 @@ Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
     
 
 - [ ] Fun cog
-    - [ ] Reddit
-        - [ ] Meme
-        - [ ] Dank meme
-        - [ ] Reddit
+    - [x] Reddit
+        - [x] Meme
+        - [x] Dank meme
+        - [x] Reddit
     - [ ] Randomizers
         - [ ] Ship
         - [ ] Howgay
@@ -86,9 +86,9 @@ Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
     - [ ] AI
       - [ ] Cleverbot
     - [ ] Minecraft
-      - [ ] Skin
-      - [ ] Head
-      - [ ] UUID
+      - [x] Skin
+      - [x] Head
+      - [x] UUID
       - [ ] Hypixel
     - [ ] Leveling
       - [ ] Level

@@ -49,15 +49,15 @@ async def uptime():
     days, hours = divmod(hours, 24)
     weeks, days = divmod(days, 7)
 
-    uptime = classes.Uptime(weeks=weeks,
-                            days=days,
-                            hours=hours,
-                            minutes=minutes,
-                            seconds=seconds)
+    uptime_class = classes.Uptime(weeks=weeks,
+                                  days=days,
+                                  hours=hours,
+                                  minutes=minutes,
+                                  seconds=seconds)
 
     # Return class
 
-    return uptime
+    return uptime_class
 
 
 async def loading_text():

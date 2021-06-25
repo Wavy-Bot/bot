@@ -19,7 +19,6 @@ class Fun(commands.Cog):
     @commands.command()
     async def reddit(self, ctx, subreddit: str, category: str = None):
         """Sends a random post from the specified subreddit."""
-
         # Create a temp embed and send it whilst getting a post.
         # Edit the embed afterwards so only 1 message is needed,
         # and the user doesn't have to wait without getting a
@@ -52,7 +51,6 @@ class Fun(commands.Cog):
     @commands.command()
     async def meme(self, ctx, category: str = None):
         """Sends a random meme from r/memes."""
-
         # Create a temp embed and send it whilst getting a post.
         # Edit the embed afterwards so only 1 message is needed,
         # and the user doesn't have to wait without getting a
@@ -84,7 +82,6 @@ class Fun(commands.Cog):
     @commands.command()
     async def dankmeme(self, ctx, category: str = None):
         """Sends a random dank meme from r/dankmemes."""
-
         # Create a temp embed and send it whilst getting a post.
         # Edit the embed afterwards so only 1 message is needed,
         # and the user doesn't have to wait without getting a
@@ -112,6 +109,50 @@ class Fun(commands.Cog):
         embed.set_footer(text=f"👍 {post.upvotes} | 💬 {post.comments} • Wavy")
 
         await temp_msg.edit(embed=embed)
+
+    @commands.command()
+    async def uuid(self, ctx, username: str):
+        """Fetches the UUID of a Minecraft user."""
+        data = await request.minecraft_uuid(username)
+
+        embed = discord.Embed(title=f"{data.name}'s UUID",
+                              description=f"`{data.uuid}`",
+                              colour=EMB_COLOUR)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def head(self, ctx, username: str):
+        """Fetches the head of a Minecraft user."""
+        data = await request.crafatar(username, "head")
+
+        embed = discord.Embed(title=f"{data.uuid_class.name}'s head",
+                              colour=EMB_COLOUR)
+
+        embed.set_image(url=data.url)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def skin(self, ctx, username: str):
+        """Fetches the skin of a Minecraft user."""
+        data = await request.crafatar(username, "body")
+
+        embed = discord.Embed(title=f"{data.uuid_class.name}'s head",
+                              colour=EMB_COLOUR)
+
+        embed.set_image(url=data.url)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

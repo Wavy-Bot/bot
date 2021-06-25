@@ -1,4 +1,4 @@
-class Stats(object):
+class Stats:
     """
     Class that represents the stats of the bot and the server it's running on.
 
@@ -28,7 +28,7 @@ class Stats(object):
         self.kernel_version = kernel_version
 
 
-class Uptime(object):
+class Uptime:
     """
     Class that represents the bot's uptime.
 
@@ -47,7 +47,7 @@ class Uptime(object):
         self.seconds = seconds
 
 
-class Minecraft(object):
+class Minecraft:
     """
     Class that represents a Minecraft user.
 
@@ -60,7 +60,20 @@ class Minecraft(object):
         self.uuid = uuid
 
 
-class Reddit(object):
+class Crafatar:
+    """
+    Class that represents a Crafatar API response.
+
+    Takes the following arguments:
+        url => The url of the render.
+        uuid_class => The UUID class that was used to fetch said render.
+    """
+    def __init__(self, url: str, uuid_class: object):
+        self.url = url
+        self.uuid_class = uuid_class
+
+
+class Reddit:
     """
     Class that represents a post in a subreddit.
 
