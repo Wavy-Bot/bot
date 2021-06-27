@@ -89,7 +89,7 @@ async def sra_image(animal: str):
 async def sad_cat():
     """Fetches a random image of a sat cat from Wavy's API."""
     async with aiohttp.ClientSession() as cs, cs.get(
-            f'https://api.wavybot.com/sad_cat') as resp:
+            'https://api.wavybot.com/sad_cat') as resp:
         if resp.status == 200:
             data = await resp.json()
 
@@ -103,7 +103,7 @@ async def sad_cat():
 async def duck():
     """Fetches a random image of a duck from random-d.uk."""
     async with aiohttp.ClientSession() as cs, cs.get(
-            f'https://random-d.uk/api/v2/random') as resp:
+            'https://random-d.uk/api/v2/random') as resp:
         if resp.status == 200:
             data = await resp.json()
 
@@ -117,7 +117,7 @@ async def duck():
 async def bunny():
     """Fetches a random image of a bunny from bunnies.io."""
     async with aiohttp.ClientSession() as cs, cs.get(
-            f'https://api.bunnies.io/v2/loop/random/?media=gif,png') as resp:
+            'https://api.bunnies.io/v2/loop/random/?media=gif,png') as resp:
         if resp.status == 200:
             data = await resp.json()
 
@@ -131,7 +131,7 @@ async def bunny():
 async def shiba():
     """Fetches a random image of a shiba from shibe.online."""
     async with aiohttp.ClientSession() as cs, cs.get(
-            f'https://shibe.online/api/shibes') as resp:
+            'https://shibe.online/api/shibes') as resp:
         if resp.status == 200:
             data = await resp.json()
 
@@ -145,7 +145,7 @@ async def shiba():
 async def sloth():
     """Fetches a random image of a sloth from sloth.pics."""
     async with aiohttp.ClientSession() as cs, cs.get(
-            f'https://sloth.pics/api') as resp:
+            'https://sloth.pics/api') as resp:
         if resp.status == 200:
             data = await resp.json()
 
@@ -159,7 +159,7 @@ async def sloth():
 async def lizard():
     """Fetches a random image of a lizard from nekos.life."""
     async with aiohttp.ClientSession() as cs, cs.get(
-            f'https://nekos.life/api/v2/img/lizard') as resp:
+            'https://nekos.life/api/v2/img/lizard') as resp:
         if resp.status == 200:
             data = await resp.json()
 
