@@ -11,6 +11,7 @@ Wavy is an open-source multi-purpose Discord bot powered by [Discord.py](https:/
     <td align="center"><a href="https://www.python.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/768px-Python-logo-notext.svg.png" width="100px;" alt=""/><br /><sub><b>Python 3</b></sub></a><br /></td>
     <td align="center"><a href="https://www.jetbrains.com/pycharm/"><img src="https://i2.wp.com/clay-atlas.com/wp-content/uploads/2019/10/PyCharm_Logo.svg_.png?resize=1024%2C1024&ssl=1" width="100px;" alt=""/><br /><sub><b>PyCharm Professional</b></sub></a><br /></td>
     <td align="center"><a href="https://deepsource.io/"><img src="https://static.crozdesk.com/web_app_library/providers/logos/000/011/711/original/deepsource-1608196869-logo.png?1608196869" width="100px;" alt=""/><br /><sub><b>Deepsource</b></sub></a><br /></td>
+    <td align="center"><a href="https://some-random-api.ml/"><img src="https://i.some-random-api.ml/logo.png" width="100px;" alt=""/><br /><sub><b>Some Random API</b></sub></a><br /></td>
   </tr>
 </table>
 
@@ -63,26 +64,27 @@ Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
         - [x] Howgay
         - [x] pp
         - [x] 8ball
-    - [ ] Random images
-        - [ ] Cat
-        - [ ] Dog
-        - [ ] Crying cat
-        - [ ] Duck
-        - [ ] Bird
-        - [ ] Bunny
-        - [ ] Bear
-        - [ ] Fox
-        - [ ] Shiba
-        - [ ] Sloth
-        - [ ] Panda
-        - [ ] Red panda
-        - [ ] Koala
-        - [ ] Raccoon
-        - [ ] Kangaroo
-        - [ ] Whale
-        - [ ] Lizard
-        - [ ] HTTP_Cat
-        - [ ] HTTP_Dog
+    - [x] Random images
+        - [x] Cat
+        - [x] Dog
+        - [x] Sad cat
+        - [x] Duck
+        - [x] Bird
+        - [x] Bunny
+        - [x] Bear
+        - [x] Fox
+        - [x] Shiba
+        - [x] Sloth
+        - [x] Panda
+        - [x] Red panda
+        - [x] Koala
+        - [x] Raccoon
+        - [x] Kangaroo
+        - [x] Whale
+        - [x] Lizard
+        - [x] HTTP_Cat
+        - [x] HTTP_Dog
+        - [x] HTTP_Duck
     - [ ] AI
       - [ ] Cleverbot
     - [ ] Minecraft

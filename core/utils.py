@@ -12,9 +12,6 @@ launch_time = datetime.utcnow()
 
 async def server_stats():
     """Gets the current server stats."""
-    # TODO(Robert): This really isn't the best way to do this,
-    #               so I will have to improve this later.
-
     cpu_usage = psutil.cpu_percent()
     ram_usage = round(psutil.virtual_memory().used / (1024.0**2))
     total_ram = round(psutil.virtual_memory().total / (1024.0**2))
@@ -118,33 +115,9 @@ async def loading_text():
 
 async def progress_bar():
     """Creates a progress bar."""
-    # NOTE(Robert) This is an absolute warcrime
-    #              and I don't recommend doing
-    #              it like this.
     percentage = (random.randint(0, 100))
 
-    if percentage == 0:
-        bar = bar = "⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛"
-    elif percentage <= 10:
-        bar = "⬜⬛⬛⬛⬛⬛⬛⬛⬛⬛"
-    elif percentage <= 20:
-        bar = "⬜⬜⬛⬛⬛⬛⬛⬛⬛⬛"
-    elif percentage <= 30:
-        bar = "⬜⬜⬜⬛⬛⬛⬛⬛⬛⬛"
-    elif percentage <= 40:
-        bar = "⬜⬜⬜⬜⬛⬛⬛⬛⬛⬛"
-    elif percentage <= 50:
-        bar = "⬜⬜⬜⬜⬜⬛⬛⬛⬛⬛"
-    elif percentage <= 60:
-        bar = "⬜⬜⬜⬜⬜⬜⬛⬛⬛⬛"
-    elif percentage <= 70:
-        bar = "⬜⬜⬜⬜⬜⬜⬜⬛⬛⬛"
-    elif percentage <= 80:
-        bar = "⬜⬜⬜⬜⬜⬜⬜⬜⬛⬛"
-    elif percentage <= 90:
-        bar = "⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛"
-    elif percentage <= 100:
-        bar = "⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜"
+    bar = f"{int(round(percentage / 10, 0)) * '⬜'}{(10 - int(round(percentage / 10, 0))) * '⬛'}"
 
     bar_class = classes.ProgressBar(bar=bar, percentage=percentage)
 

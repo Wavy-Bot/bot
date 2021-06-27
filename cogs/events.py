@@ -19,6 +19,23 @@ class Events(commands.Cog):
         print(f'Logged in as\n{self.bot.user.name}\n{self.bot.user.id}')
 
     @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        """Called when the bot joins a new guild."""
+        guild_channel = guild.text_channels[0]
+        message_channel = self.bot.get_channel(guild_channel.id)
+
+        message = "**Hi there, I'm Wavy** - The blazingly fast Discord bot.\n" \
+                  "- My prefix is `%`\n" \
+                  "- You can see a list of commands by typing `%help`\n" \
+                  "- You can set me up by going to <https://dash.wavybot.com>\n" \
+                  "- If you need help, feel free to join my support server over at https://discord.wavybot.com"
+
+        try:
+            await message_channel.send(message)
+        except discord.Forbidden:
+            return
+
+    @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         """Called when an exception was called."""
         # TODO(Robert): Set the correct documentation URLs.
