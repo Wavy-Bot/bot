@@ -151,7 +151,7 @@ class Moderation(commands.Cog):
         """Nukes all messages in a channel."""
         await ctx.channel.purge()
 
-        embed = discord.Embed(title=f"Nuked all messages.", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Nuked all messages.", colour=EMB_COLOUR)
 
         embed.set_image(
             url=

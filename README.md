@@ -107,19 +107,19 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     
 
 - [ ] Music cog
-    - [ ] Join
-    - [ ] Play
-    - [ ] Pause
-    - [ ] Resume
-    - [ ] Skip
-    - [ ] Disconnect
-    - [ ] Volume
-    - [ ] Shuffle
-    - [ ] Volume
-    - [ ] Equalizer
-    - [ ] Queue
-    - [ ] Now playing
-    - [ ] Swap DJ
+    - [x] Join
+    - [x] Play
+    - [x] Pause
+    - [x] Resume
+    - [x] Skip
+    - [x] Disconnect
+    - [x] Volume
+    - [x] Shuffle
+    - [x] Volume
+    - [x] Equalizer
+    - [x] Queue
+    - [x] Now playing
+    - [x] Swap DJ
     
 
 - [ ] Events cog
