@@ -1,5 +1,5 @@
-discord.py
-python-dotenv
-psutil
-distro
-aiohttp
+discord.py==1.7.3
+python-dotenv==0.18.0
+psutil==5.8.0
+distro==1.5.0
+aiohttp==3.7.4.post0

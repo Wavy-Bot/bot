@@ -17,6 +17,7 @@ Wavy is an open-source multi-purpose Discord bot powered by [Discord.py](https:/
 
 ## To-do list
 Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
+_You might notice a weird pattern of completed items in this list, but that's just because I am going to do database-related stuff at the end since I am still deciding what db engine to use._
 
 - [ ] General cog
     - [x] Ping
@@ -29,17 +30,17 @@ Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
     
 
 - [ ] Moderation cog
-    - [ ] Kick
-    - [ ] Ban
-    - [ ] Softban
-    - [ ] Unban
+    - [x] Kick
+    - [x] Ban
+    - [x] Softban
+    - [x] Unban
     - [ ] Mute
     - [ ] Unmute
     - [ ] Warn
     - [ ] Unwarn
     - [ ] Warnings
-    - [ ] Clear
-    - [ ] Nuke
+    - [x] Clear
+    - [x] Nuke
     - [ ] Lock
     - [ ] Unlock
     
@@ -127,7 +128,8 @@ Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
     - [ ] Leveling event (on_message)
     - [ ] Logging event (kick, ban, message delete, etc.)
     - [ ] Cleverbot event (on_message)
-    - [ ] Error handler event (on_command_error)
+    - [ ] Bot guild join event (on_guild_join)
+    - [x] Error handler event (on_command_error)
     - [ ] Add rows to DB on join (on_guild_join)
     - [ ] Add rows to DB on remove (on_guild_remove)
 
