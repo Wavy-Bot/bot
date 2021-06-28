@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+import os
 import datetime
 import math
 import random
@@ -37,7 +38,7 @@ from discord.ext import commands, menus
 # URL matching REGEX...
 URL_REG = re.compile(r'https?://(?:www\.)?.+')
 
-embcolor = 0x0c0f27  # Set embed color
+EMB_COLOUR = int(os.getenv("COLOUR"), 16)
 
 
 class Track(wavelink.Track):
@@ -56,7 +57,7 @@ class Player(wavelink.Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.context: commands.Context = kwargs.get('context', None)
+        self.context: commands.Context = kwargs.get('context')
         if self.context:
             self.dj: discord.Member = self.context.author
 
@@ -107,7 +108,7 @@ class PaginatorSource(menus.ListPageSource):
         super().__init__(entries, per_page=per_page)
 
     async def format_page(self, menu: menus.Menu, page):
-        embed = discord.Embed(title='Coming Up...', colour=embcolor)
+        embed = discord.Embed(title='Coming Up...', colour=EMB_COLOUR)
         embed.description = '\n'.join(f'`{index}. {title}`'
                                       for index, title in enumerate(page, 1))
 
@@ -132,7 +133,6 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
     async def start_nodes(self) -> None:
         """Connect and intiate nodes."""
-
         print("[Server] Connecting to Lavalink instance")
 
         await self.bot.wait_until_ready()
@@ -179,9 +179,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             for m in channel.members:
                 if m.bot:
                     continue
-                else:
-                    player.dj = m
-                    return
+                player.dj = m
+                return
 
         elif after.channel == channel and player.dj not in channel.members:
             player.dj = member
@@ -195,15 +194,14 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                                                       cls=Player,
                                                       context=ctx)
 
-        if player.context:
-            if player.context.channel != ctx.channel:
-                raise exceptions.IncorrectChannelError(
-                    f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
-                )
+        if player.context and player.context.channel != ctx.channel:
+            raise exceptions.IncorrectChannelError(
+                f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
+            )
 
         if ctx.command.name == 'connect' and not player.context:
             return
-        elif self.is_privileged(ctx):
+        if self.is_privileged(ctx):
             return
 
         if not player.channel_id:
@@ -213,11 +211,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         if not channel:
             return
 
-        if player.is_connected:
-            if ctx.author not in channel.members:
-                raise exceptions.IncorrectChannelError(
-                    f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
-                )
+        if player.is_connected and ctx.author not in channel.members:
+            raise exceptions.IncorrectChannelError(
+                f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
+            )
 
     def required(self, ctx: commands.Context):
         """Method which returns required votes based on amount of members in a channel."""
@@ -227,9 +224,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         channel = self.bot.get_channel(int(player.channel_id))
         required = math.ceil((len(channel.members) - 1) / 2.5)
 
-        if ctx.command.name == 'stop':
-            if len(channel.members) == 3:
-                required = 2
+        if ctx.command.name == 'stop' and len(channel.members) == 3:
+            required = 2
 
         return required
 
@@ -296,7 +292,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             # Create embed
 
-            embed = discord.Embed(title=f'Added to queue', colour=embcolor)
+            embed = discord.Embed(title='Added to queue', colour=EMB_COLOUR)
             embed.description = f'**[`{tracks.data["playlistInfo"]["name"]}`]({track.uri})**\n\n'
             embed.set_thumbnail(url=track.thumb)
 
@@ -318,7 +314,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             # Create embed
 
-            embed = discord.Embed(title=f'Added to queue', colour=embcolor)
+            embed = discord.Embed(title='Added to queue', colour=EMB_COLOUR)
             embed.description = f'**[`{track.title}`]({track.uri})**\n\n'
             embed.set_thumbnail(url=track.thumb)
 
@@ -553,7 +549,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return await ctx.send(
                 f'**:x: Invalid EQ provided.** Valid EQs:\n\n• {joined}')
 
-        eq = eqs.get(equalizer.lower(), None)
+        eq = eqs.get(equalizer.lower())
 
         if not eq:
             joined = "\n• ".join(eqs.keys())
@@ -604,7 +600,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         # Create embed
 
-        embed = discord.Embed(title=f'Now playing', colour=embcolor)
+        embed = discord.Embed(title='Now playing', colour=EMB_COLOUR)
         embed.description = f'**[`{track.title}`]({track.uri})**\n\n'
         embed.set_thumbnail(url=track.thumb)
 
@@ -658,10 +654,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         for m in members:
             if m == player.dj or m.bot:
                 continue
-            else:
-                player.dj = m
-                return await ctx.send(
-                    f'**:control_knobs: {member.mention} is now the DJ.**')
+            player.dj = m
+            return await ctx.send(
+                f'**:control_knobs: {member.mention} is now the DJ.**')
 
 
 def setup(bot: commands.Bot):

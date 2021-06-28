@@ -106,7 +106,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
         - [ ] Laugh
     
 
-- [ ] Music cog
+- [x] Music cog
     - [x] Join
     - [x] Play
     - [x] Pause
