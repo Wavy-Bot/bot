@@ -1,0 +1,86 @@
+import os
+import random
+
+import discord
+
+from core import request
+from core import utils
+from discord.ext import commands
+
+EMB_COLOUR = int(os.getenv("COLOUR"), 16)
+CATEGORY_LIST = ["hot", "new", "top", "rising"]
+
+
+class NSFW(commands.Cog):
+    """Cog that contains all NSFW commands."""
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    @commands.is_nsfw()
+    async def hentai(self, ctx, category: str = None):
+        """Sends a random image from r/hentai."""
+        # Create a temp embed and send it whilst getting a post.
+        # Edit the embed afterwards so only 1 message is needed,
+        # and the user doesn't have to wait without getting a
+        # response.
+
+        loading_text = await utils.loading_text()
+
+        temp_embed = discord.Embed(title="Hentai",
+                                   description=loading_text,
+                                   colour=EMB_COLOUR)
+
+        temp_msg = await ctx.send(embed=temp_embed)
+
+        if not category or category and category.lower() not in CATEGORY_LIST:
+            category = random.choice(CATEGORY_LIST)
+
+        post = await request.reddit("hentai", category, ctx.message.channel)
+
+        embed = discord.Embed(title=post.title,
+                              url=post.link,
+                              colour=EMB_COLOUR)
+
+        embed.set_image(url=post.image_url)
+
+        embed.set_footer(text=f"👍 {post.upvotes} | 💬 {post.comments} • Wavy")
+
+        await temp_msg.edit(embed=embed)
+
+    @commands.command()
+    @commands.is_nsfw()
+    async def porn(self, ctx, category: str = None):
+        """Sends a random image from r/porn."""
+        # Create a temp embed and send it whilst getting a post.
+        # Edit the embed afterwards so only 1 message is needed,
+        # and the user doesn't have to wait without getting a
+        # response.
+
+        loading_text = await utils.loading_text()
+
+        temp_embed = discord.Embed(title="Porn",
+                                   description=loading_text,
+                                   colour=EMB_COLOUR)
+
+        temp_msg = await ctx.send(embed=temp_embed)
+
+        if not category or category and category.lower() not in CATEGORY_LIST:
+            category = random.choice(CATEGORY_LIST)
+
+        post = await request.reddit("porn", category, ctx.message.channel)
+
+        embed = discord.Embed(title=post.title,
+                              url=post.link,
+                              colour=EMB_COLOUR)
+
+        embed.set_image(url=post.image_url)
+
+        embed.set_footer(text=f"👍 {post.upvotes} | 💬 {post.comments} • Wavy")
+
+        await temp_msg.edit(embed=embed)
+
+
+def setup(bot):
+    """Add cog to bot"""
+    bot.add_cog(NSFW(bot))

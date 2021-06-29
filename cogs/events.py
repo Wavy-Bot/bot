@@ -70,7 +70,7 @@ class Events(commands.Cog):
             else:
                 description = f"`{error}`"
 
-        elif isinstance(error, exceptions.NSFWChannelRequired):
+        elif isinstance(error, commands.NSFWChannelRequired):
             description = "Please set the channel to be NSFW, or move to an NSFW channel. Not sure how to do this? " \
                           "Click [here](https://docs.wavybot.com)."
 

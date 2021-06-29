@@ -92,7 +92,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
       - [x] Skin
       - [x] Head
       - [x] UUID
-      - [ ] Hypixel
+      - [ ] Hypixel (I'll have to make a custom package for this)
     - [ ] Leveling
       - [ ] Level
       - [ ] Leaderboard
@@ -120,6 +120,11 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     - [x] Queue
     - [x] Now playing
     - [x] Swap DJ
+    
+
+- [x] NSFW cog
+    - [x] Hentai
+    - [x] Porn
     
 
 - [ ] Events cog

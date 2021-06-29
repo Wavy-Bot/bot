@@ -1,4 +1,4 @@
-"""FROM https://github.com/PythonistaGuild/Wavelink/blob/master/examples/advanced.py
+"""From https://github.com/PythonistaGuild/Wavelink/blob/master/examples/advanced.py
 The MIT License (MIT)
 
 Copyright (c) 2019-2020 PythonistaGuild
@@ -114,7 +114,8 @@ class PaginatorSource(menus.ListPageSource):
 
         return embed
 
-    def is_paginating(self):
+    @staticmethod
+    def is_paginating():
         # We always want to embed even on 1 page of results...
         return True
 
@@ -196,6 +197,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if player.context and player.context.channel != ctx.channel:
             raise exceptions.IncorrectChannelError(
+                message=
                 f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
             )
 
@@ -213,6 +215,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         if player.is_connected and ctx.author not in channel.members:
             raise exceptions.IncorrectChannelError(
+                message=
                 f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
             )
 

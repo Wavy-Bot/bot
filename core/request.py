@@ -4,6 +4,7 @@ import aiohttp
 
 from core import classes
 from core import exceptions
+from discord.ext import commands
 
 
 async def reddit(subreddit: str, category: str, channel):
@@ -28,7 +29,7 @@ async def reddit(subreddit: str, category: str, channel):
 
             if post['over_18'] and not channel.is_nsfw():
 
-                raise exceptions.NSFWChannelRequired
+                raise commands.NSFWChannelRequired(channel=channel)
 
             post_class = classes.Reddit(subreddit=post['subreddit'],
                                         title=post['title'],
