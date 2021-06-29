@@ -1,12 +1,16 @@
-import asyncio
+import os
 import random
 
+import asyncio
 import aiohttp
 import rule34
+import async_cleverbot as ac
 
 from core import classes
 from core import exceptions
 from discord.ext import commands
+
+CLEVERBOT_KEY = os.getenv("CLEVERBOT_KEY")
 
 
 async def reddit(subreddit: str, category: str, channel):
@@ -220,3 +224,14 @@ async def r34(query: str):
     image = random.choice(images)
 
     return image
+
+
+async def cleverbot(text: str, member_id: int):
+    """Makes a request to Travitia's cleverbot API."""
+    cs = ac.Cleverbot(CLEVERBOT_KEY)
+
+    res = await cs.ask(text, member_id)
+
+    await cs.close()
+
+    return res.text

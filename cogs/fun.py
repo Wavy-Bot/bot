@@ -926,6 +926,22 @@ class Fun(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=["cb"])
+    async def cleverbot(self, ctx, *, text: str):
+        """Talking robot human thing, woah"""
+        await ctx.trigger_typing()
+
+        res = await request.cleverbot(text, ctx.author.id)
+
+        embed = discord.Embed(title="Cleverbot",
+                              description=res,
+                              colour=EMB_COLOUR)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     """Add cog to bot"""

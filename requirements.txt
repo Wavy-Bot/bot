@@ -7,3 +7,4 @@ wavelink==0.9.9
 asyncio==3.4.3
 async_timeout==3.0.1
 rule34==1.8.1
+async-cleverbot==0.2.2
