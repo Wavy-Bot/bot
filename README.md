@@ -86,8 +86,8 @@ _You might notice a weird pattern of completed items in this list, but that's ju
         - [x] HTTP_Cat
         - [x] HTTP_Dog
         - [x] HTTP_Duck
-    - [ ] AI
-      - [ ] Cleverbot
+    - [x] AI
+      - [x] Cleverbot
     - [ ] Minecraft
       - [x] Skin
       - [x] Head
