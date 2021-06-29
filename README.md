@@ -96,14 +96,15 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     - [ ] Leveling
       - [ ] Level
       - [ ] Leaderboard
-    - [ ]  Other
-        - [ ] Kill
-        - [ ] Heal
-        - [ ] Slap
-        - [ ] Punch
-        - [ ] Kiss
-        - [ ] Lick
-        - [ ] Laugh
+    - [x]  Other
+        - [x] Kill
+        - [x] Heal
+        - [x] Slap
+        - [x] Punch
+        - [x] Kiss
+        - [x] Lick
+        - [x] Laugh
+        - [x] Pocky
     
 
 - [x] Music cog

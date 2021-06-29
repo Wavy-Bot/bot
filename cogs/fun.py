@@ -1,5 +1,6 @@
 import os
 import random
+import json
 
 import discord
 
@@ -9,6 +10,8 @@ from discord.ext import commands
 
 EMB_COLOUR = int(os.getenv("COLOUR"), 16)
 CATEGORY_LIST = ["hot", "new", "top", "rising"]
+INTERACTIONS_JSON = open('interactions.json')
+INTERACTIONS = json.load(INTERACTIONS_JSON)
 
 
 class Fun(commands.Cog):
@@ -777,6 +780,151 @@ class Fun(commands.Cog):
                          icon_url=self.bot.user.avatar_url)
 
         await temp_msg.edit(embed=embed)
+
+    @commands.command(aliases=["murder"])
+    async def kill(self, ctx, member: discord.Member = None):
+        """Kills the specified user."""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["kill"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} kills {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def heal(self, ctx, member: discord.Member = None):
+        """Heals the specified user."""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["heal"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} heals {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def slap(self, ctx, member: discord.Member = None):
+        """Slaps the specified user."""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["slap"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} slaps {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def punch(self, ctx, member: discord.Member = None):
+        """Punches the specified user."""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["punch"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} punches {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def kiss(self, ctx, member: discord.Member = None):
+        """Kisses the specified user."""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["kiss"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} kisses {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def lick(self, ctx, member: discord.Member = None):
+        """Licks the specified user. (oh and please do not question why this exists)"""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["lick"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} licks {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def laugh(self, ctx, member: discord.Member = None):
+        """Laughs at the specified user."""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["laugh"]
+
+        embed = discord.Embed(
+            title=f"{ctx.author.display_name} laughs at {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def pocky(self, ctx, member: discord.Member = None):
+        """Pocky challenge?"""
+        member = ctx.author if not member else member
+
+        responses = INTERACTIONS["pocky"]
+
+        embed = discord.Embed(
+            title=
+            f"{ctx.author.display_name} does the pocky challenge with {member.display_name}",
+            colour=EMB_COLOUR)
+
+        embed.set_image(url=f'{random.choice(responses)}')
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
