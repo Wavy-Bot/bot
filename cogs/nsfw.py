@@ -80,6 +80,36 @@ class NSFW(commands.Cog):
 
         await temp_msg.edit(embed=embed)
 
+    @commands.command(aliases=["r34"])
+    @commands.is_nsfw()
+    async def rule34(self, ctx, query: str):
+        """Searches rule34 and returns an image."""
+        # Create a temp embed and send it whilst getting an image.
+        # Edit the embed afterwards so only 1 message is needed,
+        # and the user doesn't have to wait without getting a
+        # response.
+
+        loading_text = await utils.loading_text()
+
+        temp_embed = discord.Embed(title="Rule 34",
+                                   description=loading_text,
+                                   colour=EMB_COLOUR)
+
+        temp_msg = await ctx.send(embed=temp_embed)
+
+        image = await request.r34(query)
+
+        embed = discord.Embed(title="Rule 34",
+                              url=image.file_url,
+                              colour=EMB_COLOUR)
+
+        embed.set_image(url=image.file_url)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await temp_msg.edit(embed=embed)
+
 
 def setup(bot):
     """Add cog to bot"""

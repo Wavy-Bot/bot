@@ -1,6 +1,8 @@
+import asyncio
 import random
 
 import aiohttp
+import rule34
 
 from core import classes
 from core import exceptions
@@ -205,3 +207,16 @@ async def http_duck(code: int):
             url = f"https://random-d.uk/api/v2/http/{code}"
 
         return url
+
+
+async def r34(query: str):
+    """Fetches an image from rule34.xxx"""
+    event_loop = asyncio.get_event_loop()
+
+    cs = rule34.Rule34(event_loop)
+
+    images = await cs.getImages(tags=query, randomPID=True)
+
+    image = random.choice(images)
+
+    return image
