@@ -124,3 +124,21 @@ class Welcome:
         self.message = message
         self.embed = embed
         self.embed_colour = embed_colour
+
+
+class Leave:
+    """
+    Class that represents the leave table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        message => Leave message.
+        embed => Wether or not the leave message is an embed.
+        embed_colour => Colour of the embed.
+    """
+    def __init__(self, server_id: int, message: str, embed: bool,
+                 embed_colour: int):
+        self.server_id = server_id
+        self.message = message
+        self.embed = embed
+        self.embed_colour = embed_colour

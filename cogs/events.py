@@ -95,7 +95,7 @@ class Events(commands.Cog):
                     message = message.format(**usable_vars)
 
             else:
-                message = f"Welcome to {member.guild.name}, {member.mention}! We now have {len(member.guild.members)} members. "
+                message = f"Welcome to {member.guild.name}, {member.mention}! We now have {len(member.guild.members)} members."
 
             if config.embed:
                 colour = EMB_COLOUR
@@ -103,6 +103,67 @@ class Events(commands.Cog):
                     colour = int(config.embed_colour, 16)
 
                 embed = discord.Embed(title=":tada: Welcome!",
+                                      description=message,
+                                      colour=colour)
+
+                embed.set_thumbnail(url=member.avatar_url)
+
+                embed.set_footer(text="Wavy • https://wavybot.com",
+                                 icon_url=self.bot.user.avatar_url)
+
+                await channel.send(embed=embed)
+
+            else:
+                await channel.send(message)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        """Called when a member leaves a guild."""
+        channel_id = await self.db.fetch_channels_leave(member.guild.id)
+        channel = self.bot.get_channel(channel_id)
+        if await self.db.fetch_config_leave(member.guild.id) and channel_id:
+            # Fetch leave config from the database, check if it needs to be an embed and send the message.
+            config = await self.db.fetch_leave(member.guild.id)
+            message = config.message
+
+            if message:
+                msg_vars = [
+                    fn for _, fn, _, _ in Formatter().parse(message)
+                    if fn is not None
+                ]
+
+                if msg_vars:
+                    # Note(Robert): This is for security reasons since I don't want people to be able to access
+                    #               anything else than just these variables.
+                    server_name = member.guild.name
+                    member_mention = member.mention
+                    member_full = member.name + member.discriminator
+                    member_nickname = member.display_name
+                    member_count = len(member.guild.members)
+
+                    usable_vars = {
+                        "server_name": server_name,
+                        "member_mention": member_mention,
+                        "member_full": member_full,
+                        "member_nickname": member_nickname,
+                        "member_count": member_count
+                    }
+
+                    for i in msg_vars:
+                        if i not in usable_vars:
+                            message = message.replace("{" + i + "}", "")
+
+                    message = message.format(**usable_vars)
+
+            else:
+                message = f"{member.mention} left the server, there are now {len(member.guild.members)} members in this server."
+
+            if config.embed:
+                colour = EMB_COLOUR
+                if config.embed_colour:
+                    colour = int(config.embed_colour, 16)
+
+                embed = discord.Embed(title=":wave: Cya!",
                                       description=message,
                                       colour=colour)
 

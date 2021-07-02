@@ -65,6 +65,12 @@ class Database:
                 embed BOOL DEFAULT true,
                 embed_colour TEXT
             );
+            CREATE TABLE IF NOT EXISTS leave(
+                server_id BIGINT,
+                message TEXT,
+                embed BOOL DEFAULT true,
+                embed_colour TEXT
+            );
             """)
 
             db.commit()
@@ -90,6 +96,8 @@ class Database:
                     (server_id, ))
                 await c.execute("INSERT INTO welcome (server_id) VALUES (%s);",
                                 (server_id, ))
+                await c.execute("INSERT INTO leave (server_id) VALUES (%s);",
+                                (server_id, ))
 
                 await db.commit()
 
@@ -103,6 +111,8 @@ class Database:
             await c.execute("DELETE FROM channels WHERE server_id=%s;",
                             (server_id, ))
             await c.execute("DELETE FROM welcome WHERE server_id=%s;",
+                            (server_id, ))
+            await c.execute("DELETE FROM leave WHERE server_id=%s;",
                             (server_id, ))
 
             await db.commit()
@@ -289,5 +299,20 @@ class Database:
                                             message=r[1],
                                             embed=r[2],
                                             embed_colour=r[3])
+
+            return welcome_class
+
+    async def fetch_leave(self, server_id: int):
+        """Fetches a guild's leave message settings."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("SELECT * FROM leave WHERE server_id=%s;",
+                            (server_id, ))
+
+            r = await c.fetchone()
+
+            welcome_class = classes.Leave(server_id=r[0],
+                                          message=r[1],
+                                          embed=r[2],
+                                          embed_colour=r[3])
 
             return welcome_class

@@ -133,7 +133,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
 
 - [ ] Events cog
     - [x] Welcome messages event (on_member_join)
-    - [ ] Leave messages event (on_member_remove)
+    - [x] Leave messages event (on_member_remove)
     - [ ] Leveling event (on_message)
     - [ ] Logging event (kick, ban, message delete, etc.)
     - [ ] Cleverbot event (on_message)
