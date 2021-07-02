@@ -47,6 +47,8 @@ async def run():
 
 
 class Wavy(commands.AutoShardedBot):
+    """The blazing-fast Discord bot - now as a class for as little as $69420.99!
+    (this is a joke if you haven't noticed already ^)"""
     def __init__(self, db):
         self.db = db
 
@@ -69,6 +71,7 @@ class Wavy(commands.AutoShardedBot):
                     raise e
 
     async def __fetch_prefix(self, botobject, message):
+        """Fetches the bot's prefix from the database."""
         if not message.guild:
             return commands.when_mentioned_or("%")(botobject, message)
 

@@ -2,9 +2,9 @@ import os
 
 import discord
 
+from core import exceptions, database
 from discord.ext import commands
-from core import exceptions
-from core import database
+from string import Formatter
 
 EMB_COLOUR = int(os.getenv("COLOUR"), 16)
 ERR_COLOUR = int(os.getenv("ERR_COLOUR"), 16)
@@ -58,7 +58,6 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         """Called when a new member joins a guild."""
-        # TODO(Robert): Add support for variables in custom welcome messages.
         channel_id = await self.db.fetch_channels_welcome(member.guild.id)
         channel = self.bot.get_channel(channel_id)
         if await self.db.fetch_config_welcome(member.guild.id) and channel_id:
@@ -66,8 +65,37 @@ class Events(commands.Cog):
             config = await self.db.fetch_welcome(member.guild.id)
             message = config.message
 
-            if not message:
-                message = f"Welcome to {member.guild.name}, {member.mention}! We now have {len(member.guild.members)} members."
+            if message:
+                msg_vars = [
+                    fn for _, fn, _, _ in Formatter().parse(message)
+                    if fn is not None
+                ]
+
+                if msg_vars:
+                    # Note(Robert): This is for security reasons since I don't want people to be able to access
+                    #               anything else than just these variables.
+                    server_name = member.guild.name
+                    member_mention = member.mention
+                    member_full = member.name + member.discriminator
+                    member_nickname = member.display_name
+                    member_count = len(member.guild.members)
+
+                    usable_vars = {
+                        "server_name": server_name,
+                        "member_mention": member_mention,
+                        "member_full": member_full,
+                        "member_nickname": member_nickname,
+                        "member_count": member_count
+                    }
+
+                    for i in msg_vars:
+                        if i not in usable_vars:
+                            message = message.replace("{" + i + "}", "")
+
+                    message = message.format(**usable_vars)
+
+            else:
+                message = f"Welcome to {member.guild.name}, {member.mention}! We now have {len(member.guild.members)} members. "
 
             if config.embed:
                 colour = EMB_COLOUR

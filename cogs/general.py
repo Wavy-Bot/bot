@@ -2,9 +2,8 @@ import os
 
 import discord
 
-from core import utils
+from core import utils, database
 from discord.ext import commands
-from core import database
 
 EMB_COLOUR = int(os.getenv("COLOUR"), 16)
 
