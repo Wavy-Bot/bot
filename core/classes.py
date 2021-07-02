@@ -100,9 +100,27 @@ class ProgressBar:
     Class that represents a progress bar.
 
     Takes the following arguments:
-        bar = The progress bar itself.
-        percentage = The percentage used for the progress bar.
+        bar => The progress bar itself.
+        percentage => The percentage used for the progress bar.
     """
     def __init__(self, bar: str, percentage: int):
         self.bar = bar
         self.percentage = percentage
+
+
+class Welcome:
+    """
+    Class that represents the welcome table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        message => Welcome message.
+        embed => Wether or not the welcome message is an embed.
+        embed_colour => Colour of the embed.
+    """
+    def __init__(self, server_id: int, message: str, embed: bool,
+                 embed_colour: int):
+        self.server_id = server_id
+        self.message = message
+        self.embed = embed
+        self.embed_colour = embed_colour

@@ -9,6 +9,7 @@ Wavy is an open-source multi-purpose Discord bot powered by [Discord.py](https:/
 <table>
   <tr>
     <td align="center"><a href="https://www.python.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/768px-Python-logo-notext.svg.png" width="100px;" alt=""/><br /><sub><b>Python 3</b></sub></a><br /></td>
+    <td align="center"><a href="https://www.postgresql.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Postgresql_elephant.svg/1200px-Postgresql_elephant.svg.png" width="100px;" alt=""/><br /><sub><b>PostgreSQL</b></sub></a><br /></td>
     <td align="center"><a href="https://www.jetbrains.com/pycharm/"><img src="https://i2.wp.com/clay-atlas.com/wp-content/uploads/2019/10/PyCharm_Logo.svg_.png?resize=1024%2C1024&ssl=1" width="100px;" alt=""/><br /><sub><b>PyCharm Professional</b></sub></a><br /></td>
     <td align="center"><a href="https://deepsource.io/"><img src="https://static.crozdesk.com/web_app_library/providers/logos/000/011/711/original/deepsource-1608196869-logo.png?1608196869" width="100px;" alt=""/><br /><sub><b>Deepsource</b></sub></a><br /></td>
     <td align="center"><a href="https://some-random-api.ml/"><img src="https://i.some-random-api.ml/logo.png" width="100px;" alt=""/><br /><sub><b>Some Random API</b></sub></a><br /></td>
@@ -17,7 +18,8 @@ Wavy is an open-source multi-purpose Discord bot powered by [Discord.py](https:/
 
 ## To-do list
 Stuff I'm still working on; It's quite a list, but it's (hopefully) worth it.
-_You might notice a weird pattern of completed items in this list, but that's just because I am going to do database-related stuff at the end since I am still deciding what db engine to use._
+_You might notice a weird pattern of completed items in this list, but that's just because I am doing database-related stuff now since I was still deciding what db engine to use._
+
 
 - [ ] General cog
     - [x] Ping
@@ -130,15 +132,15 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     
 
 - [ ] Events cog
-    - [ ] Welcome messages evemt (on_member_join)
+    - [x] Welcome messages event (on_member_join)
     - [ ] Leave messages event (on_member_remove)
     - [ ] Leveling event (on_message)
     - [ ] Logging event (kick, ban, message delete, etc.)
     - [ ] Cleverbot event (on_message)
-    - [ ] Bot guild join event (on_guild_join)
+    - [x] Bot guild join event (on_guild_join)
     - [x] Error handler event (on_command_error)
-    - [ ] Add rows to DB on join (on_guild_join)
-    - [ ] Add rows to DB on remove (on_guild_remove)
+    - [x] Add rows to DB on join (on_guild_join)
+    - [x] Add rows to DB on remove (on_guild_remove)
 
 ## License
 

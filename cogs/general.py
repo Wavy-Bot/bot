@@ -4,6 +4,7 @@ import discord
 
 from core import utils
 from discord.ext import commands
+from core import database
 
 EMB_COLOUR = int(os.getenv("COLOUR"), 16)
 
@@ -12,6 +13,7 @@ class General(commands.Cog):
     """Cog that contains all general commands."""
     def __init__(self, bot):
         self.bot = bot
+        self.db = database.Database()
 
     @commands.command()
     async def ping(self, ctx):
@@ -78,6 +80,7 @@ class General(commands.Cog):
     async def serverinfo(self, ctx):
         """Sends info about the current server."""
         guild = ctx.message.guild
+        prefix = await self.db.fetch_config_prefix(guild.id)
 
         embed = discord.Embed(title=f"Info on {guild.name}", colour=EMB_COLOUR)
 
@@ -102,6 +105,8 @@ class General(commands.Cog):
         embed.add_field(name="Boosts",
                         value=str(len(guild.premium_subscribers)),
                         inline=True)
+
+        embed.add_field(name="Prefix", value=prefix, inline=True)
 
         embed.add_field(name="Created", value=guild.created_at, inline=True)
 
