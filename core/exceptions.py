@@ -27,3 +27,10 @@ class IncorrectChannelError(commands.CommandError):
     ):
         self.message = message
         super().__init__(self.message)
+
+
+class NonExistantChannelError(commands.CommandError):
+    """Error raised when a channel doesn't exist."""
+    def __init__(self, message="The specified channel does not exist."):
+        self.message = message
+        super().__init__(self.message)

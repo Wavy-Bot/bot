@@ -40,7 +40,8 @@ def init_db():
             leave BIGINT,
             log BIGINT,
             level BIGINT,
-            captcha BIGINT
+            captcha BIGINT,
+            cleverbot BIGINT
         );
         CREATE TABLE IF NOT EXISTS welcome(
             server_id BIGINT,
@@ -285,6 +286,17 @@ class Database:
         async with self.db.connection() as db, db.cursor() as c:
             await c.execute("SELECT captcha FROM channels WHERE server_id=%s;",
                             (server_id, ))
+
+            r = await c.fetchone()
+
+            return r[0]
+
+    async def fetch_channels_cleverbot(self, server_id: int):
+        """Fetches a guild's cleverbot channel."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT cleverbot FROM channels WHERE server_id=%s;",
+                (server_id, ))
 
             r = await c.fetchone()
 

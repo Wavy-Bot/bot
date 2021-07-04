@@ -2,7 +2,7 @@ import os
 
 import discord
 
-from core import exceptions, database
+from core import exceptions, database, request
 from discord.ext import commands
 from string import Formatter
 
@@ -90,8 +90,8 @@ class Events(commands.Cog):
     async def on_member_join(self, member):
         """Called when a new member joins a guild."""
         channel_id = await self.db.fetch_channels_welcome(member.guild.id)
-        channel = self.bot.get_channel(channel_id)
         if await self.db.fetch_config_welcome(member.guild.id) and channel_id:
+            channel = self.bot.get_channel(channel_id)
             # Fetch welcome config from the database, check if it needs to be an embed and send the message.
             config = await self.db.fetch_welcome(member.guild.id)
             message = config.message
@@ -116,17 +116,27 @@ class Events(commands.Cog):
                 embed.set_footer(text="Wavy • https://wavybot.com",
                                  icon_url=self.bot.user.avatar_url)
 
-                await channel.send(embed=embed)
+                try:
+                    await channel.send(embed=embed)
+                except AttributeError:
+                    raise exceptions.NonExistantChannelError(
+                        message=
+                        f"The channel with ID {channel_id} does not exist.")
 
             else:
-                await channel.send(message)
+                try:
+                    await channel.send(message)
+                except AttributeError:
+                    raise exceptions.NonExistantChannelError(
+                        message=
+                        f"The channel with ID {channel_id} does not exist.")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         """Called when a member leaves a guild."""
         channel_id = await self.db.fetch_channels_leave(member.guild.id)
-        channel = self.bot.get_channel(channel_id)
         if await self.db.fetch_config_leave(member.guild.id) and channel_id:
+            channel = self.bot.get_channel(channel_id)
             # Fetch leave config from the database, check if it needs to be an embed and send the message.
             config = await self.db.fetch_leave(member.guild.id)
             message = config.message
@@ -151,10 +161,51 @@ class Events(commands.Cog):
                 embed.set_footer(text="Wavy • https://wavybot.com",
                                  icon_url=self.bot.user.avatar_url)
 
-                await channel.send(embed=embed)
+                try:
+                    await channel.send(embed=embed)
+                except AttributeError:
+                    raise exceptions.NonExistantChannelError(
+                        message=
+                        f"The channel with ID {channel_id} does not exist.")
 
             else:
-                await channel.send(message)
+                try:
+                    await channel.send(message)
+                except AttributeError:
+                    raise exceptions.NonExistantChannelError(
+                        message=
+                        f"The channel with ID {channel_id} does not exist.")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        """Called when a member sends a message."""
+        member = message.author
+
+        if not member.bot:
+            if await self.db.fetch_config_cleverbot(message.guild.id):
+                channel_id = await self.db.fetch_channels_cleverbot(
+                    message.guild.id)
+                if channel_id:
+                    channel = self.bot.get_channel(channel_id)
+
+                    if message.channel == channel:
+                        async with message.channel.typing():
+                            res = await request.cleverbot(
+                                message.content, member.id)
+                            embed = discord.Embed(title="Cleverbot",
+                                                  description=res,
+                                                  colour=self.emb_colour)
+
+                            embed.set_footer(text="Wavy • https://wavybot.com",
+                                             icon_url=self.bot.user.avatar_url)
+
+                            try:
+                                await channel.send(embed=embed)
+                            except AttributeError:
+                                raise exceptions.NonExistantChannelError(
+                                    message=
+                                    f"The channel with ID {channel_id} does not exist."
+                                )
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

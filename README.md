@@ -136,7 +136,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     - [x] Leave messages event (on_member_remove)
     - [ ] Leveling event (on_message)
     - [ ] Logging event (kick, ban, message delete, etc.)
-    - [ ] Cleverbot event (on_message)
+    - [x] Cleverbot event (on_message)
     - [x] Bot guild join event (on_guild_join)
     - [x] Error handler event (on_command_error)
     - [x] Add rows to DB on join (on_guild_join)
