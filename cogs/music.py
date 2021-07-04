@@ -292,7 +292,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             # Create embed
 
-            embed = discord.Embed(title='Added to queue', colour=self.emb_colour)
+            embed = discord.Embed(title='Added to queue',
+                                  colour=self.emb_colour)
             embed.description = f'**[`{tracks.data["playlistInfo"]["name"]}`]({track.uri})**\n\n'
             embed.set_thumbnail(url=track.thumb)
 
@@ -314,7 +315,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             # Create embed
 
-            embed = discord.Embed(title='Added to queue', colour=self.emb_colour)
+            embed = discord.Embed(title='Added to queue',
+                                  colour=self.emb_colour)
             embed.description = f'**[`{track.title}`]({track.uri})**\n\n'
             embed.set_thumbnail(url=track.thumb)
 
