@@ -5,13 +5,12 @@ import discord
 from datetime import datetime, timedelta
 from discord.ext import commands
 
-EMB_COLOUR = int(os.getenv("COLOUR"), 16)
-
 
 class Moderation(commands.Cog):
     """Cog that contains all moderation commands."""
     def __init__(self, bot):
         self.bot = bot
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
 
     @commands.command(aliases=["yeet"])
     @commands.has_permissions(kick_members=True)
@@ -23,7 +22,7 @@ class Moderation(commands.Cog):
         """Kicks the specified member."""
         await member.kick(reason=reason)
 
-        embed = discord.Embed(title=f"Kicked {member}", colour=EMB_COLOUR)
+        embed = discord.Embed(title=f"Kicked {member}", colour=self.emb_colour)
 
         embed.add_field(name="Reason", value=reason, inline=False)
 
@@ -46,7 +45,7 @@ class Moderation(commands.Cog):
         """Bans the specified member."""
         await member.ban(reason=reason)
 
-        embed = discord.Embed(title=f"Banned {member}", colour=EMB_COLOUR)
+        embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
 
         embed.add_field(name="Reason", value=reason, inline=False)
 
@@ -77,7 +76,7 @@ class Moderation(commands.Cog):
 
         await member.kick(reason=reason)
 
-        embed = discord.Embed(title=f"Banned {member}", colour=EMB_COLOUR)
+        embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
 
         embed.add_field(name="Reason", value=reason, inline=False)
 
@@ -112,7 +111,7 @@ class Moderation(commands.Cog):
                 await ctx.guild.unban(member)
 
                 embed = discord.Embed(title=f"Unbanned {member}",
-                                      colour=EMB_COLOUR)
+                                      colour=self.emb_colour)
 
                 embed.add_field(name="Moderator",
                                 value=ctx.message.author,
@@ -138,7 +137,7 @@ class Moderation(commands.Cog):
 
         embed = discord.Embed(
             title=f"{len(deleted) - 1} messages have been deleted.",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)
@@ -151,7 +150,8 @@ class Moderation(commands.Cog):
         """Nukes all messages in a channel."""
         await ctx.channel.purge()
 
-        embed = discord.Embed(title="Nuked all messages.", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Nuked all messages.",
+                              colour=self.emb_colour)
 
         embed.set_image(
             url=

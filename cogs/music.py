@@ -35,11 +35,6 @@ import async_timeout
 from core import exceptions
 from discord.ext import commands, menus
 
-# URL matching REGEX...
-URL_REG = re.compile(r'https?://(?:www\.)?.+')
-
-EMB_COLOUR = int(os.getenv("COLOUR"), 16)
-
 
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
@@ -106,9 +101,10 @@ class PaginatorSource(menus.ListPageSource):
     """Player queue paginator class."""
     def __init__(self, entries, *, per_page=8):
         super().__init__(entries, per_page=per_page)
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
 
     async def format_page(self, menu: menus.Menu, page):
-        embed = discord.Embed(title='Coming Up...', colour=EMB_COLOUR)
+        embed = discord.Embed(title='Coming Up...', colour=self.emb_colour)
         embed.description = '\n'.join(f'`{index}. {title}`'
                                       for index, title in enumerate(page, 1))
 
@@ -124,8 +120,9 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
     """Music Cog."""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-
         self.volume = 100
+        self.url_reg = re.compile(r'https?://(?:www\.)?.+')
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
 
         if not hasattr(bot, 'wavelink'):
             bot.wavelink = wavelink.Client(bot=bot)
@@ -275,7 +272,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         await ctx.send(f"**:mag_right: Searching for `{query}`.**")
 
-        if not URL_REG.match(query):
+        if not self.url_reg.match(query):
             query = f'ytsearch:{query}'
 
         tracks = await self.bot.wavelink.get_tracks(query)
@@ -295,7 +292,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             # Create embed
 
-            embed = discord.Embed(title='Added to queue', colour=EMB_COLOUR)
+            embed = discord.Embed(title='Added to queue', colour=self.emb_colour)
             embed.description = f'**[`{tracks.data["playlistInfo"]["name"]}`]({track.uri})**\n\n'
             embed.set_thumbnail(url=track.thumb)
 
@@ -317,7 +314,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
             # Create embed
 
-            embed = discord.Embed(title='Added to queue', colour=EMB_COLOUR)
+            embed = discord.Embed(title='Added to queue', colour=self.emb_colour)
             embed.description = f'**[`{track.title}`]({track.uri})**\n\n'
             embed.set_thumbnail(url=track.thumb)
 
@@ -603,7 +600,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         # Create embed
 
-        embed = discord.Embed(title='Now playing', colour=EMB_COLOUR)
+        embed = discord.Embed(title='Now playing', colour=self.emb_colour)
         embed.description = f'**[`{track.title}`]({track.uri})**\n\n'
         embed.set_thumbnail(url=track.thumb)
 

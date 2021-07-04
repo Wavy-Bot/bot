@@ -8,16 +8,25 @@ from core import utils
 from core import request
 from discord.ext import commands
 
-EMB_COLOUR = int(os.getenv("COLOUR"), 16)
-CATEGORY_LIST = ["hot", "new", "top", "rising"]
-INTERACTIONS_JSON = open('interactions.json')
-INTERACTIONS = json.load(INTERACTIONS_JSON)
-
 
 class Fun(commands.Cog):
     """Cog that contains all fun commands."""
     def __init__(self, bot):
         self.bot = bot
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
+        self.category_list = ["hot", "new", "top", "rising"]
+        self.interactions = json.load(open('interactions.json'))
+
+    async def __temp_embed(self, ctx, title: str):
+        loading_text = await utils.loading_text()
+
+        temp_embed = discord.Embed(title=title,
+                                   description=loading_text,
+                                   colour=self.emb_colour)
+
+        temp_msg = await ctx.send(embed=temp_embed)
+
+        return temp_msg
 
     @commands.command()
     async def reddit(self, ctx, subreddit: str, category: str = None):
@@ -27,23 +36,18 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
+        temp_msg = await self.__temp_embed(ctx, "Reddit")
 
-        temp_embed = discord.Embed(title="Reddit",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
+        if not category or category and category.lower(
+        ) not in self.category_list:
 
-        temp_msg = await ctx.send(embed=temp_embed)
-
-        if not category or category and category.lower() not in CATEGORY_LIST:
-
-            category = random.choice(CATEGORY_LIST)
+            category = random.choice(self.category_list)
 
         post = await request.reddit(subreddit, category, ctx.message.channel)
 
         embed = discord.Embed(title=post.title,
                               url=post.link,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=post.image_url)
 
@@ -59,22 +63,17 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
+        temp_msg = await self.__temp_embed(ctx, "Meme")
 
-        temp_embed = discord.Embed(title="Meme",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
-
-        if not category or category and category.lower() not in CATEGORY_LIST:
-            category = random.choice(CATEGORY_LIST)
+        if not category or category and category.lower(
+        ) not in self.category_list:
+            category = random.choice(self.category_list)
 
         post = await request.reddit("memes", category, ctx.message.channel)
 
         embed = discord.Embed(title=post.title,
                               url=post.link,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=post.image_url)
 
@@ -90,22 +89,17 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
+        temp_msg = await self.__temp_embed(ctx, "Dank meme")
 
-        temp_embed = discord.Embed(title="Dank meme",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
-
-        if not category or category and category.lower() not in CATEGORY_LIST:
-            category = random.choice(CATEGORY_LIST)
+        if not category or category and category.lower(
+        ) not in self.category_list:
+            category = random.choice(self.category_list)
 
         post = await request.reddit("dankmemes", category, ctx.message.channel)
 
         embed = discord.Embed(title=post.title,
                               url=post.link,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=post.image_url)
 
@@ -121,7 +115,7 @@ class Fun(commands.Cog):
 
         embed = discord.Embed(title=f"{data.name}'s UUID",
                               description=f"`{data.uuid}`",
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)
@@ -135,7 +129,7 @@ class Fun(commands.Cog):
         data = await request.crafatar(username, "head")
 
         embed = discord.Embed(title=f"{data.uuid_class.name}'s head",
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=data.url)
 
@@ -151,7 +145,7 @@ class Fun(commands.Cog):
         data = await request.crafatar(username, "body")
 
         embed = discord.Embed(title=f"{data.uuid_class.name}'s head",
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=data.url)
 
@@ -167,7 +161,7 @@ class Fun(commands.Cog):
 
         embed = discord.Embed(title="❤️ **MATCHMAKING** ❤️",
                               description=f"\n{first} - {second}",
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.add_field(name=f"{bar.percentage}%", value=bar.bar, inline=True)
 
@@ -184,7 +178,7 @@ class Fun(commands.Cog):
         bar = await utils.progress_bar()
 
         embed = discord.Embed(title="🏳️‍🌈 **gay detection machine** 🏳️‍🌈",
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.add_field(name=f"{member} is {bar.percentage}% gay",
                         value=bar.bar,
@@ -204,8 +198,8 @@ class Fun(commands.Cog):
 
         pp = "8" + "=" * size + "D"
 
-        embed = discord.Embed(title="Peepee size calculator™",
-                              colour=EMB_COLOUR)
+        embed = discord.Embed(title="pp size calculator™",
+                              colour=self.emb_colour)
 
         embed.add_field(name=f"{member.name}'s penis", value=pp, inline=True)
 
@@ -230,7 +224,7 @@ class Fun(commands.Cog):
 
         embed = discord.Embed(title=question,
                               description=random.choice(responses),
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)
@@ -245,17 +239,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Cat",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Cat")
 
         image = await request.sra_image("cat")
 
-        embed = discord.Embed(title="Cat", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Cat", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -272,17 +260,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Dog",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Dog")
 
         image = await request.sra_image("dog")
 
-        embed = discord.Embed(title="Dog", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Dog", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -299,17 +281,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Sad cat",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Sad cat")
 
         image = await request.sad_cat()
 
-        embed = discord.Embed(title="Sad cat", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Sad cat", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -326,17 +302,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Duck",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Duck")
 
         image = await request.duck()
 
-        embed = discord.Embed(title="Duck", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Duck", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -353,17 +323,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Bird",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Bird")
 
         image = await request.sra_image("bird")
 
-        embed = discord.Embed(title="Bird", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Bird", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -380,17 +344,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Bunny",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Bunny")
 
         image = await request.bunny()
 
-        embed = discord.Embed(title="Bunny", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Bunny", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -407,22 +365,17 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
+        temp_msg = await self.__temp_embed(ctx, "Bear")
 
-        temp_embed = discord.Embed(title="Bear",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
-
-        if not category or category and category.lower() not in CATEGORY_LIST:
-            category = random.choice(CATEGORY_LIST)
+        if not category or category and category.lower(
+        ) not in self.category_list:
+            category = random.choice(self.category_list)
 
         post = await request.reddit("bears", category, ctx.message.channel)
 
         embed = discord.Embed(title=post.title,
                               url=post.link,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=post.image_url)
 
@@ -438,17 +391,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Fox",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Fox")
 
         image = await request.sra_image("fox")
 
-        embed = discord.Embed(title="Fox", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Fox", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -465,17 +412,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Shiba",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Shiba")
 
         image = await request.shiba()
 
-        embed = discord.Embed(title="Shiba", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Shiba", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -492,17 +433,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Sloth",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Sloth")
 
         image = await request.sloth()
 
-        embed = discord.Embed(title="Sloth", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Sloth", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -519,17 +454,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Panda",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Panda")
 
         image = await request.sra_image("panda")
 
-        embed = discord.Embed(title="Panda", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Panda", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -546,17 +475,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Red panda",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Red panda")
 
         image = await request.sra_image("red_panda")
 
-        embed = discord.Embed(title="Red panda", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Red panda", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -573,17 +496,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Koala",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Koala")
 
         image = await request.sra_image("koala")
 
-        embed = discord.Embed(title="Koala", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Koala", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -600,17 +517,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Raccoon",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Raccoon")
 
         image = await request.sra_image("raccoon")
 
-        embed = discord.Embed(title="Raccoon", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Raccoon", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -627,17 +538,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Kangaroo",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Kangaroo")
 
         image = await request.sra_image("kangaroo")
 
-        embed = discord.Embed(title="Kangaroo", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Kangaroo", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -654,17 +559,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Whale",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Whale")
 
         image = await request.sra_image("whale")
 
-        embed = discord.Embed(title="Whale", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Whale", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -681,17 +580,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="Lizard",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "Lizard")
 
         image = await request.lizard()
 
-        embed = discord.Embed(title="Lizard", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Lizard", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -708,17 +601,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="HTTP Cat",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "HTTP cat")
 
         image = await request.http_cat(code)
 
-        embed = discord.Embed(title="HTTP Cat", colour=EMB_COLOUR)
+        embed = discord.Embed(title="HTTP Cat", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -735,17 +622,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="HTTP Dog",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "HTTP dog")
 
         image = await request.http_dog(code)
 
-        embed = discord.Embed(title="HTTP Dog", colour=EMB_COLOUR)
+        embed = discord.Embed(title="HTTP Dog", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -762,17 +643,11 @@ class Fun(commands.Cog):
         # and the user doesn't have to wait without getting a
         # response.
 
-        loading_text = await utils.loading_text()
-
-        temp_embed = discord.Embed(title="HTTP Duck",
-                                   description=loading_text,
-                                   colour=EMB_COLOUR)
-
-        temp_msg = await ctx.send(embed=temp_embed)
+        temp_msg = await self.__temp_embed(ctx, "HTTP duck")
 
         image = await request.http_duck(code)
 
-        embed = discord.Embed(title="HTTP Duck", colour=EMB_COLOUR)
+        embed = discord.Embed(title="HTTP Duck", colour=self.emb_colour)
 
         embed.set_image(url=image)
 
@@ -786,11 +661,11 @@ class Fun(commands.Cog):
         """Kills the specified user."""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["kill"]
+        responses = self.interactions["kill"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} kills {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -804,11 +679,11 @@ class Fun(commands.Cog):
         """Heals the specified user."""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["heal"]
+        responses = self.interactions["heal"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} heals {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -822,11 +697,11 @@ class Fun(commands.Cog):
         """Slaps the specified user."""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["slap"]
+        responses = self.interactions["slap"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} slaps {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -840,11 +715,11 @@ class Fun(commands.Cog):
         """Punches the specified user."""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["punch"]
+        responses = self.interactions["punch"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} punches {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -858,11 +733,11 @@ class Fun(commands.Cog):
         """Kisses the specified user."""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["kiss"]
+        responses = self.interactions["kiss"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} kisses {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -876,11 +751,11 @@ class Fun(commands.Cog):
         """Licks the specified user. (oh and please do not question why this exists)"""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["lick"]
+        responses = self.interactions["lick"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} licks {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -894,11 +769,11 @@ class Fun(commands.Cog):
         """Laughs at the specified user."""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["laugh"]
+        responses = self.interactions["laugh"]
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name} laughs at {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -912,12 +787,12 @@ class Fun(commands.Cog):
         """Pocky challenge?"""
         member = ctx.author if not member else member
 
-        responses = INTERACTIONS["pocky"]
+        responses = self.interactions["pocky"]
 
         embed = discord.Embed(
             title=
             f"{ctx.author.display_name} does the pocky challenge with {member.display_name}",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_image(url=f'{random.choice(responses)}')
 
@@ -935,7 +810,7 @@ class Fun(commands.Cog):
 
         embed = discord.Embed(title="Cleverbot",
                               description=res,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)

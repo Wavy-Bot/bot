@@ -5,13 +5,12 @@ import discord
 from core import utils, database
 from discord.ext import commands
 
-EMB_COLOUR = int(os.getenv("COLOUR"), 16)
-
 
 class General(commands.Cog):
     """Cog that contains all general commands."""
     def __init__(self, bot):
         self.bot = bot
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.db = database.Database()
 
     @commands.command()
@@ -20,7 +19,7 @@ class General(commands.Cog):
         embed = discord.Embed(
             title="Pong :ping_pong:",
             description=f"Heartbeat: {round(self.bot.latency * 1000)}ms",
-            colour=EMB_COLOUR)
+            colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)
@@ -33,7 +32,7 @@ class General(commands.Cog):
         server_stats = await utils.server_stats()
         uptime = await utils.uptime()
 
-        embed = discord.Embed(title="Wavy", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Wavy", colour=self.emb_colour)
 
         # Add all fields with the stats
 
@@ -81,7 +80,8 @@ class General(commands.Cog):
         guild = ctx.message.guild
         prefix = await self.db.fetch_config_prefix(guild.id)
 
-        embed = discord.Embed(title=f"Info on {guild.name}", colour=EMB_COLOUR)
+        embed = discord.Embed(title=f"Info on {guild.name}",
+                              colour=self.emb_colour)
 
         embed.add_field(name="Owner", value=guild.owner.name, inline=True)
 
@@ -132,7 +132,8 @@ class General(commands.Cog):
 
         # Create the embed and add all fields
 
-        embed = discord.Embed(title=f"Info on {member}", colour=EMB_COLOUR)
+        embed = discord.Embed(title=f"Info on {member}",
+                              colour=self.emb_colour)
 
         embed.add_field(name="Display name:",
                         value=member.display_name,
@@ -183,7 +184,7 @@ class General(commands.Cog):
                               f" | [GIF]({gif})" if gif else f"[PNG]({png})"
                               f" | [JPG]({jpg})"
                               f" | [WEBP]({webp})",
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=member.avatar_url)
 
@@ -195,7 +196,7 @@ class General(commands.Cog):
     @commands.command()
     async def invite(self, ctx):
         """Sends URLs to invite the bot, join the support server, etc."""
-        embed = discord.Embed(title="Useful links", colour=EMB_COLOUR)
+        embed = discord.Embed(title="Useful links", colour=self.emb_colour)
 
         embed.add_field(name="Invite",
                         value="[Click Here](https://invite.wavybot.com)",

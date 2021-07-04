@@ -7,7 +7,7 @@ import distro
 from core import classes
 from datetime import datetime
 
-launch_time = datetime.utcnow()
+LAUNCH_TIME = datetime.utcnow()
 
 
 async def server_stats():
@@ -40,7 +40,7 @@ async def uptime():
     # TODO(Robert): This really isn't the best way to do this,
     #               so I will have to improve this later.
 
-    delta_uptime = datetime.utcnow() - launch_time
+    delta_uptime = datetime.utcnow() - LAUNCH_TIME
     hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
     days, hours = divmod(hours, 24)

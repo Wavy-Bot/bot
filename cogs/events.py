@@ -6,15 +6,46 @@ from core import exceptions, database
 from discord.ext import commands
 from string import Formatter
 
-EMB_COLOUR = int(os.getenv("COLOUR"), 16)
-ERR_COLOUR = int(os.getenv("ERR_COLOUR"), 16)
-
 
 class Events(commands.Cog):
     """Class that contains all the bot events."""
     def __init__(self, bot):
         self.bot = bot
         self.db = database.Database()
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
+        self.err_colour = int(os.getenv("ERR_COLOUR"), 16)
+
+    @staticmethod
+    async def __parse_message(message: str, member):
+
+        parsed_msg = [
+            fn for _, fn, _, _ in Formatter().parse(message) if fn is not None
+        ]
+
+        if parsed_msg:
+            # Note(Robert): This is for security reasons since I don't want people to be able to access
+            #               anything else than just these variables.
+            server_name = member.guild.name
+            member_mention = member.mention
+            member_full = member.name + member.discriminator
+            member_nickname = member.display_name
+            member_count = len(member.guild.members)
+
+            usable_vars = {
+                "server_name": server_name,
+                "member_mention": member_mention,
+                "member_full": member_full,
+                "member_nickname": member_nickname,
+                "member_count": member_count
+            }
+
+            for i in parsed_msg:
+                if i not in usable_vars:
+                    message = message.replace("{" + i + "}", "")
+
+            message = message.format(**usable_vars)
+
+        return message
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -66,39 +97,13 @@ class Events(commands.Cog):
             message = config.message
 
             if message:
-                msg_vars = [
-                    fn for _, fn, _, _ in Formatter().parse(message)
-                    if fn is not None
-                ]
-
-                if msg_vars:
-                    # Note(Robert): This is for security reasons since I don't want people to be able to access
-                    #               anything else than just these variables.
-                    server_name = member.guild.name
-                    member_mention = member.mention
-                    member_full = member.name + member.discriminator
-                    member_nickname = member.display_name
-                    member_count = len(member.guild.members)
-
-                    usable_vars = {
-                        "server_name": server_name,
-                        "member_mention": member_mention,
-                        "member_full": member_full,
-                        "member_nickname": member_nickname,
-                        "member_count": member_count
-                    }
-
-                    for i in msg_vars:
-                        if i not in usable_vars:
-                            message = message.replace("{" + i + "}", "")
-
-                    message = message.format(**usable_vars)
+                message = await self.__parse_message(message, member)
 
             else:
                 message = f"Welcome to {member.guild.name}, {member.mention}! We now have {len(member.guild.members)} members."
 
             if config.embed:
-                colour = EMB_COLOUR
+                colour = self.emb_colour
                 if config.embed_colour:
                     colour = int(config.embed_colour, 16)
 
@@ -127,39 +132,13 @@ class Events(commands.Cog):
             message = config.message
 
             if message:
-                msg_vars = [
-                    fn for _, fn, _, _ in Formatter().parse(message)
-                    if fn is not None
-                ]
-
-                if msg_vars:
-                    # Note(Robert): This is for security reasons since I don't want people to be able to access
-                    #               anything else than just these variables.
-                    server_name = member.guild.name
-                    member_mention = member.mention
-                    member_full = member.name + member.discriminator
-                    member_nickname = member.display_name
-                    member_count = len(member.guild.members)
-
-                    usable_vars = {
-                        "server_name": server_name,
-                        "member_mention": member_mention,
-                        "member_full": member_full,
-                        "member_nickname": member_nickname,
-                        "member_count": member_count
-                    }
-
-                    for i in msg_vars:
-                        if i not in usable_vars:
-                            message = message.replace("{" + i + "}", "")
-
-                    message = message.format(**usable_vars)
+                message = await self.__parse_message(message, member)
 
             else:
                 message = f"{member.mention} left the server, there are now {len(member.guild.members)} members in this server."
 
             if config.embed:
-                colour = EMB_COLOUR
+                colour = self.emb_colour
                 if config.embed_colour:
                     colour = int(config.embed_colour, 16)
 
@@ -226,7 +205,7 @@ class Events(commands.Cog):
 
         embed = discord.Embed(title="Error",
                               description=description,
-                              colour=ERR_COLOUR)
+                              colour=self.err_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)

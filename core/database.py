@@ -15,11 +15,62 @@ DATABASE = os.getenv("DB_DATABASE")
 PORT = os.getenv("DB_PORT")
 
 
+def init_db():
+    """Performs DB initialization."""
+    with psycopg3.Connection.connect(
+            f"user={USERNAME} password={PASSWORD} host={HOST} dbname={DATABASE} port={PORT}"
+    ) as db, db.cursor() as c:
+        c.execute("""
+        CREATE TABLE IF NOT EXISTS config(
+            server_id BIGINT,
+            prefix TEXT,
+            welcome BOOL DEFAULT false,
+            autorole BOOL DEFAULT false,
+            leave BOOL DEFAULT false,
+            level BOOL DEFAULT false,
+            level_rewards BOOL DEFAULT false,
+            stack_rewards BOOL DEFAULT false,
+            cleverbot BOOL DEFAULT false,
+            logs BOOL DEFAULT false,
+            captcha BOOL DEFAULT false
+        );
+        CREATE TABLE IF NOT EXISTS channels(
+            server_id BIGINT,
+            welcome BIGINT,
+            leave BIGINT,
+            log BIGINT,
+            level BIGINT,
+            captcha BIGINT
+        );
+        CREATE TABLE IF NOT EXISTS welcome(
+            server_id BIGINT,
+            message TEXT,
+            embed BOOL DEFAULT true,
+            embed_colour TEXT
+        );
+        CREATE TABLE IF NOT EXISTS leave(
+            server_id BIGINT,
+            message TEXT,
+            embed BOOL DEFAULT true,
+            embed_colour TEXT
+        );
+        """)
+
+        db.commit()
+
+        c.close()
+        db.close()
+
+
 class Database:
     """Class that contains database-related functions."""
     def __init__(self):
         self.db = self.create_db_pool()
-        self.__init_db()
+        self.username = os.getenv("DB_USERNAME")
+        self.password = os.getenv("DB_PASSWORD")
+        self.host = os.getenv("DB_HOST")
+        self.database = os.getenv("DB_DATABASE")
+        self.port = os.getenv("DB_PORT")
 
     @staticmethod
     def create_db_pool():
@@ -29,54 +80,6 @@ class Database:
         )
 
         return db_pool
-
-    @staticmethod
-    def __init_db():
-        """Performs DB initialization."""
-        with psycopg3.Connection.connect(
-                f"user={USERNAME} password={PASSWORD} host={HOST} dbname={DATABASE} port={PORT}"
-        ) as db, db.cursor() as c:
-
-            c.execute("""
-            CREATE TABLE IF NOT EXISTS config(
-                server_id BIGINT,
-                prefix TEXT,
-                welcome BOOL DEFAULT false,
-                autorole BOOL DEFAULT false,
-                leave BOOL DEFAULT false,
-                level BOOL DEFAULT false,
-                level_rewards BOOL DEFAULT false,
-                stack_rewards BOOL DEFAULT false,
-                cleverbot BOOL DEFAULT false,
-                logs BOOL DEFAULT false,
-                captcha BOOL DEFAULT false
-            );
-            CREATE TABLE IF NOT EXISTS channels(
-                server_id BIGINT,
-                welcome BIGINT,
-                leave BIGINT,
-                log BIGINT,
-                level BIGINT,
-                captcha BIGINT
-            );
-            CREATE TABLE IF NOT EXISTS welcome(
-                server_id BIGINT,
-                message TEXT,
-                embed BOOL DEFAULT true,
-                embed_colour TEXT
-            );
-            CREATE TABLE IF NOT EXISTS leave(
-                server_id BIGINT,
-                message TEXT,
-                embed BOOL DEFAULT true,
-                embed_colour TEXT
-            );
-            """)
-
-            db.commit()
-
-            c.close()
-            db.close()
 
     async def add_guild(self, server_id: str):
         """Creates rows for a specific guild."""

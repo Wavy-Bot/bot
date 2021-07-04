@@ -7,14 +7,13 @@ from core import request
 from core import utils
 from discord.ext import commands
 
-EMB_COLOUR = int(os.getenv("COLOUR"), 16)
-CATEGORY_LIST = ["hot", "new", "top", "rising"]
-
 
 class NSFW(commands.Cog):
     """Cog that contains all NSFW commands."""
     def __init__(self, bot):
         self.bot = bot
+        self.emb_colour = int(os.getenv("COLOUR"), 16)
+        self.category_list = ["hot", "new", "top", "rising"]
 
     @commands.command()
     @commands.is_nsfw()
@@ -29,18 +28,19 @@ class NSFW(commands.Cog):
 
         temp_embed = discord.Embed(title="Hentai",
                                    description=loading_text,
-                                   colour=EMB_COLOUR)
+                                   colour=self.emb_colour)
 
         temp_msg = await ctx.send(embed=temp_embed)
 
-        if not category or category and category.lower() not in CATEGORY_LIST:
-            category = random.choice(CATEGORY_LIST)
+        if not category or category and category.lower(
+        ) not in self.category_list:
+            category = random.choice(self.category_list)
 
         post = await request.reddit("hentai", category, ctx.message.channel)
 
         embed = discord.Embed(title=post.title,
                               url=post.link,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=post.image_url)
 
@@ -61,18 +61,19 @@ class NSFW(commands.Cog):
 
         temp_embed = discord.Embed(title="Porn",
                                    description=loading_text,
-                                   colour=EMB_COLOUR)
+                                   colour=self.emb_colour)
 
         temp_msg = await ctx.send(embed=temp_embed)
 
-        if not category or category and category.lower() not in CATEGORY_LIST:
-            category = random.choice(CATEGORY_LIST)
+        if not category or category and category.lower(
+        ) not in self.category_list:
+            category = random.choice(self.category_list)
 
         post = await request.reddit("porn", category, ctx.message.channel)
 
         embed = discord.Embed(title=post.title,
                               url=post.link,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=post.image_url)
 
@@ -93,7 +94,7 @@ class NSFW(commands.Cog):
 
         temp_embed = discord.Embed(title="Rule 34",
                                    description=loading_text,
-                                   colour=EMB_COLOUR)
+                                   colour=self.emb_colour)
 
         temp_msg = await ctx.send(embed=temp_embed)
 
@@ -101,7 +102,7 @@ class NSFW(commands.Cog):
 
         embed = discord.Embed(title="Rule 34",
                               url=image.file_url,
-                              colour=EMB_COLOUR)
+                              colour=self.emb_colour)
 
         embed.set_image(url=image.file_url)
 

@@ -6,11 +6,10 @@ import asyncio
 from core import database
 from discord.ext import commands
 
-TOKEN = os.getenv("TOKEN")
-
 
 async def run():
     """Starts the bot."""
+    token = os.getenv("TOKEN")
     db = database.Database()
     bot = Wavy(db=db)
 
@@ -41,14 +40,16 @@ async def run():
         await ctx.send(f"Reloaded `{extension}`.")
 
     try:
-        await bot.start(TOKEN)
+        await bot.start(token)
     except KeyboardInterrupt:
         await bot.logout()
 
 
 class Wavy(commands.AutoShardedBot):
-    """The blazing-fast Discord bot - now as a class for as little as $69420.99!
-    (this is a joke if you haven't noticed already ^)"""
+    """
+    The blazing-fast Discord bot - now as a class for as little as $69420.99!
+    (this is a joke if you haven't noticed already ^)
+    """
     def __init__(self, db):
         self.db = db
 
