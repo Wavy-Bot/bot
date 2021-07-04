@@ -17,7 +17,7 @@ class Events(commands.Cog):
 
     @staticmethod
     async def __parse_message(message: str, member):
-
+        """Parses a message and changes values where needed."""
         parsed_msg = [
             fn for _, fn, _, _ in Formatter().parse(message) if fn is not None
         ]
@@ -181,6 +181,7 @@ class Events(commands.Cog):
         """Called when a member sends a message."""
         member = message.author
 
+        # skipcq: PTC-W0048
         if not member.bot:
             if await self.db.fetch_config_cleverbot(message.guild.id):
                 channel_id = await self.db.fetch_channels_cleverbot(

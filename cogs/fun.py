@@ -18,6 +18,7 @@ class Fun(commands.Cog):
         self.interactions = json.load(open('interactions.json'))
 
     async def __temp_embed(self, ctx, title: str):
+        """Creates a temporary embed."""
         loading_text = await utils.loading_text()
 
         temp_embed = discord.Embed(title=title,

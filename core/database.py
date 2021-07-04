@@ -67,11 +67,6 @@ class Database:
     """Class that contains database-related functions."""
     def __init__(self):
         self.db = self.create_db_pool()
-        self.username = os.getenv("DB_USERNAME")
-        self.password = os.getenv("DB_PASSWORD")
-        self.host = os.getenv("DB_HOST")
-        self.database = os.getenv("DB_DATABASE")
-        self.port = os.getenv("DB_PORT")
 
     @staticmethod
     def create_db_pool():
