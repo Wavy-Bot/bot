@@ -18,12 +18,13 @@ class Events(commands.Cog):
     @staticmethod
     async def __parse_message(message: str, member):
         """Parses a message and changes values where needed."""
+        # TODO(Robert): Check if this does not introduce security issues.
         parsed_msg = [
             fn for _, fn, _, _ in Formatter().parse(message) if fn is not None
         ]
 
         if parsed_msg:
-            # Note(Robert): This is for security reasons since I don't want people to be able to access
+            # NOTE(Robert): This is for security reasons since I don't want people to be able to access
             #               anything else than just these variables.
             server_name = member.guild.name
             member_mention = member.mention
@@ -73,7 +74,7 @@ class Events(commands.Cog):
         message = "**Hi there, I'm Wavy** - The blazing-fast Discord bot.\n" \
                   "- My prefix is `%`\n" \
                   "- You can see a list of commands by typing `%help`\n" \
-                  "- You can set me up by going to <https://dash.wavybot.com>\n" \
+                  "- You can set me up by going to <https://wavybot.com>\n" \
                   "- If you need help, feel free to join my support server over at https://discord.wavybot.com"
 
         try:
@@ -207,6 +208,92 @@ class Events(commands.Cog):
                                     message=
                                     f"The channel with ID {channel_id} does not exist."
                                 )
+            if await self.db.fetch_config_level(message.guild.id):
+                command_prefix = await self.bot.command_prefix(
+                    self.bot, message)
+
+                if not message.content.startswith(tuple(command_prefix)):
+
+                    level_class = await self.db.fetch_level(
+                        message.guild.id, message.author.id)
+
+                    if not level_class:
+                        await self.db.set_xp(1, message.guild.id,
+                                             message.author.id)
+
+                        return
+
+                    new_xp = level_class.xp + 1
+
+                    await self.db.set_xp(new_xp, message.guild.id,
+                                         message.author.id)
+
+                    if new_xp >= round((8 * (level_class.level**3)) / 2):
+                        new_level = level_class.level + 1
+                        await self.db.set_level(new_level, message.guild.id,
+                                                message.author.id)
+
+                        if await self.db.fetch_config_level_rewards(
+                                message.guild.id):
+
+                            level_rewards = await self.db.fetch_level_rewards(
+                                new_level, message.guild.id)
+
+                            if level_rewards:
+                                stack_rewards = await self.db.fetch_config_stack_rewards(
+                                    message.guild.id)
+
+                                level_rewards = await self.db.fetch_level_rewards(
+                                    new_level, message.guild.id)
+
+                                role_list = list()
+
+                                for i in level_rewards:
+                                    role = message.guild.get_role(i.role_id)
+                                    if role:
+                                        role_list.append(role)
+
+                                if not stack_rewards:
+                                    lower_level_rewards = await self.db.fetch_lower_level_rewards(
+                                        new_level, message.guild.id)
+
+                                    if lower_level_rewards:
+                                        lower_role_list = list()
+
+                                        for i in lower_level_rewards:
+                                            role = message.guild.get_role(
+                                                i.role_id)
+                                            if role:
+                                                lower_role_list.append(role)
+
+                                        if lower_role_list:
+
+                                            await member.remove_roles(
+                                                *lower_role_list,
+                                                reason=
+                                                f"Member leveled up to level {new_level}"
+                                            )
+
+                                if role_list:
+
+                                    await member.add_roles(
+                                        *role_list,
+                                        reason=
+                                        f"Member leveled up to level {new_level}"
+                                    )
+
+                        channel_id = await self.db.fetch_channels_level(
+                            message.guild.id)
+
+                        up_message = f"{member.mention} is now level {new_level}! :tada:"
+
+                        if channel_id:
+                            channel = self.bot.get_channel(channel_id)
+                            await channel.send(up_message)
+
+                            return
+
+                        await message.channel.send(up_message)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

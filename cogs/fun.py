@@ -4,8 +4,7 @@ import json
 
 import discord
 
-from core import utils
-from core import request
+from core import utils, request, database
 from discord.ext import commands
 
 
@@ -16,6 +15,7 @@ class Fun(commands.Cog):
         self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.category_list = ["hot", "new", "top", "rising"]
         self.interactions = json.load(open('interactions.json'))
+        self.db = database.Database()
 
     async def __temp_embed(self, ctx, title: str):
         """Creates a temporary embed."""
@@ -812,6 +812,68 @@ class Fun(commands.Cog):
         embed = discord.Embed(title="Cleverbot",
                               description=res,
                               colour=self.emb_colour)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def level(self, ctx, member: discord.Member = None):
+        """Sends the level of the specified user."""
+        member = ctx.author if not member else member
+
+        level_enabled = await self.db.fetch_config_level(ctx.guild.id)
+
+        if not level_enabled:
+            embed = discord.Embed(
+                title="Level",
+                description="Leveling is disabled for this server.",
+                colour=self.emb_colour)
+        else:
+            if member.bot:
+                embed = discord.Embed(
+                    title="Level",
+                    description="The specified member is a bot.",
+                    colour=self.emb_colour)
+            else:
+                level_class = await self.db.fetch_level(
+                    ctx.guild.id, member.id)
+
+                embed = discord.Embed(colour=self.emb_colour)
+
+                embed.add_field(
+                    name="Level",
+                    value=str(level_class.level if level_class else 0))
+                embed.add_field(
+                    name="XP", value=str(level_class.xp if level_class else 0))
+                embed.add_field(name="XP required for next level",
+                                value=str(
+                                    round((8 * (level_class.level**3)) / 2)),
+                                inline=False)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def leaderboard(self, ctx):
+        """Sends the URL to the server's leaderboard"""
+        # TODO(Robert): Update URL
+
+        level_enabled = await self.db.fetch_config_level(ctx.guild.id)
+
+        if level_enabled:
+            embed = discord.Embed(
+                title="Leaderboard",
+                description="You can view this server's leaderboard [here](#).",
+                colour=self.emb_colour)
+        else:
+            embed = discord.Embed(
+                title="Leaderboard",
+                description="Leveling is not enabled for this server.",
+                colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)

@@ -55,6 +55,17 @@ def init_db():
             embed BOOL DEFAULT true,
             embed_colour TEXT
         );
+        CREATE TABLE IF NOT EXISTS level(
+            server_id BIGINT,
+            member_id BIGINT,
+            level BIGINT,
+            xp BIGINT
+        );
+        CREATE TABLE IF NOT EXISTS level_rewards(
+            server_id BIGINT,
+            role_id BIGINT,
+            level BIGINT
+        );
         """)
 
         db.commit()
@@ -139,7 +150,6 @@ class Database:
             r = await c.fetchone()
 
             if r:
-
                 return r[0]
 
             return r
@@ -320,9 +330,106 @@ class Database:
 
             r = await c.fetchone()
 
-            welcome_class = classes.Leave(server_id=r[0],
-                                          message=r[1],
-                                          embed=r[2],
-                                          embed_colour=r[3])
+            leave_class = classes.Leave(server_id=r[0],
+                                        message=r[1],
+                                        embed=r[2],
+                                        embed_colour=r[3])
 
-            return welcome_class
+            return leave_class
+
+    async def fetch_level(self, server_id: int, member_id: int):
+        """Fetches a guild's level settings."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM level WHERE server_id=%s AND member_id=%s;",
+                (server_id, member_id))
+
+            r = await c.fetchone()
+
+            if r:
+                level_class = classes.Level(server_id=r[0],
+                                            member_id=r[1],
+                                            level=r[2],
+                                            xp=r[3])
+
+                return level_class
+
+            return
+
+    async def set_xp(self, xp: int, server_id: int, member_id: int):
+        """Sets a member's XP."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("SELECT xp FROM level WHERE member_id=%s;",
+                            (member_id, ))
+
+            r = await c.fetchone()
+
+            if not r:
+                await c.execute(
+                    "INSERT INTO level (xp, server_id, member_id, level) VALUES (%s, %s, %s, 0);",
+                    (xp, server_id, member_id))
+
+                await db.commit()
+
+                return
+
+            await c.execute(
+                "UPDATE level SET xp=%s, server_id=%s, member_id=%s WHERE member_id=%s;",
+                (xp, server_id, member_id, member_id))
+
+            await db.commit()
+
+    async def set_level(self, level: int, server_id: int, member_id: int):
+        """Sets a member's level."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE level SET level=%s, server_id=%s, member_id=%s WHERE member_id=%s;",
+                (level, server_id, member_id, member_id))
+
+            await db.commit()
+
+    async def fetch_level_rewards(self, level: int, server_id: int):
+        """Fetches level rewards for said level, returns None if no level reward for that level has been configured."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM level_rewards WHERE server_id=%s AND level=%s;",
+                (server_id, level))
+
+            r = await c.fetchall()
+
+            if r:
+                rewards_list = list()
+
+                for i in r:
+                    rewards_class = classes.LevelRewards(server_id=i[0],
+                                                         role_id=i[1],
+                                                         level=i[2])
+
+                    rewards_list.append(rewards_class)
+                return rewards_list
+
+            return
+
+    async def fetch_lower_level_rewards(self, level: int, server_id: int):
+        """
+        Fetches level rewards for lower levels, returns None if no level reward for any lower level has been found.
+        """
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM level_rewards WHERE server_id=%s AND level < %s;",
+                (server_id, level))
+
+            r = await c.fetchall()
+
+            if r:
+                rewards_list = list()
+
+                for i in r:
+                    rewards_class = classes.LevelRewards(server_id=i[0],
+                                                         role_id=i[1],
+                                                         level=i[2])
+
+                    rewards_list.append(rewards_class)
+                return rewards_list
+
+            return

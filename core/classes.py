@@ -142,3 +142,35 @@ class Leave:
         self.message = message
         self.embed = embed
         self.embed_colour = embed_colour
+
+
+class Level:
+    """
+    Class that represents the level table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        member_id => Discord member ID.
+        level => Member's level.
+        xp => Member's xp.
+    """
+    def __init__(self, server_id: int, member_id: int, level: int, xp: int):
+        self.server_id = server_id
+        self.member_id = member_id
+        self.level = level
+        self.xp = xp
+
+
+class LevelRewards:
+    """
+    Class that represents the level rewards table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        role_id => Discord role ID.
+        level => Level at which a member gets said role.
+    """
+    def __init__(self, server_id: int, role_id: int, level: int):
+        self.server_id = server_id
+        self.role_id = role_id
+        self.level = level

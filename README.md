@@ -95,9 +95,9 @@ _You might notice a weird pattern of completed items in this list, but that's ju
       - [x] Head
       - [x] UUID
       - [ ] Hypixel (I'll have to make a custom package for this)
-    - [ ] Leveling
-      - [ ] Level
-      - [ ] Leaderboard
+    - [x] Leveling
+      - [x] Level
+      - [x] Leaderboard
     - [x]  Other
         - [x] Kill
         - [x] Heal
@@ -134,7 +134,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
 - [ ] Events cog
     - [x] Welcome messages event (on_member_join)
     - [x] Leave messages event (on_member_remove)
-    - [ ] Leveling event (on_message)
+    - [x] Leveling event (on_message)
     - [ ] Logging event (kick, ban, message delete, etc.)
     - [x] Cleverbot event (on_message)
     - [x] Bot guild join event (on_guild_join)
