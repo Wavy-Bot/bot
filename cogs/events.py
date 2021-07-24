@@ -51,7 +51,7 @@ class Events(commands.Cog):
     @staticmethod
     async def __list_to_string(i_list: list):
         """Converts a list to a string."""
-        string = ' '.join([i for i in i_list])
+        string = ' '.join(list(i_list))
 
         return string
 
@@ -616,29 +616,6 @@ class Events(commands.Cog):
                                     inline=False)
 
                     embed.set_thumbnail(url=after.icon_url)
-
-                    embed.set_footer(text="Wavy • https://wavybot.com",
-                                     icon_url=self.bot.user.avatar_url)
-
-                    await channel.send(embed=embed)
-
-    @commands.Cog.listener()
-    async def on_guild_update(self, guild):
-        """Called when an integration is created, modified, or removed from a guild."""
-        enabled = await self.db.fetch_config_logs(guild.id)
-
-        if enabled:
-            config = await self.db.fetch_logs(guild.id)
-
-            if config.guild_update:
-                channel_id = await self.db.fetch_channels_log(guild.id)
-                channel = self.bot.get_channel(channel_id)
-
-                if channel:
-                    embed = discord.Embed(title="Guild updated",
-                                          colour=self.emb_colour)
-
-                    embed.set_thumbnail(url=guild.icon_url)
 
                     embed.set_footer(text="Wavy • https://wavybot.com",
                                      icon_url=self.bot.user.avatar_url)
