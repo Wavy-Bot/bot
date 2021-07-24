@@ -48,6 +48,13 @@ class Events(commands.Cog):
 
         return message
 
+    @staticmethod
+    async def __list_to_string(i_list: list):
+        """Converts a list to a string."""
+        string = ' '.join([i for i in i_list])
+
+        return string
+
     @commands.Cog.listener()
     async def on_ready(self):
         """Called when the bot is done preparing the data received from Discord."""
@@ -183,7 +190,8 @@ class Events(commands.Cog):
         member = message.author
 
         # skipcq: PTC-W0048
-        if not member.bot:
+        if not isinstance(message.channel,
+                          discord.DMChannel) and not member.bot:
             if await self.db.fetch_config_cleverbot(message.guild.id):
                 channel_id = await self.db.fetch_channels_cleverbot(
                     message.guild.id)
@@ -246,7 +254,7 @@ class Events(commands.Cog):
                                 level_rewards = await self.db.fetch_level_rewards(
                                     new_level, message.guild.id)
 
-                                role_list = list()
+                                role_list = []
 
                                 for i in level_rewards:
                                     role = message.guild.get_role(i.role_id)
@@ -258,7 +266,7 @@ class Events(commands.Cog):
                                         new_level, message.guild.id)
 
                                     if lower_level_rewards:
-                                        lower_role_list = list()
+                                        lower_role_list = []
 
                                         for i in lower_level_rewards:
                                             role = message.guild.get_role(
@@ -294,6 +302,534 @@ class Events(commands.Cog):
                             return
 
                         await message.channel.send(up_message)
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        """Called when a message is deleted."""
+        if not isinstance(message.channel,
+                          discord.DMChannel) and not message.author.bot:
+            enabled = await self.db.fetch_config_logs(message.guild.id)
+
+            if enabled:
+                config = await self.db.fetch_logs(message.guild.id)
+
+                if config.msg_delete:
+                    channel_id = await self.db.fetch_channels_log(
+                        message.guild.id)
+                    channel = self.bot.get_channel(channel_id)
+
+                    if channel:
+                        embed = discord.Embed(
+                            title="Message deleted",
+                            description="A message got deleted.",
+                            colour=self.emb_colour)
+
+                        embed.add_field(name="Message author",
+                                        value=message.author.mention,
+                                        inline=False)
+
+                        embed.add_field(name="Message content",
+                                        value=message.content,
+                                        inline=False)
+
+                        embed.add_field(name="Message channel",
+                                        value=message.channel.mention,
+                                        inline=False)
+
+                        embed.set_thumbnail(url=message.author.avatar_url)
+
+                        embed.set_footer(text="Wavy • https://wavybot.com",
+                                         icon_url=self.bot.user.avatar_url)
+
+                        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_bulk_message_delete(self, messages):
+        """Called when messages are bulk deleted."""
+        if not isinstance(messages[0].channel, discord.DMChannel):
+            enabled = await self.db.fetch_config_logs(messages[0].guild.id)
+
+            if enabled:
+                config = await self.db.fetch_logs(messages[0].guild.id)
+
+                if config.msg_bulk_delete:
+                    channel_id = await self.db.fetch_channels_log(
+                        messages[0].guild.id)
+                    channel = self.bot.get_channel(channel_id)
+
+                    if channel:
+                        embed = discord.Embed(
+                            title="Messages bulk deleted",
+                            description="A message got deleted.",
+                            colour=self.emb_colour)
+
+                        embed.add_field(name="Message channel",
+                                        value=messages[0].channel.mention,
+                                        inline=False)
+
+                        embed.add_field(name="Messages deleted",
+                                        value=str(len(messages)),
+                                        inline=False)
+
+                        embed.set_footer(text="Wavy • https://wavybot.com",
+                                         icon_url=self.bot.user.avatar_url)
+
+                        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        """Called when a message is edited."""
+        if not isinstance(before.channel,
+                          discord.DMChannel) and not before.author.bot:
+            enabled = await self.db.fetch_config_logs(before.guild.id)
+
+            if enabled:
+                config = await self.db.fetch_logs(before.guild.id)
+
+                if config.msg_edit:
+                    channel_id = await self.db.fetch_channels_log(
+                        before.guild.id)
+                    channel = self.bot.get_channel(channel_id)
+
+                    if channel:
+                        embed = discord.Embed(title="Message edited",
+                                              colour=self.emb_colour)
+
+                        embed.add_field(name="Message author",
+                                        value=before.author.mention,
+                                        inline=False)
+
+                        embed.add_field(name="Before",
+                                        value=f"```{before.content}```",
+                                        inline=False)
+
+                        embed.add_field(name="After",
+                                        value=f"```{after.content}```",
+                                        inline=False)
+
+                        embed.add_field(name="Message channel",
+                                        value=before.channel.mention,
+                                        inline=False)
+
+                        embed.add_field(
+                            name="Message link",
+                            value=f"[Go to message]({before.jump_url})",
+                            inline=False)
+
+                        embed.set_thumbnail(url=before.author.avatar_url)
+
+                        embed.set_footer(text="Wavy • https://wavybot.com",
+                                         icon_url=self.bot.user.avatar_url)
+
+                        await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild, member):
+        """Called when a member gets banned from a guild."""
+        enabled = await self.db.fetch_config_logs(guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(guild.id)
+
+            if config.member_ban:
+                channel_id = await self.db.fetch_channels_log(guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Member banned",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Member",
+                                    value=member.mention,
+                                    inline=False)
+
+                    embed.set_thumbnail(url=member.avatar_url)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild, member):
+        """Called when a member gets unbanned from a guild."""
+        enabled = await self.db.fetch_config_logs(guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(guild.id)
+
+            if config.member_unban:
+                channel_id = await self.db.fetch_channels_log(guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Member unbanned",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Member",
+                                    value=member.mention,
+                                    inline=False)
+
+                    embed.set_thumbnail(url=member.avatar_url)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_create(self, channel):
+        """Called when a guild channel is created."""
+        enabled = await self.db.fetch_config_logs(channel.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(channel.guild.id)
+
+            if config.ch_create:
+                channel_id = await self.db.fetch_channels_log(channel.guild.id)
+                guild_channel = self.bot.get_channel(channel_id)
+
+                if guild_channel:
+                    embed = discord.Embed(title="Channel created",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Channel",
+                                    value=channel.mention,
+                                    inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await guild_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel):
+        """Called when a guild channel is deleted."""
+        enabled = await self.db.fetch_config_logs(channel.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(channel.guild.id)
+
+            if config.ch_delete:
+                channel_id = await self.db.fetch_channels_log(channel.guild.id)
+                guild_channel = self.bot.get_channel(channel_id)
+
+                if guild_channel:
+                    embed = discord.Embed(title="Channel deleted",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Channel",
+                                    value=channel.name,
+                                    inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await guild_channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        """Called when a member changes their voicestate."""
+        enabled = await self.db.fetch_config_logs(member.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(member.guild.id)
+
+            if config.voicestate_update:
+                channel_id = await self.db.fetch_channels_log(member.guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Voice state updated",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Member",
+                                    value=member.mention,
+                                    inline=False)
+
+                    if after.channel:
+                        embed.add_field(name="Channel",
+                                        value=after.channel.mention,
+                                        inline=False)
+
+                    embed.add_field(name="Disconnected",
+                                    value="False" if after.channel else "True",
+                                    inline=False)
+
+                    embed.add_field(name="Muted",
+                                    value=str(after.self_mute),
+                                    inline=False)
+
+                    embed.add_field(name="Deafened",
+                                    value=str(after.self_deaf),
+                                    inline=False)
+
+                    embed.add_field(name="Server muted",
+                                    value=str(after.mute),
+                                    inline=False)
+
+                    embed.add_field(name="Server deafened",
+                                    value=str(after.deaf),
+                                    inline=False)
+
+                    embed.set_thumbnail(url=member.avatar_url)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_update(self, before, after):
+        """Called when a guild updates."""
+        enabled = await self.db.fetch_config_logs(before.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(before.id)
+
+            if config.guild_update:
+                channel_id = await self.db.fetch_channels_log(before.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Guild updated",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Name",
+                                    value=after.name,
+                                    inline=False)
+
+                    embed.add_field(name="Owner",
+                                    value=after.owner.mention,
+                                    inline=False)
+
+                    embed.add_field(name="Text channels",
+                                    value=str(len(after.text_channels)),
+                                    inline=False)
+
+                    embed.add_field(name="Voice channels",
+                                    value=str(len(after.voice_channels)),
+                                    inline=False)
+
+                    embed.add_field(name="Shard ID",
+                                    value=str(after.shard_id + 1),
+                                    inline=False)
+
+                    embed.set_thumbnail(url=after.icon_url)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_update(self, guild):
+        """Called when an integration is created, modified, or removed from a guild."""
+        enabled = await self.db.fetch_config_logs(guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(guild.id)
+
+            if config.guild_update:
+                channel_id = await self.db.fetch_channels_log(guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Guild updated",
+                                          colour=self.emb_colour)
+
+                    embed.set_thumbnail(url=guild.icon_url)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_create(self, role):
+        """Called when a guild creates a new role."""
+        enabled = await self.db.fetch_config_logs(role.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(role.guild.id)
+
+            if config.role_create:
+                channel_id = await self.db.fetch_channels_log(role.guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Role created",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Name",
+                                    value=role.mention,
+                                    inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_delete(self, role):
+        """Called when a guild deletes a role."""
+        enabled = await self.db.fetch_config_logs(role.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(role.guild.id)
+
+            if config.role_delete:
+                channel_id = await self.db.fetch_channels_log(role.guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Role deleted",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Name", value=role.name, inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_role_update(self, before, after):
+        """
+        Called when a guild updates a role.
+        This causes a lot of spam, and I do not recommend using it.
+        """
+        enabled = await self.db.fetch_config_logs(before.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(before.guild.id)
+
+            if config.role_update:
+                channel_id = await self.db.fetch_channels_log(before.guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Role updated",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Name",
+                                    value=after.name,
+                                    inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_guild_emojis_update(self, guild, before, after):
+        """Called when a guild adds or removes an emoji."""
+        enabled = await self.db.fetch_config_logs(guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(guild.id)
+
+            if config.emoji_update:
+                channel_id = await self.db.fetch_channels_log(guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    # NOTE(Robert): This is a mess.
+                    old_emoji = [
+                        f"<:{i.name}:{i.id}>" for i in before if i.is_usable()
+                    ]
+                    new_emoji = [
+                        f"<:{i.name}:{i.id}>" for i in after if i.is_usable()
+                    ]
+                    old_emoji = await self.__list_to_string(old_emoji)
+                    new_emoji = await self.__list_to_string(new_emoji)
+
+                    embed = discord.Embed(title="Emojis updated",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Before",
+                                    value=old_emoji,
+                                    inline=False)
+
+                    embed.add_field(name="After",
+                                    value=new_emoji,
+                                    inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_invite_create(self, invite):
+        """Called when an invite is created."""
+        enabled = await self.db.fetch_config_logs(invite.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(invite.guild.id)
+
+            if config.invite_create:
+                channel_id = await self.db.fetch_channels_log(invite.guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Invite created",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Link",
+                                    value=f"[{invite.id}]({invite.url})",
+                                    inline=False)
+
+                    embed.add_field(name="Max uses",
+                                    value=str(invite.max_uses)
+                                    if invite.max_uses != 0 else "Unlimited",
+                                    inline=False)
+
+                    embed.add_field(
+                        name="Temporary membership",
+                        value="True" if invite.temporary else "False",
+                        inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
+
+    @commands.Cog.listener()
+    async def on_invite_delete(self, invite):
+        """Called when an invite is deleted."""
+        enabled = await self.db.fetch_config_logs(invite.guild.id)
+
+        if enabled:
+            config = await self.db.fetch_logs(invite.guild.id)
+
+            if config.invite_delete:
+                channel_id = await self.db.fetch_channels_log(invite.guild.id)
+                channel = self.bot.get_channel(channel_id)
+
+                if channel:
+                    embed = discord.Embed(title="Invite deleted",
+                                          colour=self.emb_colour)
+
+                    embed.add_field(name="Link",
+                                    value=f"[{invite.id}]({invite.url})",
+                                    inline=False)
+
+                    embed.add_field(
+                        name="Uses",
+                        value=
+                        f"{invite.uses if invite.uses else 0}/{'Unlimited' if not invite.max_uses or invite.max_uses == 0 else invite.max_uses}",
+                        inline=False)
+
+                    embed.add_field(
+                        name="Temporary membership",
+                        value="True" if invite.temporary else "False",
+                        inline=False)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await channel.send(embed=embed)
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):

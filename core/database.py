@@ -66,6 +66,24 @@ def init_db():
             role_id BIGINT,
             level BIGINT
         );
+        CREATE TABLE IF NOT EXISTS logs(
+            server_id BIGINT,
+            msg_delete BOOL DEFAULT true,
+            msg_bulk_delete BOOL DEFAULT true,
+            msg_edit BOOL DEFAULT true,
+            ch_create BOOL DEFAULT true,
+            ch_delete BOOL DEFAULT true,
+            member_ban BOOL DEFAULT true,
+            member_unban BOOL DEFAULT true,
+            voicestate_update BOOL DEFAULT false,
+            guild_update BOOL DEFAULT true,
+            role_create BOOL DEFAULT true,
+            role_update BOOL DEFAULT true,
+            role_delete BOOL DEFAULT true,
+            emoji_update BOOL DEFAULT false,
+            invite_create BOOL DEFAULT false,
+            invite_delete BOOL DEFAULT false
+        );
         """)
 
         db.commit()
@@ -108,6 +126,8 @@ class Database:
                                 (server_id, ))
                 await c.execute("INSERT INTO leave (server_id) VALUES (%s);",
                                 (server_id, ))
+                await c.execute("INSERT INTO logs (server_id) VALUES (%s);",
+                                (server_id, ))
 
                 await db.commit()
 
@@ -123,6 +143,12 @@ class Database:
             await c.execute("DELETE FROM welcome WHERE server_id=%s;",
                             (server_id, ))
             await c.execute("DELETE FROM leave WHERE server_id=%s;",
+                            (server_id, ))
+            await c.execute("DELETE FROM level WHERE server_id=%s;",
+                            (server_id, ))
+            await c.execute("DELETE FROM level_rewards WHERE server_id=%s;",
+                            (server_id, ))
+            await c.execute("DELETE FROM logs WHERE server_id=%s;",
                             (server_id, ))
 
             await db.commit()
@@ -398,7 +424,7 @@ class Database:
             r = await c.fetchall()
 
             if r:
-                rewards_list = list()
+                rewards_list = []
 
                 for i in r:
                     rewards_class = classes.LevelRewards(server_id=i[0],
@@ -412,7 +438,8 @@ class Database:
 
     async def fetch_lower_level_rewards(self, level: int, server_id: int):
         """
-        Fetches level rewards for lower levels, returns None if no level reward for any lower level has been found.
+        Fetches level rewards for lower levels,
+        returns None if no level reward for any lower level has been found.
         """
         async with self.db.connection() as db, db.cursor() as c:
             await c.execute(
@@ -422,7 +449,7 @@ class Database:
             r = await c.fetchall()
 
             if r:
-                rewards_list = list()
+                rewards_list = []
 
                 for i in r:
                     rewards_class = classes.LevelRewards(server_id=i[0],
@@ -433,3 +460,30 @@ class Database:
                 return rewards_list
 
             return
+
+    async def fetch_logs(self, server_id: int):
+        """Fetches a guild's log settings."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("SELECT * FROM logs WHERE server_id=%s;",
+                            (server_id, ))
+
+            r = await c.fetchone()
+
+            logs_class = classes.Logs(server_id=r[0],
+                                      msg_delete=r[1],
+                                      msg_bulk_delete=r[2],
+                                      msg_edit=r[3],
+                                      ch_create=r[4],
+                                      ch_delete=r[5],
+                                      member_ban=r[6],
+                                      member_unban=r[7],
+                                      voicestate_update=r[8],
+                                      guild_update=r[9],
+                                      role_create=r[10],
+                                      role_update=r[11],
+                                      role_delete=r[12],
+                                      emoji_update=r[13],
+                                      invite_create=r[14],
+                                      invite_delete=r[15])
+
+            return logs_class

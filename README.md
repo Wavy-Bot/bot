@@ -45,6 +45,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     - [x] Nuke
     - [ ] Lock
     - [ ] Unlock
+    - [ ] Snipe
     
 
 - [ ] Ticket cog
@@ -55,6 +56,7 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     - [ ] Ticket transcript
     - [ ] Add user 
     - [ ] Remove user
+    - [ ] Ticket categories
     
 
 - [ ] Fun cog
@@ -135,12 +137,13 @@ _You might notice a weird pattern of completed items in this list, but that's ju
     - [x] Welcome messages event (on_member_join)
     - [x] Leave messages event (on_member_remove)
     - [x] Leveling event (on_message)
-    - [ ] Logging event (kick, ban, message delete, etc.)
+    - [x] Logging event (kick, ban, message delete, etc.)
     - [x] Cleverbot event (on_message)
     - [x] Bot guild join event (on_guild_join)
     - [x] Error handler event (on_command_error)
     - [x] Add rows to DB on join (on_guild_join)
     - [x] Add rows to DB on remove (on_guild_remove)
+    - [ ] Automod
 
 ## License
 

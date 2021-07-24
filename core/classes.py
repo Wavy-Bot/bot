@@ -115,7 +115,7 @@ class Welcome:
     Takes the following arguments:
         server_id => Discord server ID.
         message => Welcome message.
-        embed => Wether or not the welcome message is an embed.
+        embed => Whether or not the welcome message is an embed.
         embed_colour => Colour of the embed.
     """
     def __init__(self, server_id: int, message: str, embed: bool,
@@ -133,7 +133,7 @@ class Leave:
     Takes the following arguments:
         server_id => Discord server ID.
         message => Leave message.
-        embed => Wether or not the leave message is an embed.
+        embed => Whether or not the leave message is an embed.
         embed_colour => Colour of the embed.
     """
     def __init__(self, server_id: int, message: str, embed: bool,
@@ -174,3 +174,50 @@ class LevelRewards:
         self.server_id = server_id
         self.role_id = role_id
         self.level = level
+
+
+class Logs:
+    """
+    Class that represents the logs table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        msg_delete => Message delete bool.
+        msg_edit => Message edit bool.
+        ch_create => Create channel bool.
+        ch_delete => Channel delete bool.
+        member_ban => Member ban bool.
+        member_unban => Member unban bool.
+        voicestate_update => Voicestate update bool.
+        guild_update => Guild update bool.
+        integration_update => Integration update bool.
+        webhook_update => Webhook update bool.
+        role_create => Role create bool.
+        role_update => Role update bool.
+        role_delete => Role delete bool.
+        emoji_update => Emoji update bool.
+        invite_create => Invite create bool.
+        invite_delete => Invite delete bool.
+    """
+    def __init__(self, server_id: int, msg_delete: bool, msg_bulk_delete: bool,
+                 msg_edit: bool, ch_create: bool, ch_delete: bool,
+                 member_ban: bool, member_unban: bool, voicestate_update: bool,
+                 guild_update: bool, role_create: bool, role_update: bool,
+                 role_delete: bool, emoji_update: bool, invite_create: bool,
+                 invite_delete: bool):
+        self.server_id = server_id
+        self.msg_delete = msg_delete
+        self.msg_bulk_delete = msg_bulk_delete
+        self.msg_edit = msg_edit
+        self.ch_create = ch_create
+        self.ch_delete = ch_delete
+        self.member_ban = member_ban
+        self.member_unban = member_unban
+        self.voicestate_update = voicestate_update
+        self.guild_update = guild_update
+        self.role_create = role_create
+        self.role_update = role_update
+        self.role_delete = role_delete
+        self.emoji_update = emoji_update
+        self.invite_create = invite_create
+        self.invite_delete = invite_delete

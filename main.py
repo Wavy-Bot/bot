@@ -3,7 +3,7 @@ import os
 import discord
 import asyncio
 
-from core import database
+from core import database, request
 from discord.ext import commands
 
 
@@ -12,6 +12,7 @@ async def run():
     token = os.getenv("TOKEN")
     db = database.Database()
     bot = Wavy(db=db)
+    emb_colour = int(os.getenv("COLOUR"), 16)
 
     # NOTE(Robert): A little explanation of all this crap, the commands are here because
     #               in the class the commands wouldn't load, but outside they would +
@@ -38,6 +39,24 @@ async def run():
         """Reloads a cog."""
         bot.reload_extension(f'cogs.{extension}')
         await ctx.send(f"Reloaded `{extension}`.")
+
+    @bot.event
+    async def on_message(message):
+        if isinstance(message.channel,
+                      discord.DMChannel) and not message.author.bot:
+            async with message.channel.typing():
+                res = await request.cleverbot(message.content,
+                                              message.author.id)
+
+                embed = discord.Embed(title="Cleverbot",
+                                      description=res,
+                                      colour=emb_colour)
+
+                embed.set_footer(text="Wavy • https://wavybot.com",
+                                 icon_url=bot.user.avatar_url)
+
+                await message.channel.send(embed=embed)
+        await bot.process_commands(message)
 
     try:
         await bot.start(token)
