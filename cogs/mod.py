@@ -1,4 +1,5 @@
 import os
+import json
 
 import discord
 
@@ -317,6 +318,96 @@ class Moderation(commands.Cog):
         else:
             embed = discord.Embed(title=f"{member} has not been muted",
                                   colour=self.emb_colour)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def lock(self, ctx, channel: discord.TextChannel = None):
+        """Locks the specified channel."""
+        channel = channel if channel else ctx.message.channel
+
+        role = ctx.message.guild.default_role
+
+        perms = channel.overwrites_for(role)
+
+        perms.send_messages = False
+        perms.add_reactions = False
+
+        await channel.set_permissions(role, overwrite=perms)
+
+        embed = discord.Embed(title=f"Locked channel {channel}",
+                              colour=self.emb_colour)
+
+        embed.add_field(name="Moderator",
+                        value=ctx.message.author,
+                        inline=False)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.has_permissions(manage_channels=True)
+    async def unlock(self, ctx, channel: discord.TextChannel = None):
+        """Unlocks the specified channel."""
+        channel = channel if channel else ctx.message.channel
+
+        role = ctx.message.guild.default_role
+
+        perms = channel.overwrites_for(role)
+
+        perms.send_messages = None
+        perms.add_reactions = None
+
+        await channel.set_permissions(role, overwrite=perms)
+
+        embed = discord.Embed(title=f"Unlocked channel {channel}",
+                              colour=self.emb_colour)
+
+        embed.add_field(name="Moderator",
+                        value=ctx.message.author,
+                        inline=False)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def snipe(self, ctx):
+        """Gets the last deleted message."""
+        with open("snipe.json", "r") as json_file:
+            snipe_file = json.load(json_file)
+
+        json_file.close()
+
+        if str(ctx.message.guild.id) in snipe_file and str(
+                ctx.message.channel.id) in snipe_file[str(
+                    ctx.message.guild.id)]:
+            embed = discord.Embed(title="Snipe",
+                                  description=snipe_file[str(
+                                      ctx.message.guild.id)][str(
+                                          ctx.message.channel.id)]['content'],
+                                  colour=self.emb_colour)
+
+            if snipe_file[str(ctx.message.guild.id)][str(
+                    ctx.message.channel.id)]['attachments']:
+                embed.add_field(
+                    name="Attachments",
+                    value=str(snipe_file[str(ctx.message.guild.id)][str(
+                        ctx.message.channel.id)]['attachments']),
+                    inline=False)
+        else:
+            embed = discord.Embed(
+                title="Snipe",
+                description=
+                "No deleted messages for this channel have been found.",
+                colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)

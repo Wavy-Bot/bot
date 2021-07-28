@@ -1,4 +1,5 @@
 import os
+import json
 
 import discord
 
@@ -18,6 +19,7 @@ class Events(commands.Cog):
         self.check_mute.start()
 
     def cog_unload(self):
+        """Runs when the cog gets unloaded."""
         self.check_mute.cancel()
 
     @staticmethod
@@ -340,6 +342,26 @@ class Events(commands.Cog):
         """Called when a message is deleted."""
         if not isinstance(message.channel,
                           discord.DMChannel) and not message.author.bot:
+
+            with open("snipe.json", "r") as json_file:
+                snipe_file = json.load(json_file)
+
+            json_file.close()
+
+            if str(message.guild.id) not in snipe_file:
+                snipe_file[str(message.guild.id)] = {}
+
+            snipe_file[str(message.guild.id)][str(message.channel.id)] = {
+                "member_id": message.author.id,
+                "content": message.content,
+                "attachments": [i.url for i in message.attachments]
+            }
+
+            with open("snipe.json", "w") as json_file:
+                json.dump(snipe_file, json_file, indent=4)
+
+            json_file.close()
+
             enabled = await self.db.fetch_config_logs(message.guild.id)
 
             if enabled:
@@ -360,9 +382,18 @@ class Events(commands.Cog):
                                         value=message.author.mention,
                                         inline=False)
 
-                        embed.add_field(name="Message content",
-                                        value=message.content,
-                                        inline=False)
+                        if message.content:
+
+                            embed.add_field(name="Message content",
+                                            value=message.content,
+                                            inline=False)
+
+                        if message.attachments:
+                            embed.add_field(
+                                name="Message attachments",
+                                value=str([i.url
+                                           for i in message.attachments]),
+                                inline=False)
 
                         embed.add_field(name="Message channel",
                                         value=message.channel.mention,
@@ -877,6 +908,10 @@ class Events(commands.Cog):
 
             else:
                 description = f"`{error}`"
+
+        if isinstance(error, commands.ChannelNotFound):
+            description = "Please mention or put in a valid channel ID. Not sure how to do this? Click [here](" \
+                          "#)."
 
         elif isinstance(error, commands.NSFWChannelRequired):
             description = "Please set the channel to be NSFW, or move to an NSFW channel. Not sure how to do this? " \
