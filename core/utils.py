@@ -1,11 +1,12 @@
 import platform
 import random
+import re
 
 import psutil
 import distro
 
 from core import classes
-from datetime import datetime
+from datetime import datetime, timedelta
 
 LAUNCH_TIME = datetime.utcnow()
 
@@ -122,3 +123,29 @@ async def progress_bar():
     bar_class = classes.ProgressBar(bar=bar, percentage=percentage)
 
     return bar_class
+
+
+async def convert_time(time: str):
+    """Converts time into a format postgres understands."""
+    time_formats = ["s", "m", "h", "d", "w"]
+    time_format = re.sub("[^a-zA-Z]*", "", time)[0]
+
+    if time_format not in time_formats:
+        return
+
+    time = int(re.sub("[^0-9]", "", time))
+
+    if time_format == "m":
+        time = time * 60
+    elif time_format == "h":
+        time = time * 3600
+    elif time_format == "d":
+        time = time * 86400
+    elif time_format == "w":
+        time = time * 604800
+
+    time_delta = datetime.utcnow() + timedelta(seconds=time)
+
+    time_class = classes.Time(time=time, timedelta=time_delta)
+
+    return time_class

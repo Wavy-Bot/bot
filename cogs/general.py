@@ -38,7 +38,7 @@ class General(commands.Cog):
         prefixes = await self.bot.command_prefix(self.bot, ctx.message)
         prefix = prefixes[2]
 
-        categories = [i for i in self.bot.cogs]
+        categories = list(self.bot.cogs)
 
         if category:
             if category in categories:
@@ -62,8 +62,8 @@ class General(commands.Cog):
             embed = discord.Embed(title="Help Menu: Categories",
                                   colour=self.emb_colour)
 
-            for category in categories:
-                cog = self.bot.get_cog(category)
+            for item in categories:
+                cog = self.bot.get_cog(item)
                 cog_commands = cog.get_commands()
 
                 human_commands = ', '.join(
@@ -71,7 +71,7 @@ class General(commands.Cog):
 
                 if human_commands:
 
-                    embed.add_field(name=category,
+                    embed.add_field(name=item,
                                     value=human_commands,
                                     inline=False)
 

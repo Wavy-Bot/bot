@@ -45,6 +45,7 @@ async def run():
 
     @bot.event
     async def on_message(message):
+        """Called when a message is created and sent."""
         if isinstance(message.channel,
                       discord.DMChannel) and not message.author.bot:
             async with message.channel.typing():

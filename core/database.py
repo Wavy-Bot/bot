@@ -43,6 +43,11 @@ def init_db():
             captcha BIGINT,
             cleverbot BIGINT
         );
+        CREATE TABLE IF NOT EXISTS roles(
+            server_id BIGINT,
+            role_id BIGINT,
+            type TEXT
+        );
         CREATE TABLE IF NOT EXISTS welcome(
             server_id BIGINT,
             message TEXT,
@@ -83,6 +88,11 @@ def init_db():
             emoji_update BOOL DEFAULT false,
             invite_create BOOL DEFAULT false,
             invite_delete BOOL DEFAULT false
+        );
+        CREATE TABLE IF NOT EXISTS mutes(
+            server_id BIGINT,
+            member_id BIGINT,
+            end_time TIMESTAMP
         );
         """)
 
@@ -149,6 +159,10 @@ class Database:
             await c.execute("DELETE FROM level_rewards WHERE server_id=%s;",
                             (server_id, ))
             await c.execute("DELETE FROM logs WHERE server_id=%s;",
+                            (server_id, ))
+            await c.execute("DELETE FROM mutes WHERE server_id=%s;",
+                            (server_id, ))
+            await c.execute("DELETE FROM roles WHERE server_id=%s;",
                             (server_id, ))
 
             await db.commit()
@@ -395,13 +409,10 @@ class Database:
                     "INSERT INTO level (xp, server_id, member_id, level) VALUES (%s, %s, %s, 0);",
                     (xp, server_id, member_id))
 
-                await db.commit()
-
-                return
-
-            await c.execute(
-                "UPDATE level SET xp=%s, server_id=%s, member_id=%s WHERE member_id=%s;",
-                (xp, server_id, member_id, member_id))
+            else:
+                await c.execute(
+                    "UPDATE level SET xp=%s, server_id=%s, member_id=%s WHERE member_id=%s;",
+                    (xp, server_id, member_id, member_id))
 
             await db.commit()
 
@@ -487,3 +498,96 @@ class Database:
                                       invite_delete=r[15])
 
             return logs_class
+
+    async def fetch_mutes(self):
+        """Fetches all mutes."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("SELECT * FROM mutes;")
+
+            r = await c.fetchall()
+
+            mute_list = []
+
+            for i in r:
+                mute_class = classes.Mutes(server_id=i[0],
+                                           member_id=i[1],
+                                           end_time=i[2])
+
+                mute_list.append(mute_class)
+
+            return mute_list
+
+    async def fetch_mute(self, server_id: int, member_id: int):
+        """Fetches if a member is muted in a specific guild."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM mutes WHERE server_id=%s AND member_id=%s;",
+                (server_id, member_id))
+
+            r = await c.fetchone()
+
+            if r:
+                mute_class = classes.Mutes(server_id=server_id,
+                                           member_id=r[1],
+                                           end_time=r[2])
+
+                return mute_class
+
+            return
+
+    async def set_mute(self,
+                       server_id: int,
+                       member_id: int,
+                       time: object = None):
+        """Mutes a member."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "INSERT INTO mutes (server_id, member_id, end_time) VALUES (%s, %s, %s);",
+                (server_id, member_id, time))
+
+            await db.commit()
+
+    async def remove_mute(self, server_id: int, member_id: int):
+        """Mutes a member."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "DELETE FROM mutes WHERE server_id=%s AND member_id=%s",
+                (server_id, member_id))
+
+            await db.commit()
+
+    async def fetch_role(self, server_id: int, role_type: str):
+        """Fetches a specific role."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM roles WHERE server_id=%s AND type=%s;",
+                (server_id, role_type))
+
+            r = await c.fetchone()
+
+            if r:
+                role_class = classes.Roles(server_id=server_id,
+                                           role_id=r[1],
+                                           role_type=r[2])
+
+                return role_class
+
+            return
+
+    async def set_role(self, server_id: int, role_id: int, role_type: str):
+        """Sets a role."""
+        async with self.db.connection() as db, db.cursor() as c:
+            role = await self.fetch_role(server_id, role_type)
+
+            if not role:
+                await c.execute(
+                    "INSERT INTO roles (server_id, role_id, type) VALUES (%s, %s, %s);",
+                    (server_id, role_id, role_type))
+
+            else:
+
+                await c.execute(
+                    "UPDATE roles SET role_id=%s WHERE server_id=%s AND type=%s;",
+                    (role_id, server_id, role_type))
+
+            await db.commit()

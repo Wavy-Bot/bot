@@ -1,7 +1,7 @@
 [![Logo Image](https://cdn.wavybot.com/wavy_logo.png)](https://wavybot.com)
 
 ![GitHub](https://img.shields.io/github/license/Wavy-Bot/bot?color=%23ED4245&logo=apache&logoColor=white&style=for-the-badge)
-![Discord](https://img.shields.io/discord/710436465938530307?color=%235865F2&label=Discord&logo=discord&logoColor=white&style=for-the-badge)
+[![Discord](https://img.shields.io/discord/710436465938530307?color=%235865F2&label=Discord&logo=discord&logoColor=white&style=for-the-badge)](https://discord.wavybot.com)
 
 
 # Wavy

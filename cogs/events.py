@@ -3,8 +3,9 @@ import os
 import discord
 
 from core import exceptions, database, request
-from discord.ext import commands
+from discord.ext import commands, tasks
 from string import Formatter
+from datetime import datetime
 
 
 class Events(commands.Cog):
@@ -14,6 +15,10 @@ class Events(commands.Cog):
         self.db = database.Database()
         self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.err_colour = int(os.getenv("ERR_COLOUR"), 16)
+        self.check_mute.start()
+
+    def cog_unload(self):
+        self.check_mute.cancel()
 
     @staticmethod
     async def __parse_message(message: str, member):
@@ -69,6 +74,33 @@ class Events(commands.Cog):
 
         for i in guilds:
             await self.db.add_guild(i.id)
+
+    @tasks.loop(seconds=10)
+    async def check_mute(self):
+        """Checks the current mutes in the database."""
+        await self.bot.wait_until_ready()
+
+        mutes = await self.db.fetch_mutes()
+
+        for i in mutes:
+            if i.end_time and i.end_time <= datetime.utcnow():
+
+                server = self.bot.get_guild(i.server_id)
+
+                member = discord.utils.get(server.members, id=i.member_id)
+
+                if member:
+
+                    fetch_role = await self.db.fetch_role(server.id, "mute")
+
+                    role = discord.utils.get(server.roles,
+                                             id=fetch_role.role_id)
+
+                    if role:
+
+                        await member.remove_roles(role)
+
+                await self.db.remove_mute(server.id, member.id)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -876,8 +908,6 @@ class Events(commands.Cog):
                          icon_url=self.bot.user.avatar_url)
 
         await ctx.send(embed=embed)
-
-        raise error
 
 
 def setup(bot):

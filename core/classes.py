@@ -221,3 +221,49 @@ class Logs:
         self.emoji_update = emoji_update
         self.invite_create = invite_create
         self.invite_delete = invite_delete
+
+
+class Mutes:
+    """
+    Class that represents the mutes table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        member_id => Discord member ID.
+        end_time => Timestamp the mute will end at, will be None if no time specified.
+    """
+    def __init__(self,
+                 server_id: int = None,
+                 member_id: int = None,
+                 end_time: object = None):
+        self.server_id = server_id
+        self.member_id = member_id
+        self.end_time = end_time
+
+
+class Roles:
+    """
+    Class that represents the roles table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        role_id => Discord role ID.
+        role_type => Role type.
+    """
+    def __init__(self, server_id: int, role_id: int, role_type: str):
+        self.server_id = server_id
+        self.role_id = role_id
+        self.role_type = role_type
+
+
+class Time:
+    """
+    Class that represents the time in seconds and in a datetime object.
+
+    Takes the following arguments:
+        time => Time in seconds.
+        timedelta => datetime object.
+    """
+    def __init__(self, time: int, timedelta: object):
+        self.time = time
+        self.timedelta = timedelta
