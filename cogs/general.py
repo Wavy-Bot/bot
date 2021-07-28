@@ -44,10 +44,13 @@ class General(commands.Cog):
             if category in categories:
                 cog = self.bot.get_cog(category)
 
-                embed = discord.Embed(title=f"Help for category: {cog.qualified_name}", colour=self.emb_colour)
+                embed = discord.Embed(
+                    title=f"Help for category: {cog.qualified_name}",
+                    colour=self.emb_colour)
 
                 for command in cog.get_commands():
-                    embed.add_field(name=prefix + command.name, value=f"`{command.brief or command.help}`")
+                    embed.add_field(name=prefix + command.name,
+                                    value=f"`{command.brief or command.help}`")
 
                 embed.set_footer(text="Wavy • https://wavybot.com",
                                  icon_url=self.bot.user.avatar_url)
@@ -56,19 +59,26 @@ class General(commands.Cog):
                 raise exceptions.NonExistantCategoryError
 
         else:
-            embed = discord.Embed(title="Help Menu: Categories", colour=self.emb_colour)
+            embed = discord.Embed(title="Help Menu: Categories",
+                                  colour=self.emb_colour)
 
             for category in categories:
                 cog = self.bot.get_cog(category)
                 cog_commands = cog.get_commands()
 
-                human_commands = ', '.join([f'`{prefix}{command.name}`' for command in cog_commands])
+                human_commands = ', '.join(
+                    [f'`{prefix}{command.name}`' for command in cog_commands])
 
                 if human_commands:
 
-                    embed.add_field(name=category, value=human_commands, inline=False)
+                    embed.add_field(name=category,
+                                    value=human_commands,
+                                    inline=False)
 
-                embed.set_footer(text=f"To get more in-depth help you can run {prefix}help <category> • Wavy", icon_url=self.bot.user.avatar_url)
+                embed.set_footer(
+                    text=
+                    f"To get more in-depth help you can run {prefix}help <category> • Wavy",
+                    icon_url=self.bot.user.avatar_url)
 
         await ctx.send(embed=embed)
 
