@@ -30,13 +30,24 @@ Contributing guidelines, issue templates, pull request templates and code of con
 - A terminal or CMD (if on Windows).
 - [git](https://git-scm.com/downloads)
 - [Python 3.x, tested on 3.8.](https://www.python.org/downloads/)
+- [An app on Discord](https://discord.com/developers/applications) with bot usage enabled
+- [A Lavalink instance](https://github.com/freyacodes/Lavalink)
+- [A PostgreSQL instance](https://www.postgresql.org/)
+- [A Travitia API key](https://discord.com/invite/C98nsXt)
 
 ```bash
 git clone https://github.com/Wavy-Bot/bot.git
 cd bot
+```
+Then copy the `.env.example` file to `.env` and edit it using your preferred text editor.
+
+Afterwards install the required dependencies and start the bot using
+```bash
 python3 -m pip install -r requirements.txt
 python3 main.py
 ```
+
+The aforementioned however is only to run the bot. You wil also need some way to configure it, like a web dashboard. Wavy's web dashboard is located [here](https://github.com/Wavy-Bot/website/).
 
 ## To-do list
 Moved to [GitHub Projects](https://github.com/Wavy-Bot/bot/projects/1)

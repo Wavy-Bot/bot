@@ -259,6 +259,8 @@ class Moderation(commands.Cog):
                                         value=old_time,
                                         inline=False)
                         time = time.timedelta
+                    elif time.time == 0:
+                        time = None
                     else:
                         embed = discord.Embed(
                             title=f"Could not mute {member}",
