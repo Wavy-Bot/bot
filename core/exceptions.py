@@ -34,3 +34,10 @@ class NonExistantChannelError(commands.CommandError):
     def __init__(self, message="The specified channel does not exist."):
         self.message = message
         super().__init__(self.message)
+
+
+class NonExistantCategoryError(commands.CommandError):
+    """Error raised when a category doesn't exist."""
+    def __init__(self, message="That category does not exist."):
+        self.message = message
+        super().__init__(self.message)

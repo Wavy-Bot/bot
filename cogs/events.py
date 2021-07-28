@@ -528,6 +528,7 @@ class Events(commands.Cog):
                     await guild_channel.send(embed=embed)
 
     @commands.Cog.listener()
+    # skipcq: PYL-W0613
     async def on_voice_state_update(self, member, before, after):
         """Called when a member changes their voicestate."""
         enabled = await self.db.fetch_config_logs(member.guild.id)
@@ -852,6 +853,18 @@ class Events(commands.Cog):
         elif isinstance(error, exceptions.APIError):
             description = error
 
+        elif isinstance(error, exceptions.NoChannelProvided):
+            description = error
+
+        elif isinstance(error, exceptions.NonExistantChannelError):
+            description = error
+
+        elif isinstance(error, exceptions.IncorrectChannelError):
+            description = error
+
+        elif isinstance(error, exceptions.NonExistantCategoryError):
+            description = error
+
         else:
             description = f"`{error}`"
 
@@ -863,6 +876,8 @@ class Events(commands.Cog):
                          icon_url=self.bot.user.avatar_url)
 
         await ctx.send(embed=embed)
+
+        raise error
 
 
 def setup(bot):

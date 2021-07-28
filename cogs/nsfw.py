@@ -8,7 +8,7 @@ from core import utils
 from discord.ext import commands
 
 
-class NSFW(commands.Cog):
+class Nsfw(commands.Cog):
     """Cog that contains all NSFW commands."""
     def __init__(self, bot):
         self.bot = bot
@@ -114,4 +114,4 @@ class NSFW(commands.Cog):
 
 def setup(bot):
     """Add cog to bot"""
-    bot.add_cog(NSFW(bot))
+    bot.add_cog(Nsfw(bot))

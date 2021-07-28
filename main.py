@@ -40,6 +40,9 @@ async def run():
         bot.reload_extension(f'cogs.{extension}')
         await ctx.send(f"Reloaded `{extension}`.")
 
+    # NOTE(Robert): This is here because if I were to put it in a cog it would only apply for said cog,
+    #               not globally.
+
     @bot.event
     async def on_message(message):
         if isinstance(message.channel,
@@ -79,7 +82,8 @@ class Wavy(commands.AutoShardedBot):
                          case_insensitive=True,
                          intents=intents,
                          status=discord.Status.online,
-                         activity=discord.Game('https://wavybot.com'))
+                         activity=discord.Game('https://wavybot.com'),
+                         help_command=None)
 
         for cog in os.listdir("./cogs"):
             if cog.endswith(".py") and not cog.startswith("_"):

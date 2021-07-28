@@ -2,7 +2,7 @@ import os
 
 import discord
 
-from core import utils, database
+from core import utils, database, exceptions
 from discord.ext import commands
 
 
@@ -23,6 +23,52 @@ class General(commands.Cog):
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def help(self, ctx, category: str = None):
+        """Sends a help message."""
+        if category:
+            category = category.capitalize()
+
+        # Fetch all prefixes and get the third item from the list, that being the prefix.
+        # (The first two items are bot mentions)
+
+        prefixes = await self.bot.command_prefix(self.bot, ctx.message)
+        prefix = prefixes[2]
+
+        categories = [i for i in self.bot.cogs]
+
+        if category:
+            if category in categories:
+                cog = self.bot.get_cog(category)
+
+                embed = discord.Embed(title=f"Help for category: {cog.qualified_name}", colour=self.emb_colour)
+
+                for command in cog.get_commands():
+                    embed.add_field(name=prefix + command.name, value=f"`{command.brief or command.help}`")
+
+                embed.set_footer(text="Wavy • https://wavybot.com",
+                                 icon_url=self.bot.user.avatar_url)
+
+            else:
+                raise exceptions.NonExistantCategoryError
+
+        else:
+            embed = discord.Embed(title="Help Menu: Categories", colour=self.emb_colour)
+
+            for category in categories:
+                cog = self.bot.get_cog(category)
+                cog_commands = cog.get_commands()
+
+                human_commands = ', '.join([f'`{prefix}{command.name}`' for command in cog_commands])
+
+                if human_commands:
+
+                    embed.add_field(name=category, value=human_commands, inline=False)
+
+                embed.set_footer(text=f"To get more in-depth help you can run {prefix}help <category> • Wavy", icon_url=self.bot.user.avatar_url)
 
         await ctx.send(embed=embed)
 
