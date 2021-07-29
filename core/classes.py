@@ -267,3 +267,21 @@ class Time:
     def __init__(self, time: int, timedelta: object):
         self.time = time
         self.timedelta = timedelta
+
+
+class Warns:
+    """
+    Class that represents the warns table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        member_id => Discord member ID.
+        warn_id => ID assigned to the warning.
+        reason => Reason the member got a warning.
+    """
+    def __init__(self, server_id: int, member_id: int, warn_id: str,
+                 reason: str):
+        self.server_id = server_id
+        self.member_id = member_id
+        self.warn_id = warn_id
+        self.reason = reason

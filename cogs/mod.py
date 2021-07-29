@@ -1,5 +1,6 @@
 import os
 import json
+import secrets
 
 import discord
 
@@ -385,8 +386,7 @@ class Moderation(commands.Cog):
         """Gets the last deleted message."""
         with open("snipe.json", "r") as json_file:
             snipe_file = json.load(json_file)
-
-        json_file.close()
+            json_file.close()
 
         if str(ctx.message.guild.id) in snipe_file and str(
                 ctx.message.channel.id) in snipe_file[str(
@@ -410,6 +410,76 @@ class Moderation(commands.Cog):
                 description=
                 "No deleted messages for this channel have been found.",
                 colour=self.emb_colour)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command(aliases=["addwarn", "addwarning", "warning"])
+    @commands.has_permissions(kick_members=True)
+    async def warn(self,
+                   ctx,
+                   member: discord.Member,
+                   *,
+                   reason='No reason provided.'):
+        """Warns the specified member."""
+        if member.bot:
+            await ctx.send("Bots cannot get warned.")
+
+            return
+
+        warn_id = secrets.token_urlsafe(8)
+
+        await self.db.set_warn(ctx.message.guild.id, member.id, warn_id,
+                               reason)
+
+        embed = discord.Embed(title=f"Warned {member}", colour=self.emb_colour)
+
+        embed.add_field(name="Reason", value=reason, inline=False)
+
+        embed.add_field(name="Moderator",
+                        value=ctx.message.author,
+                        inline=False)
+
+        embed.add_field(name="Warn ID", value=f"`{warn_id}`", inline=False)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command(aliases=["removewarn", "removewarning"])
+    @commands.has_permissions(kick_members=True)
+    async def unwarn(self, ctx, warn_id: str):
+        """Removes a member's warning."""
+        await self.db.remove_warn(ctx.message.guild.id, warn_id)
+
+        embed = discord.Embed(title=f"Removed warning `{warn_id}`",
+                              colour=self.emb_colour)
+
+        embed.set_footer(text="Wavy • https://wavybot.com",
+                         icon_url=self.bot.user.avatar_url)
+
+        await ctx.send(embed=embed)
+
+    @commands.command(aliases=["warnings", "listwarnings", "listwarns"])
+    async def warns(self, ctx, member: discord.Member = None):
+        """Sends the warnings a member has."""
+        member = ctx.author if not member else member
+
+        warns = await self.db.fetch_warns(ctx.message.guild.id, member.id)
+
+        embed = discord.Embed(title=f"Showing warns for {member}"
+                              if warns else f"{member} has no warns.",
+                              colour=self.emb_colour)
+
+        # TODO(Robert): Add pagination.
+
+        for i in warns:
+            embed.add_field(name=f"Warn ID `{i.warn_id}`",
+                            value=f"**Reason**: {i.reason}",
+                            inline=False)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)

@@ -345,8 +345,7 @@ class Events(commands.Cog):
 
             with open("snipe.json", "r") as json_file:
                 snipe_file = json.load(json_file)
-
-            json_file.close()
+                json_file.close()
 
             if str(message.guild.id) not in snipe_file:
                 snipe_file[str(message.guild.id)] = {}
@@ -917,19 +916,12 @@ class Events(commands.Cog):
             description = "Please set the channel to be NSFW, or move to an NSFW channel. Not sure how to do this? " \
                           "Click [here](https://docs.wavybot.com)."
 
-        elif isinstance(error, exceptions.APIError):
-            description = error
-
-        elif isinstance(error, exceptions.NoChannelProvided):
-            description = error
-
-        elif isinstance(error, exceptions.NonExistantChannelError):
-            description = error
-
-        elif isinstance(error, exceptions.IncorrectChannelError):
-            description = error
-
-        elif isinstance(error, exceptions.NonExistantCategoryError):
+        elif isinstance(error,
+                        (exceptions.APIError, exceptions.NoChannelProvided,
+                         exceptions.NonExistantChannelError,
+                         exceptions.IncorrectChannelError,
+                         exceptions.NonExistantCategoryError,
+                         exceptions.NonExistantWarnID)):
             description = error
 
         else:

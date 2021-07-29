@@ -41,3 +41,10 @@ class NonExistantCategoryError(commands.CommandError):
     def __init__(self, message="That category does not exist."):
         self.message = message
         super().__init__(self.message)
+
+
+class NonExistantWarnID(commands.CommandError):
+    """Error raised when a warning ID does not exist."""
+    def __init__(self, message="Could not find warning with that ID."):
+        self.message = message
+        super().__init__(self.message)

@@ -143,6 +143,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         with open('wavelink.json') as f:
             nodes = json.load(f)
+            f.close()
 
         for n in nodes.values():
             await self.bot.wavelink.initiate_node(**n)

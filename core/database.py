@@ -2,7 +2,7 @@ import os
 
 import psycopg3
 
-from core import classes
+from core import classes, exceptions
 from psycopg3 import pool
 from dotenv import load_dotenv
 
@@ -93,6 +93,12 @@ def init_db():
             server_id BIGINT,
             member_id BIGINT,
             end_time TIMESTAMP
+        );
+        CREATE TABLE IF NOT EXISTS warns(
+            server_id BIGINT,
+            member_id BIGINT,
+            warn_id TEXT,
+            reason TEXT
         );
         """)
 
@@ -548,7 +554,7 @@ class Database:
             await db.commit()
 
     async def remove_mute(self, server_id: int, member_id: int):
-        """Mutes a member."""
+        """Unmutes a member."""
         async with self.db.connection() as db, db.cursor() as c:
             await c.execute(
                 "DELETE FROM mutes WHERE server_id=%s AND member_id=%s",
@@ -591,3 +597,69 @@ class Database:
                     (role_id, server_id, role_type))
 
             await db.commit()
+
+    async def fetch_warns(self, server_id: int, member_id: int):
+        """Fetches all warnings a member has."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM warns WHERE server_id=%s AND member_id=%s;",
+                (server_id, member_id))
+
+            r = await c.fetchall()
+
+            warn_list = []
+
+            for i in r:
+                warn_class = classes.Warns(server_id=server_id,
+                                           member_id=member_id,
+                                           warn_id=i[2],
+                                           reason=i[3])
+
+                warn_list.append(warn_class)
+
+            return warn_list
+
+    async def fetch_warn(self, server_id: int, warn_id: str):
+        """Fetches a warning by ID."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM warns WHERE server_id=%s AND warn_id=%s;",
+                (server_id, warn_id))
+
+            r = await c.fetchone()
+
+            if r:
+                warn_class = classes.Warns(server_id=server_id,
+                                           member_id=r[1],
+                                           warn_id=warn_id,
+                                           reason=r[3])
+
+                return warn_class
+
+            return
+
+    async def set_warn(self, server_id: int, member_id: int, warn_id: str,
+                       reason: str):
+        """Warns a member."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "INSERT INTO warns (server_id, member_id, warn_id, reason) VALUES (%s, %s, %s, %s);",
+                (server_id, member_id, warn_id, reason))
+
+            await db.commit()
+
+    async def remove_warn(self, server_id: int, warn_id: str):
+        """Unwarns a member."""
+        async with self.db.connection() as db, db.cursor() as c:
+            if await self.fetch_warn(server_id, warn_id):
+
+                await c.execute(
+                    "DELETE FROM warns WHERE server_id=%s AND warn_id=%s",
+                    (server_id, warn_id))
+
+                await db.commit()
+
+                return
+
+            raise exceptions.NonExistantWarnID(
+                message=f"Could not find warning with ID `{warn_id}`.")
