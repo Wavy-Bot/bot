@@ -77,11 +77,19 @@ async def run():
         """Index page."""
         return json({"message": "Welcome to Wavy's API."})
 
-    @app.route("/fetch/roles")
+    # The following API routes are POST due to JS fetch not allowing a request body with GET requests.
+
+    # And as to why the guild IDs are being turned into strings: JS keeps doing weird stuff to
+    # my integers for some reason. E.g 494933638635323412 becomes 494933638635323400
+    # or 602093249573945354 becomes 602093249573945300,
+    # and to fix it I have to make my integers strings instead of integers
+
+    @app.route("/fetch/roles", methods=["POST"])
     async def fetch_roles(request):
         """Fetches all roles of the specified server."""
         try:
             guild_id = request.json['guild_id']
+            guild_id = int(guild_id)
         except TypeError:
             return json({"message": "No guild ID was provided."}, status=400)
 
@@ -104,15 +112,16 @@ async def run():
         roles.pop(0)  # Remove @everyone role
 
         for i in roles:
-            role_list.append({"role_id": i.id, "role_name": i.name})
+            role_list.append({"id": str(i.id), "name": i.name})
 
         return json(role_list)
 
-    @app.route("/fetch/channels")
+    @app.route("/fetch/channels", methods=["POST"])
     async def fetch_channels(request):
         """Fetches all text channels of the specified server."""
         try:
             guild_id = request.json['guild_id']
+            guild_id = int(guild_id)
         except TypeError:
             return json({"message": "No guild ID was provided."}, status=400)
 
@@ -134,14 +143,14 @@ async def run():
         channels = guild.text_channels
 
         for i in channels:
-            channel_list.append({"channel_id": i.id, "channel_name": i.name})
+            channel_list.append({"id": str(i.id), "name": i.name})
 
         return json(channel_list)
 
     try:
         bot.loop.create_task(
-            app.create_server(host="0.0.0.0",
-                              port=8000,
+            app.create_server(host="127.0.0.1",
+                              port=31088,
                               debug=False,
                               return_asyncio_server=True))
         await bot.start(token)
