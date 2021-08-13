@@ -1,9 +1,9 @@
 import os
 
-import psycopg3
+import psycopg
 
 from core import classes, exceptions
-from psycopg3 import pool
+from psycopg import pool
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +17,7 @@ PORT = os.getenv("DB_PORT")
 
 def init_db():
     """Performs DB initialization."""
-    with psycopg3.Connection.connect(
+    with psycopg.Connection.connect(
             f"user={USERNAME} password={PASSWORD} host={HOST} dbname={DATABASE} port={PORT}"
     ) as db, db.cursor() as c:
         c.execute("""
@@ -132,7 +132,7 @@ class Database:
 
             if not r:
                 # NOTE(Robert): This is like this due to
-                #               psycopg3.errors.SyntaxError: cannot insert multiple commands into a prepared statement
+                #               psycopg.errors.SyntaxError: cannot insert multiple commands into a prepared statement
                 await c.execute("INSERT INTO config (server_id) VALUES (%s);",
                                 (server_id, ))
                 await c.execute(
@@ -151,7 +151,7 @@ class Database:
         """Removes all rows that correspond to a specific guild."""
         async with self.db.connection() as db, db.cursor() as c:
             # NOTE(Robert): This is like this due to
-            #               psycopg3.errors.SyntaxError: cannot insert multiple commands into a prepared statement
+            #               psycopg.errors.SyntaxError: cannot insert multiple commands into a prepared statement
             await c.execute("DELETE FROM config WHERE server_id=%s;",
                             (server_id, ))
             await c.execute("DELETE FROM channels WHERE server_id=%s;",

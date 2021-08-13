@@ -34,6 +34,7 @@ Contributing guidelines, issue templates, pull request templates and code of con
 - [A Lavalink instance](https://github.com/freyacodes/Lavalink)
 - [A PostgreSQL instance](https://www.postgresql.org/)
 - [A Travitia API key](https://discord.com/invite/C98nsXt)
+- [A Sentry application](https://sentry.io)
 
 ```bash
 git clone https://github.com/Wavy-Bot/bot.git

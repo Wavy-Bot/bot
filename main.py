@@ -2,16 +2,26 @@ import os
 
 import discord
 import asyncio
+import sentry_sdk
 
-from core import database, request
+from core import database
+import core.request as core_request
 from discord.ext import commands
+from sanic import Sanic
+from sanic.response import json
+
+SENTRY_URL = os.getenv("SENTRY_URL")
+
+sentry_sdk.init(SENTRY_URL, traces_sample_rate=1.0)
 
 
 async def run():
     """Starts the bot."""
     token = os.getenv("TOKEN")
+    secret = os.getenv("API_SECRET")
     db = database.Database()
     bot = Wavy(db=db)
+    app = Sanic(__name__)
     emb_colour = int(os.getenv("COLOUR"), 16)
 
     # NOTE(Robert): A little explanation of all this crap, the commands are here because
@@ -49,8 +59,8 @@ async def run():
         if isinstance(message.channel,
                       discord.DMChannel) and not message.author.bot:
             async with message.channel.typing():
-                res = await request.cleverbot(message.content,
-                                              message.author.id)
+                res = await core_request.cleverbot(message.content,
+                                                   message.author.id)
 
                 embed = discord.Embed(title="Cleverbot",
                                       description=res,
@@ -62,7 +72,78 @@ async def run():
                 await message.channel.send(embed=embed)
         await bot.process_commands(message)
 
+    @app.route("/")
+    async def index(request):
+        """Index page."""
+        return json({"message": "Welcome to Wavy's API."})
+
+    @app.route("/fetch/roles")
+    async def fetch_roles(request):
+        """Fetches all roles of the specified server."""
+        try:
+            guild_id = request.json['guild_id']
+        except TypeError:
+            return json({"message": "No guild ID was provided."}, status=400)
+
+        if request.token != secret:
+            return json(
+                {
+                    "message":
+                    "The API key provided did not match the key that was set."
+                },
+                status=401)
+
+        guild = bot.get_guild(guild_id)
+
+        if not guild:
+            return json({"message": "The guild ID provided was invalid."},
+                        status=400)
+
+        role_list = []
+        roles = guild.roles
+        roles.pop(0)  # Remove @everyone role
+
+        for i in roles:
+            role_list.append({"role_id": i.id, "role_name": i.name})
+
+        return json(role_list)
+
+    @app.route("/fetch/channels")
+    async def fetch_channels(request):
+        """Fetches all text channels of the specified server."""
+        try:
+            guild_id = request.json['guild_id']
+        except TypeError:
+            return json({"message": "No guild ID was provided."}, status=400)
+
+        if request.token != secret:
+            return json(
+                {
+                    "message":
+                    "The API key provided did not match the key that was set."
+                },
+                status=401)
+
+        guild = bot.get_guild(guild_id)
+
+        if not guild:
+            return json({"message": "The guild ID provided was invalid."},
+                        status=400)
+
+        channel_list = []
+        channels = guild.text_channels
+
+        for i in channels:
+            channel_list.append({"channel_id": i.id, "channel_name": i.name})
+
+        return json(channel_list)
+
     try:
+        bot.loop.create_task(
+            app.create_server(host="0.0.0.0",
+                              port=8000,
+                              debug=False,
+                              return_asyncio_server=True))
         await bot.start(token)
     except KeyboardInterrupt:
         await bot.logout()
