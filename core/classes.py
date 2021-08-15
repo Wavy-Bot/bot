@@ -262,11 +262,16 @@ class Time:
 
     Takes the following arguments:
         time => Time in seconds.
-        timedelta => datetime object.
+        timedelta => Datetime object.
+        epoch = Unix epoch.
     """
-    def __init__(self, time: int, timedelta: object):
+    def __init__(self,
+                 time: int = None,
+                 timedelta: object = None,
+                 epoch: int = None):
         self.time = time
         self.timedelta = timedelta
+        self.epoch = epoch
 
 
 class Warns:
@@ -285,3 +290,23 @@ class Warns:
         self.member_id = member_id
         self.warn_id = warn_id
         self.reason = reason
+
+
+class Giveaways:
+    """
+    Class that represents the giveaways table in the database.
+
+    Takes the following arguments:
+        server_id => Discord server ID.
+        channel_id => Discord channel ID.
+        message_id => Discord channel ID.
+        winners => Amount of winners the giveaway has.
+        end_time => Timestamp the giveaway will end at.
+    """
+    def __init__(self, server_id: int, channel_id: int, message_id: int,
+                 winners: int, end_time: object):
+        self.server_id = server_id
+        self.channel_id = channel_id
+        self.message_id = message_id
+        self.winners = winners
+        self.end_time = end_time

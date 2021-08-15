@@ -48,3 +48,10 @@ class NonExistantWarnID(commands.CommandError):
     def __init__(self, message="Could not find warning with that ID."):
         self.message = message
         super().__init__(self.message)
+
+
+class NonExistantMessageID(commands.CommandError):
+    """Error raised when a message ID does not exist."""
+    def __init__(self, message="Could not find message with that ID."):
+        self.message = message
+        super().__init__(self.message)

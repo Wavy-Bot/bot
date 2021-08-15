@@ -100,6 +100,13 @@ def init_db():
             warn_id TEXT,
             reason TEXT
         );
+        CREATE TABLE IF NOT EXISTS giveaways(
+            server_id BIGINT,
+            channel_id BIGINT,
+            message_id BIGINT,
+            winners BIGINT,
+            end_time TIMESTAMP
+        )
         """)
 
         db.commit()
@@ -663,3 +670,89 @@ class Database:
 
             raise exceptions.NonExistantWarnID(
                 message=f"Could not find warning with ID `{warn_id}`.")
+
+    async def set_giveaway(self, server_id: int, channel_id: int,
+                           message_id: int, winners: int, end_time: object):
+        """Sets a giveaway."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "INSERT INTO giveaways (server_id, channel_id, message_id, winners, end_time)"
+                "VALUES (%s, %s, %s, %s, %s);",
+                (server_id, channel_id, message_id, winners, end_time))
+
+            await db.commit()
+
+    async def fetch_giveaway(self, server_id: int, message_id: int):
+        """Fetches a giveaway."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM giveaways WHERE server_id=%s AND message_id=%s;",
+                (server_id, message_id))
+
+            r = await c.fetchone()
+
+            if r:
+                giveaway_class = classes.Giveaways(server_id=server_id,
+                                                   channel_id=r[1],
+                                                   message_id=r[2],
+                                                   winners=r[3],
+                                                   end_time=r[4])
+
+                return giveaway_class
+            return
+
+    async def remove_giveaway(self, server_id: int, message_id: int):
+        """Deletes a giveaway."""
+        async with self.db.connection() as db, db.cursor() as c:
+            if await self.fetch_giveaway(server_id, message_id):
+                await c.execute(
+                    "DELETE FROM giveaways WHERE server_id=%s AND message_id=%s",
+                    (server_id, message_id))
+
+                await db.commit()
+
+                return
+
+            raise exceptions.NonExistantMessageID(
+                message=f"Could not find giveaway with ID `{message_id}`.")
+
+    async def fetch_giveaways(self):
+        """Fetches all giveaways."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("SELECT * FROM giveaways;")
+
+            r = await c.fetchall()
+
+            giveaway_list = []
+
+            for i in r:
+                giveaway_class = classes.Giveaways(server_id=i[0],
+                                                   channel_id=i[1],
+                                                   message_id=i[2],
+                                                   winners=i[3],
+                                                   end_time=i[4])
+
+                giveaway_list.append(giveaway_class)
+
+            return giveaway_list
+
+    async def fetch_giveaways_in_guild(self, server_id: int):
+        """Fetches all giveaways in a guild."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("SELECT * FROM giveaways WHERE server_id=%s;",
+                            (server_id, ))
+
+            r = await c.fetchall()
+
+            giveaway_list = []
+
+            for i in r:
+                giveaway_class = classes.Giveaways(server_id=i[0],
+                                                   channel_id=i[1],
+                                                   message_id=i[2],
+                                                   winners=i[3],
+                                                   end_time=i[4])
+
+                giveaway_list.append(giveaway_class)
+
+            return giveaway_list

@@ -125,8 +125,8 @@ async def progress_bar():
     return bar_class
 
 
-async def convert_time(time: str):
-    """Converts time into a format postgres understands."""
+async def convert_time_into_timedelta(time: str):
+    """Converts time into a timedelta."""
     time_formats = ["s", "m", "h", "d", "w"]
     time_format = re.sub("[^a-zA-Z]*", "", time)[0]
 
@@ -147,5 +147,21 @@ async def convert_time(time: str):
     time_delta = datetime.utcnow() + timedelta(seconds=time)
 
     time_class = classes.Time(time=time, timedelta=time_delta)
+
+    return time_class
+
+
+async def convert_time_into_epoch(time: str):
+    """Converts time into a unix epoch timestamp."""
+    time = await convert_time_into_timedelta(time)
+
+    if not time:
+        return
+
+    timestamp = int(time.timedelta.timestamp())
+
+    time_class = classes.Time(time=time.time,
+                              timedelta=time.timedelta,
+                              epoch=timestamp)
 
     return time_class

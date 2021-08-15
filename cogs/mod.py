@@ -3,6 +3,7 @@ import json
 import secrets
 
 import discord
+import asyncio
 
 from core import database, utils
 from datetime import datetime, timedelta
@@ -146,7 +147,11 @@ class Moderation(commands.Cog):
         embed.set_footer(text="Wavy • https://wavybot.com",
                          icon_url=self.bot.user.avatar_url)
 
-        await ctx.send(embed=embed)
+        message = await ctx.send(embed=embed)
+
+        await asyncio.sleep(2)
+
+        await message.delete()
 
     @commands.command(aliases=["purgeall", "purge_all"])
     @commands.has_permissions(manage_messages=True)
@@ -250,7 +255,7 @@ class Moderation(commands.Cog):
             if time:
                 old_time = time
 
-                converted_time = await utils.convert_time(time)
+                converted_time = await utils.convert_time_into_timedelta(time)
 
                 time = converted_time
 

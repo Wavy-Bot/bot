@@ -17,10 +17,12 @@ class Events(commands.Cog):
         self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.err_colour = int(os.getenv("ERR_COLOUR"), 16)
         self.check_mute.start()
+        self.check_giveaways.start()
 
     def cog_unload(self):
         """Runs when the cog gets unloaded."""
         self.check_mute.cancel()
+        self.check_giveaways.cancel()
 
     @staticmethod
     async def __parse_message(message: str, member):
@@ -86,7 +88,6 @@ class Events(commands.Cog):
 
         for i in mutes:
             if i.end_time and i.end_time <= datetime.utcnow():
-
                 server = self.bot.get_guild(i.server_id)
 
                 member = discord.utils.get(server.members, id=i.member_id)
@@ -103,6 +104,50 @@ class Events(commands.Cog):
                         await member.remove_roles(role)
 
                 await self.db.remove_mute(server.id, member.id)
+
+    @tasks.loop(seconds=10)
+    async def check_giveaways(self):
+        """Checks the current giveaways in the database."""
+        await self.bot.wait_until_ready()
+
+        giveaways = await self.db.fetch_giveaways()
+
+        for giveaway in giveaways:
+            if giveaway.end_time <= datetime.utcnow():
+                server = self.bot.get_guild(giveaway.server_id)
+                channel = self.bot.get_channel(giveaway.channel_id)
+
+                if channel:
+                    try:
+                        message = await channel.fetch_message(
+                            giveaway.message_id)
+                    except discord.errors.NotFound:
+                        await self.db.remove_giveaway(giveaway.server_id,
+                                                      giveaway.message_id)
+                        continue
+
+                    winners = []
+
+                    for reaction in message.reactions:
+                        async for user in reaction.users():
+                            if not user.bot and len(
+                                    winners) <= giveaway.winners:
+                                winners.append(user)
+
+                    if not winners:
+                        await channel.send("no-one entered the giveaway.")
+
+                        await self.db.remove_giveaway(giveaway.server_id,
+                                                      giveaway.message_id)
+
+                        continue
+
+                    for winner in winners:
+                        await channel.send(
+                            f"{winner.mention} has won the giveaway!")
+
+                await self.db.remove_giveaway(giveaway.server_id,
+                                              giveaway.message_id)
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
@@ -422,7 +467,7 @@ class Events(commands.Cog):
                     if channel:
                         embed = discord.Embed(
                             title="Messages bulk deleted",
-                            description="A message got deleted.",
+                            description="Messages got bulk deleted.",
                             colour=self.emb_colour)
 
                         embed.add_field(name="Message channel",
@@ -896,9 +941,11 @@ class Events(commands.Cog):
                           f"You need the following permissions:\n{permission_string}"
 
         elif isinstance(error, commands.CommandInvokeError):
+
             if isinstance(error.original, ValueError):
-                description = "Please mention or put in a valid channel ID. Not sure how to do this? Click [here](" \
-                              "#)."
+                description = "Invalid value provided. Please mention or put in a valid channel ID if applicable." \
+                              "Else, please make sure you have put every value in correctly." \
+                              "Not sure how to do this? Click [here](#)."
 
             elif isinstance(error.original, discord.Forbidden):
                 description = "Wavy does not have the required permissions to do that. Please also make sure that you" \
@@ -916,12 +963,13 @@ class Events(commands.Cog):
             description = "Please set the channel to be NSFW, or move to an NSFW channel. Not sure how to do this? " \
                           "Click [here](https://docs.wavybot.com)."
 
-        elif isinstance(error,
-                        (exceptions.APIError, exceptions.NoChannelProvided,
-                         exceptions.NonExistantChannelError,
-                         exceptions.IncorrectChannelError,
-                         exceptions.NonExistantCategoryError,
-                         exceptions.NonExistantWarnID)):
+        elif isinstance(
+                error,
+            (exceptions.APIError, exceptions.NoChannelProvided,
+             exceptions.NonExistantChannelError,
+             exceptions.IncorrectChannelError,
+             exceptions.NonExistantCategoryError, exceptions.NonExistantWarnID,
+             exceptions.NonExistantMessageID)):
             description = error
 
         else:
