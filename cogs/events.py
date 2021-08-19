@@ -83,7 +83,7 @@ class Events(commands.Cog):
 
     @tasks.loop(seconds=1800)
     async def post_botlist_data(self):
-        """POSTs data to botlists."""
+        """Posts data to botlists."""
         await self.bot.wait_until_ready()
 
         await request.botlists(len(self.bot.guilds),

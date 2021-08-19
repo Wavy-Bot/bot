@@ -289,6 +289,6 @@ async def botlists(server_count: int, users: int, shards: int):
 
         for botlist in botlist_list:
             await cs.post(
-                f'https://discords.com/bots/api/bot/475685785040060437',
+                'https://discords.com/bots/api/bot/475685785040060437',
                 headers=botlist['headers'],
                 json=botlist['data'])
