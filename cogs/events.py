@@ -866,8 +866,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         """Called when an exception was called."""
-        # TODO(Robert): Set the correct documentation URLs
-        #               and declutter this. For now I'll add this:
+        # TODO(Robert): Declutter this. For now I'll add this:
         # skipcq: PYL-R1705
         if isinstance(error, commands.CommandNotFound):
             return
@@ -891,24 +890,25 @@ class Events(commands.Cog):
 
             if isinstance(error.original, ValueError):
                 description = "Invalid value provided. Please mention or put in a valid channel ID if applicable." \
-                              "Else, please make sure you have put every value in correctly." \
-                              "Not sure how to do this? Click [here](#)."
+                              " Not sure how to do this? Click [here](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)." \
+                              " Else, please make sure you have put every value in correctly."
 
             elif isinstance(error.original, discord.Forbidden):
                 description = "Wavy does not have the required permissions to do that. Please also make sure that you" \
                               " have put Wavy's role above all other roles. Not sure how to do this? Click [here](" \
-                              "https://docs.wavybot.com). "
+                              "https://medium.com/cbblog/understanding-discord-roles-and-permissions-a1fff3ee07a7). "
 
             else:
                 description = f"`{error}`"
 
-        if isinstance(error, commands.ChannelNotFound):
+        elif isinstance(error, commands.ChannelNotFound):
             description = "Please mention or put in a valid channel ID. Not sure how to do this? Click [here](" \
-                          "#)."
+                          "https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)."
 
         elif isinstance(error, commands.NSFWChannelRequired):
             description = "Please set the channel to be NSFW, or move to an NSFW channel. Not sure how to do this? " \
-                          "Click [here](https://docs.wavybot.com)."
+                          "Click [here]" \
+                          "(https://support.discord.com/hc/en-us/articles/115000084051-NSFW-Channels-and-Content)."
 
         elif isinstance(
                 error,

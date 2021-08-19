@@ -221,11 +221,11 @@ class Config(commands.Cog):
                 "\nThis message will time out within 4 minutes.",
                 colour=self.emb_colour)
 
-            # TODO(Robert): Add correct URL
-
             embed.add_field(
                 name="Tip",
-                value="Click [here](#) to view all usable variables.")
+                value=
+                "Click [here](https://docs.wavybot.com/configuration/variables) to view all usable variables."
+            )
 
             embed.set_footer(text="Wavy • https://wavybot.com",
                              icon_url=self.bot.user.avatar_url)
@@ -480,11 +480,11 @@ class Config(commands.Cog):
                 "\nThis message will time out within 4 minutes.",
                 colour=self.emb_colour)
 
-            # TODO(Robert): Add correct URL
-
             embed.add_field(
                 name="Tip",
-                value="Click [here](#) to view all usable variables.")
+                value=
+                "Click [here](https://docs.wavybot.com/configuration/variables) to view all usable variables."
+            )
 
             embed.set_footer(text="Wavy • https://wavybot.com",
                              icon_url=self.bot.user.avatar_url)
@@ -745,8 +745,6 @@ class Config(commands.Cog):
                          icon_url=self.bot.user.avatar_url)
 
         await message.edit(embed=embed)
-
-    # TODO(Robert): Logs setup
 
     @config.command(aliases=["lo", "log", "logging"])
     @commands.has_permissions(manage_guild=True)
