@@ -2,7 +2,6 @@ import os
 
 import discord
 
-from datetime import timedelta
 from core import utils, database
 from discord.ext import commands
 
@@ -15,6 +14,7 @@ class Utility(commands.Cog):
         self.db = database.Database()
 
     async def __giveaway_cancel_message(self, reason: str):
+        """Creates a message as to why the giveaway creation got cancelled"""
         embed = discord.Embed(
             title="Giveaway",
             description=f"Giveaway creation cancelled. Reason: {reason}",
@@ -47,6 +47,7 @@ class Utility(commands.Cog):
     async def create(self, ctx):
         """Creates a giveaway."""
         def check(m):
+            """Checks if the message channel is the same as it was and if the message author is also the same author."""
             return m.channel == ctx.message.channel and m.author == ctx.message.author
 
         embed = discord.Embed(
@@ -55,7 +56,8 @@ class Utility(commands.Cog):
             "\nFirst, what channel do you want the giveaway in?"
             "\n(for example `#giveaways`) or use its ID (for example `731143785769074780`)."
             "Also, please make sure that the bot has send message permissions in the desired channel."
-            "\nYou can type `cancel` at any time to cancel creation.\n\nThis message will time out within 30 seconds.",
+            "\nYou can type `cancel` at any time to cancel creation.\n"
+            "\nThis message will time out within 30 seconds.",
             colour=self.emb_colour)
 
         embed.set_footer(text="Wavy • https://wavybot.com",
@@ -67,6 +69,8 @@ class Utility(commands.Cog):
                                               timeout=30,
                                               check=check)
 
+        await chann_input.delete()
+
         if chann_input.content == "CANCEL".lower():
             embed = await self.__giveaway_cancel_message(
                 "User cancelled giveaway creation.")
@@ -75,9 +79,18 @@ class Utility(commands.Cog):
 
             return
 
-        channel = int(
-            chann_input.content.replace('<', '').replace('>',
-                                                         '').replace('#', ''))
+        try:
+            channel = int(
+                chann_input.content.replace('<',
+                                            '').replace('>',
+                                                        '').replace('#', ''))
+        except ValueError:
+            embed = await self.__giveaway_cancel_message(
+                "User provided invalid channel.")
+
+            await message.edit(embed=embed)
+
+            return
 
         channel = self.bot.get_channel(channel)
 
@@ -88,8 +101,6 @@ class Utility(commands.Cog):
             await message.edit(embed=embed)
 
             return
-
-        await chann_input.delete()
 
         embed = discord.Embed(
             title="Giveaway",
@@ -106,6 +117,8 @@ class Utility(commands.Cog):
         time_input = await self.bot.wait_for('message',
                                              timeout=30,
                                              check=check)
+
+        await time_input.delete()
 
         if time_input.content == "CANCEL".lower():
             embed = await self.__giveaway_cancel_message(
@@ -135,8 +148,6 @@ class Utility(commands.Cog):
 
             return
 
-        await time_input.delete()
-
         embed = discord.Embed(
             title="Giveaway",
             description=
@@ -152,6 +163,8 @@ class Utility(commands.Cog):
         winners_input = await self.bot.wait_for('message',
                                                 timeout=30,
                                                 check=check)
+
+        await winners_input.delete()
 
         if winners_input.content == "CANCEL".lower():
             embed = await self.__giveaway_cancel_message(
@@ -171,8 +184,6 @@ class Utility(commands.Cog):
 
             return
 
-        await winners_input.delete()
-
         embed = discord.Embed(
             title="Giveaway",
             description=f"Gotcha! The giveaway will have {winners} winners."
@@ -188,6 +199,8 @@ class Utility(commands.Cog):
         item_input = await self.bot.wait_for('message',
                                              timeout=30,
                                              check=check)
+
+        await item_input.delete()
 
         if item_input.content == "CANCEL".lower():
             embed = await self.__giveaway_cancel_message(
@@ -205,12 +218,9 @@ class Utility(commands.Cog):
 
             return
 
-        await item_input.delete()
-
         embed = discord.Embed(
             title="Giveaway",
-            description=
-            f"Very well. Here is a rundown of the information you provided",
+            description="Here is a rundown of the information you provided.",
             colour=self.emb_colour)
 
         embed.add_field(name="Channel", value=channel.mention)
@@ -230,7 +240,7 @@ class Utility(commands.Cog):
             title="🎉 **GIVEAWAY** 🎉",
             description=
             f"{ctx.author.mention} hosted a giveaway for `{item_input.content}`!\n\nReact with 🎉 to enter the giveaway!"
-            f"\n\nGiveaway end: <t:{time.epoch}:F> | <t:{time.epoch}:R>",
+            f"\n\nGiveaway end: <t:{time.epoch}:F> UTC",
             colour=self.emb_colour)
 
         g_embed.set_footer(text=f"{winners} Winner(s) • Wavy",

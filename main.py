@@ -77,14 +77,7 @@ async def run():
         """Index page."""
         return json({"message": "Welcome to Wavy's API."})
 
-    # The following API routes are POST due to JS fetch not allowing a request body with GET requests.
-
-    # And as to why the guild IDs are being turned into strings: JS keeps doing weird stuff to
-    # my integers for some reason. E.g 494933638635323412 becomes 494933638635323400
-    # or 602093249573945354 becomes 602093249573945300,
-    # and to fix it I have to make my integers strings instead of integers
-
-    @app.route("/fetch/roles", methods=["POST"])
+    @app.route("/fetch/roles")
     async def fetch_roles(request):
         """Fetches all roles of the specified server."""
         try:
@@ -112,11 +105,11 @@ async def run():
         roles.pop(0)  # Remove @everyone role
 
         for i in roles:
-            role_list.append({"id": str(i.id), "name": i.name})
+            role_list.append({"id": i.id, "name": i.name})
 
         return json(role_list)
 
-    @app.route("/fetch/channels", methods=["POST"])
+    @app.route("/fetch/channels")
     async def fetch_channels(request):
         """Fetches all text channels of the specified server."""
         try:
@@ -143,7 +136,7 @@ async def run():
         channels = guild.text_channels
 
         for i in channels:
-            channel_list.append({"id": str(i.id), "name": i.name})
+            channel_list.append({"id": i.id, "name": i.name})
 
         return json(channel_list)
 

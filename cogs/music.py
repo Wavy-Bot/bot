@@ -104,9 +104,13 @@ class PaginatorSource(menus.ListPageSource):
         self.emb_colour = int(os.getenv("COLOUR"), 16)
 
     async def format_page(self, menu: menus.Menu, page):
+        print(page)
+
         embed = discord.Embed(title='Coming Up...', colour=self.emb_colour)
-        embed.description = '\n'.join(f'`{index}. {title}`'
-                                      for index, title in enumerate(page, 1))
+        embed.description = '\n'.join(
+            f'`{index}.` [{track.title}]({track.uri}) | `{datetime.timedelta(milliseconds=int(track.length))}`'
+            f'\nRequested by: {track.requester.mention}\n'
+            for index, track in enumerate(page, 1))
 
         return embed
 
@@ -216,6 +220,17 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
                 message=
                 f'{ctx.author.mention}, you must be in {player.context.channel.mention} for this session.'
             )
+
+    @staticmethod
+    async def position(player_position: float):
+        """Method which returns the player position."""
+        player_position = datetime.timedelta(
+            milliseconds=round(player_position))
+
+        player_position = player_position - datetime.timedelta(
+            microseconds=player_position.microseconds)
+
+        return player_position
 
     def required(self, ctx: commands.Context):
         """Method which returns required votes based on amount of members in a channel."""
@@ -578,7 +593,7 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
             return await ctx.send(
                 '**:x: There are no more songs in the queue.**')
 
-        entries = [track.title for track in player.queue._queue]
+        entries = [track for track in player.queue._queue]
         pages = PaginatorSource(entries=entries)
         paginator = menus.MenuPages(source=pages,
                                     timeout=None,
@@ -601,6 +616,8 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
 
         track = player.current
 
+        player_position = await self.position(player.position)
+
         # Create embed
 
         embed = discord.Embed(title='Now playing', colour=self.emb_colour)
@@ -608,8 +625,10 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed.set_thumbnail(url=track.thumb)
 
         embed.add_field(
-            name='Duration',
-            value=str(datetime.timedelta(milliseconds=int(track.length))))
+            name='Playing for',
+            value=
+            f"`{player_position}/{datetime.timedelta(milliseconds=int(track.length))}`"
+        )
         embed.add_field(name='Queue Length', value=str(qsize))
         embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
         embed.add_field(name='Requested By', value=track.requester.mention)
@@ -617,6 +636,143 @@ class Music(commands.Cog, wavelink.WavelinkMixin):
         embed.add_field(name='Channel', value=f'{channel.name}')
 
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def seek(self, ctx: commands.Context, time_in_seconds: int):
+        """Seeks to a certain point in the currently playing song."""
+        player: Player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
+                                                      cls=Player,
+                                                      context=ctx)
+
+        if not player.is_connected:
+            return
+
+        time = time_in_seconds * 1000
+
+        await player.seek(position=time)
+
+        player_position = datetime.timedelta(milliseconds=time)
+
+        await ctx.send(
+            f":left_right_arrow: Set position to `{player_position}`")
+
+    @commands.command(aliases=["fwd"])
+    async def forward(self, ctx: commands.Context, time_in_seconds: int):
+        """Forwards by a certain amount of time in the currently playing song."""
+        player: Player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
+                                                      cls=Player,
+                                                      context=ctx)
+
+        if not player.is_connected:
+            return
+
+        player_position = await self.position(player.position)
+
+        time = (player_position.seconds + time_in_seconds) * 1000
+
+        await player.seek(position=time)
+
+        player_position = datetime.timedelta(milliseconds=time)
+
+        await ctx.send(f" :fast_forward: Set position to `{player_position}`")
+
+    @commands.command(aliases=["rwd"])
+    async def rewind(self, ctx: commands.Context, time_in_seconds: int):
+        """Rewinds by a certain amount of time in the currently playing song."""
+        player: Player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
+                                                      cls=Player,
+                                                      context=ctx)
+
+        if not player.is_connected:
+            return
+
+        player_position = await self.position(player.position)
+
+        time = (player_position.seconds - time_in_seconds) * 1000
+
+        await player.seek(position=time)
+
+        player_position = datetime.timedelta(milliseconds=time)
+
+        await ctx.send(f":rewind: Set position to `{player_position}`")
+
+    @commands.command(aliases=["pt", "ptop"])
+    async def playtop(self, ctx: commands.Context, *, query: str):
+        """Adds a song with the given query to the top of the queue."""
+        player: Player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
+                                                      cls=Player,
+                                                      context=ctx)
+
+        if not player.is_connected:
+            await ctx.invoke(self.connect)
+
+        query = query.strip('<>')
+
+        await ctx.send(f"**:mag_right: Searching for `{query}`.**")
+
+        if not self.url_reg.match(query):
+            query = f'ytsearch:{query}'
+
+        tracks = await self.bot.wavelink.get_tracks(query)
+        if not tracks:
+            return await ctx.send(
+                '**:x: No songs were found with that query. Please try again.**'
+            )
+
+        channel = self.bot.get_channel(int(player.channel_id))
+
+        if isinstance(tracks, wavelink.TrackPlaylist):
+            for track in tracks.tracks:
+                track = Track(track.id, track.info, requester=ctx.author)
+                player.queue._queue.insert(0, track)
+
+            qsize = player.queue.qsize()
+
+            # Create embed
+
+            embed = discord.Embed(title='Added to queue',
+                                  colour=self.emb_colour)
+            embed.description = f'**[`{tracks.data["playlistInfo"]["name"]}`]({track.uri})**\n\n'
+            embed.set_thumbnail(url=track.thumb)
+
+            embed.add_field(
+                name='Duration',
+                value=str(datetime.timedelta(milliseconds=int(track.length))))
+            embed.add_field(name='Queue Length', value=str(qsize))
+            embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
+            embed.add_field(name='Requested By', value=track.requester.mention)
+            embed.add_field(name='DJ', value=player.dj.mention)
+            embed.add_field(name='Channel', value=f'{channel.name}')
+
+            await ctx.send(embed=embed)
+
+        else:
+            track = Track(tracks[0].id, tracks[0].info, requester=ctx.author)
+
+            qsize = player.queue.qsize()
+
+            # Create embed
+
+            embed = discord.Embed(title='Added to queue',
+                                  colour=self.emb_colour)
+            embed.description = f'**[`{track.title}`]({track.uri})**\n\n'
+            embed.set_thumbnail(url=track.thumb)
+
+            embed.add_field(
+                name='Duration',
+                value=str(datetime.timedelta(milliseconds=int(track.length))))
+            embed.add_field(name='Queue Length', value=str(qsize + 1))
+            embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
+            embed.add_field(name='Requested By', value=track.requester.mention)
+            embed.add_field(name='DJ', value=player.dj.mention)
+            embed.add_field(name='Channel', value=f'{channel.name}')
+
+            await ctx.send(embed=embed)
+
+            player.queue._queue.insert(0, track)
+
+        if not player.is_playing:
+            await player.do_next()
 
     @commands.command(aliases=['swap'])
     async def swap_dj(self,

@@ -185,7 +185,8 @@ class Moderation(commands.Cog):
 
         if not fetch_mute:
 
-            fetch_role = await self.db.fetch_role(ctx.message.guild.id, "mute")
+            fetch_role = await self.db.fetch_single_role(
+                ctx.message.guild.id, "mute")
 
             if fetch_role:
                 role = discord.utils.get(ctx.guild.roles,
@@ -235,13 +236,14 @@ class Moderation(commands.Cog):
                 await ctx.message.guild.edit_role_positions(positions=positions
                                                             )
 
-                await self.db.set_role(ctx.message.guild.id, role.id, "mute")
+                await self.db.set_single_role(ctx.message.guild.id, role.id,
+                                              "mute")
 
             else:
                 role = discord.utils.get(ctx.guild.roles,
                                          id=fetch_role.role_id)
 
-            await member.add_roles(role)
+            await member.add_roles(role, reason=f"{member} has been muted.")
 
             embed = discord.Embed(title=f"Muted {member}",
                                   colour=self.emb_colour)
@@ -304,7 +306,8 @@ class Moderation(commands.Cog):
 
         if fetch_mute:
 
-            fetch_role = await self.db.fetch_role(ctx.message.guild.id, "mute")
+            fetch_role = await self.db.fetch_single_role(
+                ctx.message.guild.id, "mute")
 
             if fetch_role:
                 role = discord.utils.get(ctx.guild.roles,

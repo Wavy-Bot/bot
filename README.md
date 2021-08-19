@@ -48,7 +48,8 @@ python3 -m pip install -r requirements.txt
 python3 main.py
 ```
 
-The aforementioned however is only to run the bot. You wil also need some way to configure it, like a web dashboard. Wavy's web dashboard is located [here](https://github.com/Wavy-Bot/website/).
+The aforementioned however is only to run the bot. ~~You wil also need some way to configure it, like a web dashboard. Wavy's web dashboard is located [here](https://github.com/Wavy-Bot/website/).~~
+I will be working on a web dashboard located over [here](https://github.com/Wavy-Bot/website/), but for now I have made configuration commands since it was taking too long.
 
 ## To-do list
 Moved to [GitHub Projects](https://github.com/Wavy-Bot/bot/projects/1)

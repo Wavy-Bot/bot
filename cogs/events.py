@@ -94,13 +94,13 @@ class Events(commands.Cog):
 
                 if member:
 
-                    fetch_role = await self.db.fetch_role(server.id, "mute")
+                    fetch_role = await self.db.fetch_single_role(
+                        server.id, "mute")
 
                     role = discord.utils.get(server.roles,
                                              id=fetch_role.role_id)
 
                     if role:
-
                         await member.remove_roles(role)
 
                 await self.db.remove_mute(server.id, member.id)
@@ -114,7 +114,6 @@ class Events(commands.Cog):
 
         for giveaway in giveaways:
             if giveaway.end_time <= datetime.utcnow():
-                server = self.bot.get_guild(giveaway.server_id)
                 channel = self.bot.get_channel(giveaway.channel_id)
 
                 if channel:
@@ -145,6 +144,18 @@ class Events(commands.Cog):
                     for winner in winners:
                         await channel.send(
                             f"{winner.mention} has won the giveaway!")
+
+                    embed = discord.Embed(
+                        title="🎉 **GIVEAWAY** 🎉",
+                        description="This giveaway has ended.",
+                        colour=self.emb_colour)
+
+                    embed.set_footer(text="Wavy • https://wavybot.com",
+                                     icon_url=self.bot.user.avatar_url)
+
+                    await message.edit(embed=embed)
+
+                    await message.clear_reaction('🎉')
 
                 await self.db.remove_giveaway(giveaway.server_id,
                                               giveaway.message_id)
@@ -217,6 +228,18 @@ class Events(commands.Cog):
                     raise exceptions.NonExistantChannelError(
                         message=
                         f"The channel with ID {channel_id} does not exist.")
+
+            roles = await self.db.fetch_roles(member.guild.id, "auto")
+
+            if roles:
+                role_list = []
+
+                for i in roles:
+                    role = discord.utils.get(member.guild.roles, id=i.role_id)
+
+                    if role:
+                        role_list.append(role)
+                await member.add_roles(*role_list, reason="Autorole")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
@@ -295,92 +318,6 @@ class Events(commands.Cog):
                                     message=
                                     f"The channel with ID {channel_id} does not exist."
                                 )
-            if await self.db.fetch_config_level(message.guild.id):
-                command_prefix = await self.bot.command_prefix(
-                    self.bot, message)
-
-                if not message.content.startswith(tuple(command_prefix)):
-
-                    level_class = await self.db.fetch_level(
-                        message.guild.id, message.author.id)
-
-                    if not level_class:
-                        await self.db.set_xp(1, message.guild.id,
-                                             message.author.id)
-
-                        return
-
-                    new_xp = level_class.xp + 1
-
-                    await self.db.set_xp(new_xp, message.guild.id,
-                                         message.author.id)
-
-                    if new_xp >= round((8 * (level_class.level**3)) / 2):
-                        new_level = level_class.level + 1
-                        await self.db.set_level(new_level, message.guild.id,
-                                                message.author.id)
-
-                        if await self.db.fetch_config_level_rewards(
-                                message.guild.id):
-
-                            level_rewards = await self.db.fetch_level_rewards(
-                                new_level, message.guild.id)
-
-                            if level_rewards:
-                                stack_rewards = await self.db.fetch_config_stack_rewards(
-                                    message.guild.id)
-
-                                level_rewards = await self.db.fetch_level_rewards(
-                                    new_level, message.guild.id)
-
-                                role_list = []
-
-                                for i in level_rewards:
-                                    role = message.guild.get_role(i.role_id)
-                                    if role:
-                                        role_list.append(role)
-
-                                if not stack_rewards:
-                                    lower_level_rewards = await self.db.fetch_lower_level_rewards(
-                                        new_level, message.guild.id)
-
-                                    if lower_level_rewards:
-                                        lower_role_list = []
-
-                                        for i in lower_level_rewards:
-                                            role = message.guild.get_role(
-                                                i.role_id)
-                                            if role:
-                                                lower_role_list.append(role)
-
-                                        if lower_role_list:
-
-                                            await member.remove_roles(
-                                                *lower_role_list,
-                                                reason=
-                                                f"Member leveled up to level {new_level}"
-                                            )
-
-                                if role_list:
-
-                                    await member.add_roles(
-                                        *role_list,
-                                        reason=
-                                        f"Member leveled up to level {new_level}"
-                                    )
-
-                        channel_id = await self.db.fetch_channels_level(
-                            message.guild.id)
-
-                        up_message = f"{member.mention} is now level {new_level}! :tada:"
-
-                        if channel_id:
-                            channel = self.bot.get_channel(channel_id)
-                            await channel.send(up_message)
-
-                            return
-
-                        await message.channel.send(up_message)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -427,7 +364,6 @@ class Events(commands.Cog):
                                         inline=False)
 
                         if message.content:
-
                             embed.add_field(name="Message content",
                                             value=message.content,
                                             inline=False)

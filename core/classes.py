@@ -144,38 +144,6 @@ class Leave:
         self.embed_colour = embed_colour
 
 
-class Level:
-    """
-    Class that represents the level table in the database.
-
-    Takes the following arguments:
-        server_id => Discord server ID.
-        member_id => Discord member ID.
-        level => Member's level.
-        xp => Member's xp.
-    """
-    def __init__(self, server_id: int, member_id: int, level: int, xp: int):
-        self.server_id = server_id
-        self.member_id = member_id
-        self.level = level
-        self.xp = xp
-
-
-class LevelRewards:
-    """
-    Class that represents the level rewards table in the database.
-
-    Takes the following arguments:
-        server_id => Discord server ID.
-        role_id => Discord role ID.
-        level => Level at which a member gets said role.
-    """
-    def __init__(self, server_id: int, role_id: int, level: int):
-        self.server_id = server_id
-        self.role_id = role_id
-        self.level = level
-
-
 class Logs:
     """
     Class that represents the logs table in the database.
@@ -310,3 +278,16 @@ class Giveaways:
         self.message_id = message_id
         self.winners = winners
         self.end_time = end_time
+
+
+class LogOptions:
+    """
+    Class that contains the description and value of a log option.
+
+    Takes the following arguments:
+        description: Description of the option.
+        value: Value of the option.
+    """
+    def __init__(self, description: str, value: bool):
+        self.description = description
+        self.value = value

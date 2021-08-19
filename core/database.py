@@ -1,3 +1,5 @@
+# TODO(Robert): Move this to asyncpg or mongodb
+
 import os
 
 import psycopg
@@ -27,8 +29,6 @@ def init_db():
             welcome BOOL DEFAULT false,
             autorole BOOL DEFAULT false,
             leave BOOL DEFAULT false,
-            level BOOL DEFAULT false,
-            level_rewards BOOL DEFAULT false,
             stack_rewards BOOL DEFAULT false,
             cleverbot BOOL DEFAULT false,
             logs BOOL DEFAULT false,
@@ -39,7 +39,6 @@ def init_db():
             welcome BIGINT,
             leave BIGINT,
             log BIGINT,
-            level BIGINT,
             captcha BIGINT,
             cleverbot BIGINT
         );
@@ -59,17 +58,6 @@ def init_db():
             message TEXT,
             embed BOOL DEFAULT true,
             embed_colour TEXT
-        );
-        CREATE TABLE IF NOT EXISTS level(
-            server_id BIGINT,
-            member_id BIGINT,
-            level BIGINT,
-            xp BIGINT
-        );
-        CREATE TABLE IF NOT EXISTS level_rewards(
-            server_id BIGINT,
-            role_id BIGINT,
-            level BIGINT
         );
         CREATE TABLE IF NOT EXISTS logs(
             server_id BIGINT,
@@ -167,10 +155,6 @@ class Database:
                             (server_id, ))
             await c.execute("DELETE FROM leave WHERE server_id=%s;",
                             (server_id, ))
-            await c.execute("DELETE FROM level WHERE server_id=%s;",
-                            (server_id, ))
-            await c.execute("DELETE FROM level_rewards WHERE server_id=%s;",
-                            (server_id, ))
             await c.execute("DELETE FROM logs WHERE server_id=%s;",
                             (server_id, ))
             await c.execute("DELETE FROM mutes WHERE server_id=%s;",
@@ -207,6 +191,14 @@ class Database:
 
             return r
 
+    async def set_config_prefix(self, server_id: int, prefix: str):
+        """Sets a guild's prefix."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("UPDATE config SET prefix=%s WHERE server_id=%s;",
+                            (prefix, server_id))
+
+            await db.commit()
+
     async def fetch_config_welcome(self, server_id: int):
         """Fetches if a guild has welcome messages enabled."""
         async with self.db.connection() as db, db.cursor() as c:
@@ -216,6 +208,22 @@ class Database:
             r = await c.fetchone()
 
             return r[0]
+
+    async def set_config_welcome(self, server_id: int, enabled: bool):
+        """Sets a guild's welcome message config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("UPDATE config SET welcome=%s WHERE server_id=%s;",
+                            (enabled, server_id))
+
+            await db.commit()
+
+    async def set_config_leave(self, server_id: int, enabled: bool):
+        """Sets a guild's leave message config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("UPDATE config SET leave=%s WHERE server_id=%s;",
+                            (enabled, server_id))
+
+            await db.commit()
 
     async def fetch_config_autorole(self, server_id: int):
         """Fetches if a guild has autorole enabled."""
@@ -237,38 +245,6 @@ class Database:
 
             return r[0]
 
-    async def fetch_config_level(self, server_id: int):
-        """Fetches if a guild has level messages enabled."""
-        async with self.db.connection() as db, db.cursor() as c:
-            await c.execute("SELECT level FROM config WHERE server_id=%s;",
-                            (server_id, ))
-
-            r = await c.fetchone()
-
-            return r[0]
-
-    async def fetch_config_level_rewards(self, server_id: int):
-        """Fetches if a guild has level rewards enabled."""
-        async with self.db.connection() as db, db.cursor() as c:
-            await c.execute(
-                "SELECT level_rewards FROM config WHERE server_id=%s;",
-                (server_id, ))
-
-            r = await c.fetchone()
-
-            return r[0]
-
-    async def fetch_config_stack_rewards(self, server_id: int):
-        """Fetches if a guild has level reward stacking enabled."""
-        async with self.db.connection() as db, db.cursor() as c:
-            await c.execute(
-                "SELECT stack_rewards FROM config WHERE server_id=%s;",
-                (server_id, ))
-
-            r = await c.fetchone()
-
-            return r[0]
-
     async def fetch_config_cleverbot(self, server_id: int):
         """Fetches if a guild has cleverbot enabled."""
         async with self.db.connection() as db, db.cursor() as c:
@@ -279,6 +255,15 @@ class Database:
 
             return r[0]
 
+    async def set_config_cleverbot(self, server_id: int, enabled: bool):
+        """Sets a guild's Cleverbot config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE config SET cleverbot=%s WHERE server_id=%s;",
+                (enabled, server_id))
+
+            await db.commit()
+
     async def fetch_config_logs(self, server_id: int):
         """Fetches if a guild has logging enabled."""
         async with self.db.connection() as db, db.cursor() as c:
@@ -288,6 +273,14 @@ class Database:
             r = await c.fetchone()
 
             return r[0]
+
+    async def set_config_logs(self, server_id: int, enabled: bool):
+        """Sets a guild's logging config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("UPDATE config SET logs=%s WHERE server_id=%s;",
+                            (enabled, server_id))
+
+            await db.commit()
 
     async def fetch_config_captcha(self, server_id: int):
         """Fetches if a guild has captchas enabled."""
@@ -309,6 +302,15 @@ class Database:
 
             return r[0]
 
+    async def set_channels_welcome(self, server_id: int, channel_id: int):
+        """Sets a guild's welcome channel."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE channels SET welcome=%s WHERE server_id=%s;",
+                (channel_id, server_id))
+
+            await db.commit()
+
     async def fetch_channels_leave(self, server_id: int):
         """Fetches a guild's leave channel."""
         async with self.db.connection() as db, db.cursor() as c:
@@ -318,6 +320,14 @@ class Database:
             r = await c.fetchone()
 
             return r[0]
+
+    async def set_channels_leave(self, server_id: int, channel_id: int):
+        """Sets a guild's leave channel."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("UPDATE channels SET leave=%s WHERE server_id=%s;",
+                            (channel_id, server_id))
+
+            await db.commit()
 
     async def fetch_channels_log(self, server_id: int):
         """Fetches a guild's logging channel."""
@@ -329,15 +339,13 @@ class Database:
 
             return r[0]
 
-    async def fetch_channels_level(self, server_id: int):
-        """Fetches a guild's level channel."""
+    async def set_channels_log(self, server_id: int, channel_id: int):
+        """Sets a guild's leave channel."""
         async with self.db.connection() as db, db.cursor() as c:
-            await c.execute("SELECT level FROM channels WHERE server_id=%s;",
-                            (server_id, ))
+            await c.execute("UPDATE channels SET log=%s WHERE server_id=%s;",
+                            (channel_id, server_id))
 
-            r = await c.fetchone()
-
-            return r[0]
+            await db.commit()
 
     async def fetch_channels_captcha(self, server_id: int):
         """Fetches a guild's captcha channel."""
@@ -360,6 +368,15 @@ class Database:
 
             return r[0]
 
+    async def set_channels_cleverbot(self, server_id: int, channel_id: int):
+        """Sets a guild's Cleverbot channel."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE channels SET cleverbot=%s WHERE server_id=%s;",
+                (channel_id, server_id))
+
+            await db.commit()
+
     async def fetch_welcome(self, server_id: int):
         """Fetches a guild's welcome message settings."""
         async with self.db.connection() as db, db.cursor() as c:
@@ -374,6 +391,32 @@ class Database:
                                             embed_colour=r[3])
 
             return welcome_class
+
+    async def set_welcome_message(self, server_id: int, message: str):
+        """Sets a guild's welcome message."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE welcome SET message=%s WHERE server_id=%s;",
+                (message, server_id))
+
+            await db.commit()
+
+    async def set_welcome_embed(self, server_id: int, enabled: bool):
+        """Sets a guild's welcome message embed config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute("UPDATE welcome SET embed=%s WHERE server_id=%s;",
+                            (enabled, server_id))
+
+            await db.commit()
+
+    async def set_welcome_embed_colour(self, server_id: int, colour: str):
+        """Sets a guild's welcome message embed colour config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE welcome SET embed_colour=%s WHERE server_id=%s;",
+                (colour, server_id))
+
+            await db.commit()
 
     async def fetch_leave(self, server_id: int):
         """Fetches a guild's leave message settings."""
@@ -390,100 +433,30 @@ class Database:
 
             return leave_class
 
-    async def fetch_level(self, server_id: int, member_id: int):
-        """Fetches a guild's level settings."""
+    async def set_leave_message(self, server_id: int, message: str):
+        """Sets a guild's leave message."""
         async with self.db.connection() as db, db.cursor() as c:
-            await c.execute(
-                "SELECT * FROM level WHERE server_id=%s AND member_id=%s;",
-                (server_id, member_id))
-
-            r = await c.fetchone()
-
-            if r:
-                level_class = classes.Level(server_id=r[0],
-                                            member_id=r[1],
-                                            level=r[2],
-                                            xp=r[3])
-
-                return level_class
-
-            return
-
-    async def set_xp(self, xp: int, server_id: int, member_id: int):
-        """Sets a member's XP."""
-        async with self.db.connection() as db, db.cursor() as c:
-            await c.execute("SELECT xp FROM level WHERE member_id=%s;",
-                            (member_id, ))
-
-            r = await c.fetchone()
-
-            if not r:
-                await c.execute(
-                    "INSERT INTO level (xp, server_id, member_id, level) VALUES (%s, %s, %s, 0);",
-                    (xp, server_id, member_id))
-
-            else:
-                await c.execute(
-                    "UPDATE level SET xp=%s, server_id=%s, member_id=%s WHERE member_id=%s;",
-                    (xp, server_id, member_id, member_id))
+            await c.execute("UPDATE leave SET message=%s WHERE server_id=%s;",
+                            (message, server_id))
 
             await db.commit()
 
-    async def set_level(self, level: int, server_id: int, member_id: int):
-        """Sets a member's level."""
+    async def set_leave_embed(self, server_id: int, enabled: bool):
+        """Sets a guild's leave message embed config."""
         async with self.db.connection() as db, db.cursor() as c:
-            await c.execute(
-                "UPDATE level SET level=%s, server_id=%s, member_id=%s WHERE member_id=%s;",
-                (level, server_id, member_id, member_id))
+            await c.execute("UPDATE leave SET embed=%s WHERE server_id=%s;",
+                            (enabled, server_id))
 
             await db.commit()
 
-    async def fetch_level_rewards(self, level: int, server_id: int):
-        """Fetches level rewards for said level, returns None if no level reward for that level has been configured."""
+    async def set_leave_embed_colour(self, server_id: int, colour: str):
+        """Sets a guild's leave message embed colour config."""
         async with self.db.connection() as db, db.cursor() as c:
             await c.execute(
-                "SELECT * FROM level_rewards WHERE server_id=%s AND level=%s;",
-                (server_id, level))
+                "UPDATE leave SET embed_colour=%s WHERE server_id=%s;",
+                (colour, server_id))
 
-            r = await c.fetchall()
-
-            if r:
-                rewards_list = []
-
-                for i in r:
-                    rewards_class = classes.LevelRewards(server_id=i[0],
-                                                         role_id=i[1],
-                                                         level=i[2])
-
-                    rewards_list.append(rewards_class)
-                return rewards_list
-
-            return
-
-    async def fetch_lower_level_rewards(self, level: int, server_id: int):
-        """
-        Fetches level rewards for lower levels,
-        returns None if no level reward for any lower level has been found.
-        """
-        async with self.db.connection() as db, db.cursor() as c:
-            await c.execute(
-                "SELECT * FROM level_rewards WHERE server_id=%s AND level < %s;",
-                (server_id, level))
-
-            r = await c.fetchall()
-
-            if r:
-                rewards_list = []
-
-                for i in r:
-                    rewards_class = classes.LevelRewards(server_id=i[0],
-                                                         role_id=i[1],
-                                                         level=i[2])
-
-                    rewards_list.append(rewards_class)
-                return rewards_list
-
-            return
+            await db.commit()
 
     async def fetch_logs(self, server_id: int):
         """Fetches a guild's log settings."""
@@ -511,6 +484,24 @@ class Database:
                                       invite_delete=r[15])
 
             return logs_class
+
+    async def set_logs(self, server_id: int, msg_delete: bool,
+                       msg_bulk_delete: bool, msg_edit: bool, ch_create: bool,
+                       ch_delete: bool, member_ban: bool, member_unban: bool,
+                       voicestate_update: bool, guild_update: bool,
+                       role_create: bool, role_update: bool, role_delete: bool,
+                       emoji_update: bool, invite_create: bool,
+                       invite_delete: bool):
+        """Sets a guild's logging config."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "UPDATE logs SET msg_delete=%s, msg_bulk_delete=%s, msg_edit=%s, ch_create=%s, ch_delete=%s, member_ban=%s, member_unban=%s, voicestate_update=%s, guild_update=%s, role_create=%s, role_update=%s, role_delete=%s, emoji_update=%s, invite_create=%s, invite_delete=%s WHERE server_id=%s;",
+                (msg_delete, msg_bulk_delete, msg_edit, ch_create, ch_delete,
+                 member_ban, member_unban, voicestate_update, guild_update,
+                 role_create, role_update, role_delete, emoji_update,
+                 invite_create, invite_delete, server_id))
+
+            await db.commit()
 
     async def fetch_mutes(self):
         """Fetches all mutes."""
@@ -569,8 +560,8 @@ class Database:
 
             await db.commit()
 
-    async def fetch_role(self, server_id: int, role_type: str):
-        """Fetches a specific role."""
+    async def fetch_single_role(self, server_id: int, role_type: str):
+        """Fetches a single specific role."""
         async with self.db.connection() as db, db.cursor() as c:
             await c.execute(
                 "SELECT * FROM roles WHERE server_id=%s AND type=%s;",
@@ -587,10 +578,49 @@ class Database:
 
             return
 
-    async def set_role(self, server_id: int, role_id: int, role_type: str):
-        """Sets a role."""
+    async def fetch_role(self, server_id: int, role_id: int, role_type: str):
+        """Fetches a specific role."""
         async with self.db.connection() as db, db.cursor() as c:
-            role = await self.fetch_role(server_id, role_type)
+            await c.execute(
+                "SELECT * FROM roles WHERE server_id=%s AND role_id=%s AND type=%s;",
+                (server_id, role_id, role_type))
+
+            r = await c.fetchone()
+
+            if r:
+                role_class = classes.Roles(server_id=server_id,
+                                           role_id=r[1],
+                                           role_type=r[2])
+
+                return role_class
+
+            return
+
+    async def fetch_roles(self, server_id: int, role_type: str):
+        """Fetches multiple roles."""
+        async with self.db.connection() as db, db.cursor() as c:
+            await c.execute(
+                "SELECT * FROM roles WHERE server_id=%s AND type=%s;",
+                (server_id, role_type))
+
+            r = await c.fetchall()
+
+            role_list = []
+
+            for i in r:
+                role_class = classes.Roles(server_id=server_id,
+                                           role_id=i[1],
+                                           role_type=i[2])
+
+                role_list.append(role_class)
+
+            return role_list
+
+    async def set_single_role(self, server_id: int, role_id: int,
+                              role_type: str):
+        """Sets a single role."""
+        async with self.db.connection() as db, db.cursor() as c:
+            role = await self.fetch_single_role(server_id, role_type)
 
             if not role:
                 await c.execute(
@@ -598,12 +628,45 @@ class Database:
                     (server_id, role_id, role_type))
 
             else:
-
                 await c.execute(
                     "UPDATE roles SET role_id=%s WHERE server_id=%s AND type=%s;",
                     (role_id, server_id, role_type))
 
             await db.commit()
+
+    async def set_role(self, server_id: int, role_id: int, role_type: str):
+        """Sets a role."""
+        async with self.db.connection() as db, db.cursor() as c:
+            role = await self.fetch_role(server_id, role_id, role_type)
+
+            if not role:
+                await c.execute(
+                    "INSERT INTO roles (server_id, role_id, type) VALUES (%s, %s, %s);",
+                    (server_id, role_id, role_type))
+
+            else:
+                await c.execute(
+                    "UPDATE roles SET role_id=%s WHERE server_id=%s AND type=%s;",
+                    (role_id, server_id, role_type))
+
+            await db.commit()
+
+    async def remove_role(self, server_id: int, role_id: int, role_type: str):
+        """Removes a role."""
+        async with self.db.connection() as db, db.cursor() as c:
+            role = await self.fetch_role(server_id, role_id, role_type)
+
+            if not role:
+                return
+
+            else:
+                await c.execute(
+                    "DELETE FROM roles WHERE server_id=%s AND role_id=%s AND type=%s;",
+                    (server_id, role_id, role_type))
+
+                await db.commit()
+
+                return True
 
     async def fetch_warns(self, server_id: int, member_id: int):
         """Fetches all warnings a member has."""
