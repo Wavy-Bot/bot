@@ -659,14 +659,13 @@ class Database:
             if not role:
                 return
 
-            else:
-                await c.execute(
-                    "DELETE FROM roles WHERE server_id=%s AND role_id=%s AND type=%s;",
-                    (server_id, role_id, role_type))
+            await c.execute(
+                "DELETE FROM roles WHERE server_id=%s AND role_id=%s AND type=%s;",
+                (server_id, role_id, role_type))
 
-                await db.commit()
+            await db.commit()
 
-                return True
+            return True
 
     async def fetch_warns(self, server_id: int, member_id: int):
         """Fetches all warnings a member has."""

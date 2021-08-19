@@ -11,6 +11,10 @@ from core import exceptions
 from discord.ext import commands
 
 CLEVERBOT_KEY = os.getenv("CLEVERBOT_KEY")
+TGG_API_KEY = os.getenv("TGG_API_KEY")
+BGG_API_KEY = os.getenv("BGG_API_KEY")
+BFD_API_KEY = os.getenv("BFD_API_KEY")
+DBL_API_KEY = os.getenv("DBL_API_KEY")
 
 
 async def reddit(subreddit: str, category: str, channel):
@@ -235,3 +239,56 @@ async def cleverbot(text: str, member_id: int):
     await cs.close()
 
     return res.text
+
+
+async def botlists(server_count: int, users: int, shards: int):
+    """Makes a request to all the bot lists Wavy is listed on."""
+    async with aiohttp.ClientSession() as cs:
+        botlist_list = [{
+            "url": "https://top.gg/api/bots/475685785040060437/stats",
+            "headers": {
+                "Authorization": TGG_API_KEY,
+                "Content-Type": "application/json"
+            },
+            "data": {
+                "server_count": server_count,
+                "shard_count": shards
+            }
+        }, {
+            "url":
+            "https://discord.bots.gg/api/v1/bots/475685785040060437/stats",
+            "headers": {
+                "Authorization": BGG_API_KEY,
+                "Content-Type": "application/json"
+            },
+            "data": {
+                "guildCount": server_count,
+                "shardCount": shards
+            }
+        }, {
+            "url": "https://discords.com/bots/api/bot/475685785040060437",
+            "headers": {
+                "Authorization": BFD_API_KEY,
+                "Content-Type": "application/json"
+            },
+            "data": {
+                "server_count": server_count
+            }
+        }, {
+            "url":
+            "https://discordbotlist.com/api/v1/bots/475685785040060437/stats",
+            "headers": {
+                "Authorization": DBL_API_KEY,
+                "Content-Type": "application/json"
+            },
+            "data": {
+                "guilds": server_count,
+                "users": users
+            }
+        }]
+
+        for botlist in botlist_list:
+            await cs.post(
+                f'https://discords.com/bots/api/bot/475685785040060437',
+                headers=botlist['headers'],
+                json=botlist['data'])

@@ -82,7 +82,7 @@ class Config(commands.Cog):
             embed = discord.Embed(
                 title="Prefix",
                 description=
-                f"Unable to set prefix: prefix length is over 2000 characters.",
+                "Unable to set prefix: prefix length is over 2000 characters.",
                 colour=self.emb_colour)
 
             embed.set_footer(text="Wavy • https://wavybot.com",

@@ -18,11 +18,13 @@ class Events(commands.Cog):
         self.err_colour = int(os.getenv("ERR_COLOUR"), 16)
         self.check_mute.start()
         self.check_giveaways.start()
+        self.post_botlist_data.start()
 
     def cog_unload(self):
         """Runs when the cog gets unloaded."""
         self.check_mute.cancel()
         self.check_giveaways.cancel()
+        self.post_botlist_data.cancel()
 
     @staticmethod
     async def __parse_message(message: str, member):
@@ -78,6 +80,15 @@ class Events(commands.Cog):
 
         for i in guilds:
             await self.db.add_guild(i.id)
+
+    @tasks.loop(seconds=1800)
+    async def post_botlist_data(self):
+        """POSTs data to botlists."""
+        await self.bot.wait_until_ready()
+
+        await request.botlists(len(self.bot.guilds),
+                               len(list(self.bot.get_all_members())),
+                               self.bot.shard_count)
 
     @tasks.loop(seconds=10)
     async def check_mute(self):
