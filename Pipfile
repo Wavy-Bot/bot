@@ -4,11 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-py-cord = {extras = ["speed", "voice"], version = "*"}
 python-dotenv = "*"
 uvloop = "*"
+motor = "*"
+pymongo = {extras = ["srv"], version = "*"}
+psutil = "*"
+py-cord = {extras = ["speed", "voice"], git = "https://github.com/Pycord-Development/pycord"}
+"pycord.wavelink" = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
