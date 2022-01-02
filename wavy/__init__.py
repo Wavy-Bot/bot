@@ -56,6 +56,7 @@ class Wavy(commands.AutoShardedBot):
         intents.members = True
 
         super().__init__(
+            command_prefix=commands.when_mentioned_or("%"),
             case_insensitive=True,
             intents=intents,
             status=discord.Status.online,
@@ -65,7 +66,6 @@ class Wavy(commands.AutoShardedBot):
         )
 
         for cog in os.listdir("wavy/cogs"):
-
             if cog.endswith(".py") and not cog.startswith("_"):
                 try:
                     cog = f"wavy.cogs.{cog.replace('.py', '')}"
@@ -73,7 +73,3 @@ class Wavy(commands.AutoShardedBot):
                 except Exception as e:
                     print(f"{cog} cannot be loaded.")
                     raise e
-
-    async def on_ready(self) -> print:
-        """Called when the client is done preparing the data received from Discord."""
-        print(f"Logged in as\n{self.user.name}\n{self.user.id}")

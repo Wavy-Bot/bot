@@ -17,7 +17,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def ping(self, ctx):
-        """Pings the bot."""
+        """Ping pong"""
         embed = discord.Embed(
             title="Pong :ping_pong:",
             description=f"Heartbeat: {round(self.bot.latency * 1000)}ms",
@@ -32,7 +32,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def help(self, ctx, category: str = None):
-        """Shows the help message."""
+        """Send help"""
         if category:
             category = category.capitalize()
 
@@ -50,7 +50,7 @@ class General(commands.Cog):
                 for command in cog.get_commands():
                     embed.add_field(
                         name=command.name,
-                        value=f"`{command.brief or command.help}`",
+                        value=f"`{command.description}`",
                     )
 
                 embed.set_footer(
@@ -84,7 +84,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def stats(self, ctx):
-        """Shows the bot's stats."""
+        """The boring stuff"""
         server_stats = await utils.server_stats()
         uptime = await utils.uptime()
 
@@ -129,7 +129,7 @@ class General(commands.Cog):
         view.add_item(
             discord.ui.Button(
                 style=discord.ButtonStyle.link,
-                url="https://discord.gg/uDwQGyW",
+                url="https://discord.gg/Nbcf36Fge5",
                 label="Discord Server",
             )
         )
@@ -144,7 +144,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def serverinfo(self, ctx):
-        """Shows info about the current server."""
+        """Cool stats nobody's going to look at"""
         guild = ctx.guild
 
         embed = discord.Embed(title=f"Info on {guild.name}", colour=self.emb_colour)
@@ -187,7 +187,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def userinfo(self, ctx, member: discord.Member = None):
-        """Shows info about a member."""
+        """Nobody cares"""
         member = ctx.author if not member else member
 
         # Make a list of roles and remove the @everyone role
@@ -231,7 +231,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def avatar(self, ctx, member: discord.Member = None):
-        """Shows a member's avatar."""
+        """Here's a cool avatar that you may steal now"""
         member = ctx.author if not member else member
 
         # Image types (it's a bit messy, but for now it's fine)
@@ -266,7 +266,7 @@ class General(commands.Cog):
 
     @commands.slash_command()
     async def displayavatar(self, ctx, member: discord.Member = None):
-        """Shows a member's display avatar."""
+        """The cooler avatar"""
         member = ctx.author if not member else member
 
         # Image types (it's a bit messy, but for now it's fine)
