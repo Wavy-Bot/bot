@@ -59,7 +59,7 @@ class General(commands.Cog):
                 )
 
             else:
-                raise errors.NonExistantCategoryError(category)
+                raise errors.NonExistantCategory(category)
 
         else:
             embed = discord.Embed(title="Help Menu: Categories", colour=self.emb_colour)

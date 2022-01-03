@@ -51,6 +51,8 @@ class Events(commands.Cog):
             status=discord.Status.online,
         )
 
+    # TODO(Robert): Error handler.
+
 
 def setup(bot: commands.Bot):
     """Add cog to bot"""

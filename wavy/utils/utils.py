@@ -1,12 +1,14 @@
+import os
 import platform
 import random
 import json
+import re
 
 import discord
 import psutil
 
 from . import classes
-from datetime import datetime
+from datetime import datetime, timedelta
 
 LAUNCH_TIME = datetime.utcnow()
 
@@ -74,3 +76,15 @@ async def loading_message():
     message = random.choice(loading_list)
 
     return message
+
+
+async def fetch_thumbnail(identifier: str):
+    """Fetches a thumbnail from a Youtube ID."""
+    ytid = identifier if re.match(r"^[a-zA-Z0-9_-]{11}$", identifier) else None
+
+    if ytid:
+        thumb = f"https://img.youtube.com/vi/{ytid}/hqdefault.jpg"
+    else:
+        thumb = None
+
+    return thumb

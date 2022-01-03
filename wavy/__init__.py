@@ -8,10 +8,7 @@ from discord.ext import commands
 from discord.commands import permissions
 from dotenv import load_dotenv
 
-# Only set this to True if this is a production environment.
-production = False
-
-load_dotenv(".env.production" if production else ".env.development")
+load_dotenv()
 
 
 async def run(event_loop: uvloop.Loop) -> None:

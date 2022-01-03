@@ -1,7 +1,7 @@
 from discord.ext import commands
 
 
-class IncorrectChannelError(commands.CommandError):
+class IncorrectChannel(commands.CommandError):
     """Error raised when commands are issued outside the players' session channel."""
 
     def __init__(self, message_author, channel):
@@ -22,9 +22,17 @@ class NoChannelProvided(commands.CommandError):
         super().__init__(self.message)
 
 
-class NonExistantCategoryError(commands.CommandError):
+class NonExistantCategory(commands.CommandError):
     """Error raised when a category doesn't exist."""
 
     def __init__(self, category: str):
         self.message = f"The category `{category}` does not exist."
+        super().__init__(self.message)
+
+
+class PlayerNotConnected(commands.CommandError):
+    """Error raised when a player is not connected."""
+
+    def __init__(self):
+        self.message = f"**:x: The bot is not currently playing anything.**"
         super().__init__(self.message)
