@@ -8,29 +8,32 @@ from discord.ext import commands
 from discord.commands import permissions
 from dotenv import load_dotenv
 
+__VERSION__ = "0.0.1"
+
 load_dotenv()
 
 
 async def run(event_loop: uvloop.Loop) -> None:
     """Runs the bot."""
+    admin_guild = int(os.environ["ADMIN_GUILD"])
     db = database.Database()
     bot = Wavy(event_loop=event_loop, db=db)
 
-    @bot.slash_command(guild_ids=[710436465938530307])
+    @bot.slash_command(guild_ids=[admin_guild])
     @permissions.is_owner()
     async def load(ctx, extension: str):
         """Loads a cog."""
         bot.load_extension(f"wavy.cogs.{extension}")
         await ctx.respond(f"Loaded `{extension}`.")
 
-    @bot.slash_command(guild_ids=[710436465938530307])
+    @bot.slash_command(guild_ids=[admin_guild])
     @permissions.is_owner()
     async def unload(ctx, extension: str):
         """Unloads a cog."""
         bot.unload_extension(f"wavy.cogs.{extension}")
         await ctx.respond(f"Unloaded `{extension}`.")
 
-    @bot.slash_command(guild_ids=[710436465938530307])
+    @bot.slash_command(guild_ids=[admin_guild])
     @permissions.is_owner()
     async def reload(ctx, extension: str):
         """Reloads a cog."""

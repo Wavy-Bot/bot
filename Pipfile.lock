@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ab96a559a4e7c219406d006f872f63f14c01074fb56d28c2d55db557a0500fab"
+            "sha256": "132795a49029fbc1daa38902761309ff2eed508dcd765c480f13c086ad819cca"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -21,6 +21,7 @@
                 "sha256:2b19bc5f97e5c936638d28e665923c093d8af2bf3aa88d35c43417fa25d136a2",
                 "sha256:946bdfabe743fceeeb093c8a010f5d1645f708a241be849e17edfb0e49e08cd6"
             ],
+            "index": "pypi",
             "version": "==3.0.0"
         },
         "aiohttp": {
@@ -108,6 +109,13 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==1.2.0"
+        },
+        "async-spotify": {
+            "hashes": [
+                "sha256:7fccc0de213a148acfa12322a3ad7a06a36836a85c832eed06d1b4a5655b1ea4"
+            ],
+            "index": "pypi",
+            "version": "==0.4.1"
         },
         "async-timeout": {
             "hashes": [
@@ -208,6 +216,7 @@
                 "sha256:f86e0566cb61dc4397297696a4a1b30f6391b50bc52b4f073507a48466b6255a",
                 "sha256:fdac1e4366d0579fff056d1280b8dc6348be964fda8ebb627c0269e097ab37fa"
             ],
+            "index": "pypi",
             "version": "==2.1.7"
         },
         "cffi": {
@@ -528,7 +537,7 @@
                 "voice"
             ],
             "git": "https://github.com/Pycord-Development/pycord",
-            "ref": "a52f3cac3bf0761cb338e2b9666b2de74b2122e4"
+            "ref": "128a9e97aec7bc485451bca641d40b237b154b2d"
         },
         "pycares": {
             "hashes": [

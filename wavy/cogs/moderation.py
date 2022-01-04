@@ -129,9 +129,7 @@ class Moderation(commands.Cog):
     async def clear(self, ctx, amount: int):
         """Roomba mode activated"""
         if commands.has_permissions(manage_messages=True):
-            # NOTE(Robert): You might be thinking: "why does he add 1 to the amount of messages?"
-            #               Well, this is so it also deletes the author's "/clear" message.
-            deleted = await ctx.channel.purge(limit=amount + 1)
+            deleted = await ctx.channel.purge(limit=amount)
 
             embed = discord.Embed(
                 title=f"{len(deleted) - 1} messages have been deleted.",
@@ -143,7 +141,7 @@ class Moderation(commands.Cog):
                 icon_url=self.bot.user.display_avatar.url,
             )
 
-            message = await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed)
 
     @commands.slash_command()
     async def nuke(self, ctx):

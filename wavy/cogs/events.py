@@ -2,7 +2,7 @@ import os
 
 import discord
 
-from ..utils import utils
+from ..utils import utils, errors
 from discord.ext import commands, tasks
 
 
@@ -51,7 +51,55 @@ class Events(commands.Cog):
             status=discord.Status.online,
         )
 
-    # TODO(Robert): Error handler.
+    @commands.Cog.listener()
+    async def on_application_command_error(self, ctx, error):
+        """Called when a command raises an error."""
+        if isinstance(error, commands.CommandNotFound):
+            return
+        elif isinstance(error, commands.CommandOnCooldown):
+            description = f"**:x: You can use this command again in {error.retry_after} seconds.**"
+        elif isinstance(error, commands.MissingPermissions):
+            permission_string = ""
+
+            for i in error.missing_permissions:
+                permission_string += f"• `{i}`\n"
+
+            description = (
+                f"**:x:You don't have permission to execute `{ctx.invoked_with}`."
+                f"You need the following permissions:\n{permission_string}**"
+            )
+        elif isinstance(error, commands.BotMissingPermissions):
+            permission_string = ""
+
+            for i in error.missing_permissions:
+                permission_string += f"• `{i}`\n"
+
+            description = (
+                f"**:x: I don't have permission to execute `{ctx.invoked_with}`. "
+                f"I need the following permissions:\n{permission_string}**"
+            )
+        elif isinstance(
+            error.original,
+            (
+                errors.IncorrectChannel,
+                errors.NoChannelProvided,
+                errors.NonExistantCategory,
+                errors.PlayerNotConnected,
+                errors.SongNotFound,
+                errors.NoVoiceChannel,
+            ),
+        ):
+            description = error.original
+        else:
+            description = f"`{error}`"
+
+        embed = discord.Embed(title="Error", description=description, colour=0xE73C24)
+
+        embed.set_footer(
+            text="Wavy • https://wavybot.com", icon_url=self.bot.user.display_avatar.url
+        )
+
+        await ctx.respond(embed=embed)
 
 
 def setup(bot: commands.Bot):

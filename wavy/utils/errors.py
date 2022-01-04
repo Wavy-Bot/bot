@@ -34,5 +34,21 @@ class PlayerNotConnected(commands.CommandError):
     """Error raised when a player is not connected."""
 
     def __init__(self):
-        self.message = f"**:x: The bot is not currently playing anything.**"
+        self.message = "**:x: The bot is not currently playing anything.**"
+        super().__init__(self.message)
+
+
+class SongNotFound(commands.CommandError):
+    """Error raised when a song could not be connected."""
+
+    def __init__(self):
+        self.message = "**:x: No songs were found with that query. Please try again.**"
+        super().__init__(self.message)
+
+
+class NoVoiceChannel(commands.CommandError):
+    """Error raised when a player is not connected."""
+
+    def __init__(self):
+        self.message = "**:x: You must be in a voice channel to play music.**"
         super().__init__(self.message)

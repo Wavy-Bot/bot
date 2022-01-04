@@ -3,6 +3,7 @@ import time
 
 import discord
 
+import wavy
 from ..utils import utils, errors
 from discord.ext import commands
 from discord.errors import InvalidArgument
@@ -31,10 +32,19 @@ class General(commands.Cog):
         await ctx.respond(embed=embed)
 
     @commands.slash_command()
-    async def help(self, ctx, category: str = None):
+    async def help(
+        self,
+        ctx,
+        category: discord.Option(
+            str,
+            "category",
+            choices=["General", "Moderation", "Music"],
+            required=False,
+        ),
+    ):
         """Send help"""
-        if category:
-            category = category.capitalize()
+        # if category:
+        #     category = category.capitalize()
 
         categories = list(self.bot.cogs)
 
@@ -102,7 +112,8 @@ class General(commands.Cog):
 
         embed = discord.Embed(
             title="Bot stats",
-            description=f"Pycord version: {server_stats.pycord_version}\n"
+            description=f"Bot version: {wavy.__VERSION__}\n"
+            f"Pycord version: {server_stats.pycord_version}\n"
             f"Python version: {server_stats.python_version}\n"
             f"Bot uptime: {uptime_text}"
             f"{uptime.seconds} second(s)\n"

@@ -1,4 +1,3 @@
-import os
 import platform
 import random
 import json
@@ -88,3 +87,7 @@ async def fetch_thumbnail(identifier: str):
         thumb = None
 
     return thumb
+
+
+async def chop_microseconds(delta):
+    return delta - timedelta(microseconds=delta.microseconds)

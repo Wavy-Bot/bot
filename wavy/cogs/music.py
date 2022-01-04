@@ -32,7 +32,7 @@ import discord
 import lavalink
 
 from datetime import timedelta
-from ..utils import utils, equalizers, errors
+from ..utils import utils, equalizers, spotify, errors
 from discord.ext import commands, pages
 
 
@@ -58,12 +58,14 @@ class LavalinkVoiceClient(discord.VoiceClient):
             self.lavalink = self.client.lavalink
 
     async def on_voice_server_update(self, data):
+        """Event called on voice server update."""
         # the data needs to be transformed before being handed down to
         # voice_update_handler
         lavalink_data = {"t": "VOICE_SERVER_UPDATE", "d": data}
         await self.lavalink.voice_update_handler(lavalink_data)
 
     async def on_voice_state_update(self, data):
+        """Event called on voice state update."""
         # the data needs to be transformed before being handed down to
         # voice_update_handler
         lavalink_data = {"t": "VOICE_STATE_UPDATE", "d": data}
@@ -138,7 +140,8 @@ class Music(commands.Cog):
         #  except it saves us repeating ourselves (and also a few lines).
 
         if guild_check:
-            await self.ensure_voice(ctx)
+            if ctx.command.name in ("play",):
+                await self.ensure_voice(ctx)
             #  Ensure that the bot and command author share a mutual voicechannel.
 
         return guild_check
@@ -162,28 +165,30 @@ class Music(commands.Cog):
             # Our cog_command_error handler catches this and sends it to the voicechannel.
             # Exceptions allow us to "short-circuit" command invocation via checks so the
             # execution state of the command goes no further.
-            raise commands.CommandInvokeError("Join a voicechannel first.")
+            raise errors.NoVoiceChannel
 
         if not player.is_connected:
             if not should_connect:
-                raise commands.CommandInvokeError("Not connected.")
+                raise errors.PlayerNotConnected
 
             permissions = ctx.author.voice.channel.permissions_for(ctx.me)
 
             if (
                 not permissions.connect or not permissions.speak
             ):  # Check user limit too?
-                raise commands.CommandInvokeError(
-                    "I need the `CONNECT` and `SPEAK` permissions."
-                )
+                raise commands.BotMissingPermissions(["Connect", "Speak"])
 
             player.store("channel", ctx.channel.id)
             await ctx.author.voice.channel.connect(cls=LavalinkVoiceClient)
         else:
             if int(player.channel_id) != ctx.author.voice.channel.id:
-                raise commands.CommandInvokeError("You need to be in my voicechannel.")
+                channel = self.bot.get_channel(int(player.channel_id))
+                raise errors.IncorrectChannel(
+                    message_author=ctx.author.mention, channel=channel.mention
+                )
 
     async def track_hook(self, event):
+        """Lavalink event hook for track end."""
         if isinstance(event, lavalink.events.QueueEndEvent):
             # When this track_hook receives a "QueueEndEvent" from lavalink.py
             # it indicates that there are no tracks left in the player's queue.
@@ -223,18 +228,91 @@ class Music(commands.Cog):
 
         return player_position
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        """Event listener for when a user changes voice state."""
+        player = self.bot.lavalink.player_manager.get(member.guild.id)
+
+        if player and before.channel:
+            members = before.channel.members
+
+            if player.is_connected:
+                if len(members) == 1:
+                    text_channel = player.fetch(key="channel", default=None)
+
+                    guild_id = int(player.guild_id)
+                    guild = self.bot.get_guild(guild_id)
+
+                    # Clear the queue to ensure old tracks don't start playing
+                    # when someone else queues something.
+                    player.queue.clear()
+                    # Stop the current track so Lavalink consumes less resources.
+                    await player.stop()
+                    # Disconnect from the voice channel.
+                    await guild.voice_client.disconnect(force=True)
+
+                    if text_channel:
+                        channel = self.bot.get_channel(text_channel)
+                        await channel.send(
+                            "**:white_check_mark: Disconnected from voice channel due to all members leaving.**"
+                        )
+
     @commands.slash_command()
-    async def play(self, ctx, query: str):
+    async def connect(self, ctx):
+        """Connect to a voice channel."""
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if player and player.is_connected:
+            await ctx.respond("**:x: I'm already connected to a voice channel.**")
+            return
+
+        channel = getattr(ctx.author.voice, "channel", None)
+        if channel is None:
+            raise errors.NoChannelProvided(channel_type="voice")
+
+        await channel.connect(cls=LavalinkVoiceClient)
+
+        await ctx.respond(f"**:robot: Joined `{channel.name}`.**")
+
+    @commands.slash_command()
+    async def play(
+        self,
+        ctx,
+        query: str,
+        platform: discord.Option(
+            str,
+            "platform",
+            choices=["YouTube", "Spotify", "SoundCloud"],
+            required=False,
+        ),
+        position: discord.Option(
+            str,
+            "position",
+            choices=["start", "end"],
+            required=False,
+        ),
+    ):
         """Searches and plays a song from a given query."""
         # Get the player for this guild from cache.
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         query = query.strip("<>")
+        spotify_query = None
 
         # Check if the user input might be a URL. If it isn't, we can Lavalink do a YouTube search for it instead.
         # SoundCloud searching is possible by prefixing "scsearch:" instead.
         if not self.url_reg.match(query):
-            query = f"ytsearch:{query}"
+            if platform == "SoundCloud":
+                query = f"scsearch:{query}"
+            elif platform == "Spotify":
+                spotify_query = await spotify.fetch(name=query)
+                query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
+            else:
+                query = f"ytsearch:{query}"
+
+        if platform == "Spotify" and not spotify_query:
+            spotify_query = await spotify.fetch(url=query)
+            query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
 
         # Get the results for the query from Lavalink.
         results = await player.node.get_tracks(query)
@@ -242,10 +320,7 @@ class Music(commands.Cog):
         # Results could be None if Lavalink returns an invalid response (non-JSON/non-200 (OK)).
         # Alternatively, resullts['tracks'] could be an empty array if the query yielded no tracks.
         if not results or not results["tracks"]:
-            await ctx.respond(
-                "**:x: No songs were found with that query. Please try again.**"
-            )
-            return
+            raise errors.SongNotFound
 
         embed = discord.Embed(colour=self.emb_colour)
 
@@ -267,7 +342,9 @@ class Music(commands.Cog):
 
             for track in tracks:
                 # Add all of the tracks from the playlist to the queue.
-                player.add(requester=ctx.author.id, track=track)
+                player.add(
+                    requester=ctx.author.id, track=track, index=0 if position else None
+                )
 
             embed.title = "Added playlist to queue"
             embed.description = f'**[`{results["playlistInfo"]["name"]}`]({query})**'
@@ -282,33 +359,89 @@ class Music(commands.Cog):
             embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
             embed.add_field(name="Requested By", value=ctx.author.mention)
             embed.add_field(name="DJ", value=dj.mention)
-            embed.add_field(name="Channel", value=f"{channel.name}")
+            embed.add_field(name="Channel", value=f"{channel.mention}")
         else:
-            track = results["tracks"][0]
-            embed.title = "Added track to queue"
-            embed.description = (
-                f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
-            )
+            if platform == "Spotify":
+                loading_message = await utils.loading_message()
 
-            thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
-            qsize = len(player.queue)
+                temp_embed = discord.Embed(
+                    title="Adding songs to queue...",
+                    description=loading_message,
+                    colour=self.emb_colour,
+                )
 
-            embed.add_field(
-                name="Duration",
-                value=str(timedelta(milliseconds=int(track["info"]["length"]))),
-            )
-            embed.add_field(name="Queue Length", value=str(qsize + 1))
-            embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
-            embed.add_field(name="Requested By", value=ctx.author.mention)
-            embed.add_field(name="DJ", value=dj.mention)
-            embed.add_field(name="Channel", value=f"{channel.name}")
+                await ctx.respond(embed=temp_embed)
 
-            # You can attach additional information to audiotracks through kwargs, however this involves
-            # constructing the AudioTrack class yourself.
-            track = lavalink.models.AudioTrack(track, ctx.author.id, recommended=True)
-            player.add(requester=ctx.author.id, track=track)
+                for track in spotify_query:
+                    query = f"ytsearch:{track.name} {track.artist}"
+                    results = await player.node.get_tracks(query)
 
-        embed.set_thumbnail(url=thumb)
+                    track = results["tracks"][0]
+                    track = lavalink.models.AudioTrack(
+                        track, ctx.author.id, recommended=True
+                    )
+
+                    player.add(
+                        requester=ctx.author.id,
+                        track=track,
+                        index=0 if position else None,
+                    )
+
+                embed.title = "Added track(s) to queue"
+
+                thumb = await utils.fetch_thumbnail(
+                    results["tracks"][0]["info"]["identifier"]
+                )
+                qsize = len(player.queue)
+
+                embed.add_field(name="Tracks", value=str(len(spotify_query)))
+                embed.add_field(name="Queue Length", value=str(qsize + 1))
+                embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
+                embed.add_field(name="Requested By", value=ctx.author.mention)
+                embed.add_field(name="DJ", value=dj.mention)
+                embed.add_field(name="Channel", value=f"{channel.mention}")
+
+                if thumb:
+                    embed.set_thumbnail(url=thumb)
+
+                await ctx.send(embed=embed)
+
+                return
+            else:
+                track = results["tracks"][0]
+                embed.title = "Added track to queue"
+                embed.description = (
+                    f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
+                )
+
+                thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
+                qsize = len(player.queue)
+
+                embed.add_field(
+                    name="Duration",
+                    value=str(
+                        await utils.chop_microseconds(
+                            timedelta(milliseconds=int(track["info"]["length"]))
+                        )
+                    ),
+                )
+                embed.add_field(name="Queue Length", value=str(qsize + 1))
+                embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
+                embed.add_field(name="Requested By", value=ctx.author.mention)
+                embed.add_field(name="DJ", value=dj.mention)
+                embed.add_field(name="Channel", value=f"{channel.mention}")
+
+                # You can attach additional information to audiotracks through kwargs, however this involves
+                # constructing the AudioTrack class yourself.
+                track = lavalink.models.AudioTrack(
+                    track, ctx.author.id, recommended=True
+                )
+                player.add(
+                    requester=ctx.author.id, track=track, index=0 if position else None
+                )
+
+        if thumb:
+            embed.set_thumbnail(url=thumb)
 
         await ctx.respond(embed=embed)
 
@@ -325,7 +458,8 @@ class Music(commands.Cog):
         if player.paused:
             await ctx.respond("**:x: The player is already paused.**")
             return
-        elif not player.is_connected:
+
+        if not player.is_connected:
             raise errors.PlayerNotConnected
 
         if self.is_privileged(ctx):
@@ -339,7 +473,7 @@ class Music(commands.Cog):
 
         required = self.required(ctx)
 
-        pause_votes = player.fetch(key="pause_votes", default=list())
+        pause_votes = player.fetch(key="pause_votes", default=[])
         pause_votes.append(ctx.author)
         player.store(key="pause_votes", value=pause_votes)
 
@@ -362,7 +496,8 @@ class Music(commands.Cog):
         if not player.paused:
             await ctx.respond("**:x: The player is not paused.**")
             return
-        elif not player.is_connected:
+
+        if not player.is_connected:
             raise errors.PlayerNotConnected
 
         if self.is_privileged(ctx):
@@ -376,7 +511,7 @@ class Music(commands.Cog):
 
         required = self.required(ctx)
 
-        resume_votes = player.fetch(key="resume_votes", default=list())
+        resume_votes = player.fetch(key="resume_votes", default=[])
         resume_votes.append(ctx.author)
         player.store(key="resume_votes", value=resume_votes)
 
@@ -417,7 +552,7 @@ class Music(commands.Cog):
 
         required = self.required(ctx)
 
-        skip_votes = player.fetch(key="skip_votes", default=list())
+        skip_votes = player.fetch(key="skip_votes", default=[])
         skip_votes.append(ctx.author)
         player.store(key="skip_votes", value=skip_votes)
 
@@ -505,7 +640,7 @@ class Music(commands.Cog):
 
         required = self.required(ctx)
 
-        shuffle_votes = player.fetch(key="shuffle_votes", default=list())
+        shuffle_votes = player.fetch(key="shuffle_votes", default=[])
         shuffle_votes.append(ctx.author)
         player.store(key="shuffle_votes", value=shuffle_votes)
 
@@ -527,7 +662,13 @@ class Music(commands.Cog):
             )
 
     @commands.slash_command()
-    async def equalizer(self, ctx, equalizer: str = None):
+    async def equalizer(
+        self,
+        ctx,
+        equalizer: discord.Option(
+            str, "profile", choices=["flat", "boost", "metal", "piano"]
+        ),
+    ):
         """Changes the player's equalizer."""
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
@@ -544,11 +685,6 @@ class Music(commands.Cog):
             "metal": equalizers.Equalizer.metal(),
             "piano": equalizers.Equalizer.piano(),
         }
-
-        if not equalizer:
-            joined = "\n• ".join(eqs.keys())
-            await ctx.respond(f"**:x: Invalid EQ provided.** Valid EQs:\n\n• {joined}")
-            return
 
         eq = eqs.get(equalizer.lower())
 
@@ -584,7 +720,8 @@ class Music(commands.Cog):
 
         embed = discord.Embed(title="Now playing", colour=self.emb_colour)
         embed.description = f"**[`{track.title}`]({track.uri})**\n\n"
-        embed.set_thumbnail(url=thumb)
+        if thumb:
+            embed.set_thumbnail(url=thumb)
 
         embed.add_field(
             name="Playing for",
@@ -594,7 +731,7 @@ class Music(commands.Cog):
         embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
         embed.add_field(name="Requested By", value=f"<@{player.current.requester}>")
         embed.add_field(name="DJ", value=dj.mention)
-        embed.add_field(name="Channel", value=f"{channel.name}")
+        embed.add_field(name="Channel", value=f"{channel.mention}")
 
         await ctx.respond(embed=embed)
 
@@ -651,97 +788,6 @@ class Music(commands.Cog):
         await ctx.respond(f"**:rewind: Set position to `{player_position}`**")
 
     @commands.slash_command()
-    async def playtop(self, ctx, query: str):
-        """Adds a song with the given query to the top of the queue."""
-        # Get the player for this guild from cache.
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-
-        query = query.strip("<>")
-
-        # Check if the user input might be a URL. If it isn't, we can Lavalink do a YouTube search for it instead.
-        # SoundCloud searching is possible by prefixing "scsearch:" instead.
-        if not self.url_reg.match(query):
-            query = f"ytsearch:{query}"
-
-        # Get the results for the query from Lavalink.
-        results = await player.node.get_tracks(query)
-
-        # Results could be None if Lavalink returns an invalid response (non-JSON/non-200 (OK)).
-        # Alternatively, resullts['tracks'] could be an empty array if the query yielded no tracks.
-        if not results or not results["tracks"]:
-            await ctx.respond(
-                "**:x: No songs were found with that query. Please try again.**"
-            )
-            return
-
-        embed = discord.Embed(colour=self.emb_colour)
-
-        channel = self.bot.get_channel(int(player.channel_id))
-
-        # Valid loadTypes are:
-        #   TRACK_LOADED    - single video/direct URL)
-        #   PLAYLIST_LOADED - direct URL to playlist)
-        #   SEARCH_RESULT   - query prefixed with either ytsearch: or scsearch:.
-        #   NO_MATCHES      - query yielded no results
-        #   LOAD_FAILED     - most likely, the video encountered an exception during loading.
-        if results["loadType"] == "PLAYLIST_LOADED":
-            tracks = results["tracks"]
-
-            for track in tracks:
-                # Add all of the tracks from the playlist to the queue.
-                player.add(requester=ctx.author.id, track=track, index=0)
-
-            embed.title = "Added playlist to queue"
-            embed.description = f'**[`{results["playlistInfo"]["name"]}`]({query})**'
-
-            thumb = await utils.fetch_thumbnail(
-                results["tracks"][0]["info"]["identifier"]
-            )
-            qsize = len(player.queue)
-            dj = player.fetch(key="dj", default=ctx.author)
-
-            embed.add_field(name="Tracks", value=str(len(tracks)))
-            embed.add_field(name="Queue Length", value=str(qsize + 1))
-            embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
-            embed.add_field(name="Requested By", value=ctx.author.mention)
-            embed.add_field(name="DJ", value=dj.mention)
-            embed.add_field(name="Channel", value=f"{channel.name}")
-        else:
-            track = results["tracks"][0]
-            embed.title = "Added track to queue"
-            embed.description = (
-                f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
-            )
-
-            thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
-            qsize = len(player.queue)
-            dj = player.fetch(key="dj", default=ctx.author)
-
-            embed.add_field(
-                name="Duration",
-                value=str(timedelta(milliseconds=int(track["info"]["length"]))),
-            )
-            embed.add_field(name="Queue Length", value=str(qsize + 1))
-            embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
-            embed.add_field(name="Requested By", value=ctx.author.mention)
-            embed.add_field(name="DJ", value=dj.mention)
-            embed.add_field(name="Channel", value=f"{channel.name}")
-
-            # You can attach additional information to audiotracks through kwargs, however this involves
-            # constructing the AudioTrack class yourself.
-            track = lavalink.models.AudioTrack(track, ctx.author.id, recommended=True)
-            player.add(requester=ctx.author.id, track=track, index=0)
-
-        embed.set_thumbnail(url=thumb)
-
-        await ctx.respond(embed=embed)
-
-        # We don't want to call .play() if the player is playing as that will effectively skip
-        # the current track.
-        if not player.is_playing:
-            await player.play()
-
-    @commands.slash_command()
     async def swap_dj(self, ctx, member: discord.Member = None):
         """Swap the current DJ to another member in the voice channel."""
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
@@ -789,8 +835,7 @@ class Music(commands.Cog):
         qsize = len(player.queue)
 
         if not player.is_connected:
-            await ctx.respond("**:x: The bot is not currently playing anything.**")
-            return
+            raise errors.PlayerNotConnected
 
         if qsize == 0:
             await ctx.respond("**:x: There are no more songs in the queue.**")
@@ -798,13 +843,14 @@ class Music(commands.Cog):
 
         queue = [player.queue[i : i + 8] for i in range(0, len(player.queue), 8)]
         page_list = []
+        count = 0
 
         for page_number, tracks in enumerate(queue):
             embed = discord.Embed(
-                title=f"Coming up...",
+                title="Coming up...",
                 description="\n".join(
                     [
-                        f"{idx}. **[`{track.title}`]({track.uri})**\n"
+                        f"{idx + count}. **[`{track.title}`]({track.uri})**\n"
                         for idx, track in enumerate(tracks, start=1)
                     ]
                 ),
@@ -818,11 +864,63 @@ class Music(commands.Cog):
 
             page_list.append(embed)
 
+            count += 8
+
         paginator = pages.Paginator(
             pages=page_list, show_disabled=False, show_indicator=True
         )
 
         await paginator.respond(ctx, ephemeral=False)
+
+    @commands.slash_command()
+    async def remove(self, ctx, track: int):
+        """Removes the specified track from the queue."""
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if not player.is_connected:
+            raise errors.PlayerNotConnected
+
+        # Due to how indexing works, we need to subtract 1 from the song number
+        track_index = track - 1
+        try:
+            track = player.queue[track_index]
+        except IndexError:
+            await ctx.respond(
+                f"**:x: Track number {track} could not be found in the queue.**"
+            )
+            return
+
+        if self.is_privileged(ctx):
+            player.queue.remove(track)
+
+            await ctx.respond(
+                f"**:outbox_tray: An admin or DJ has removed `{track.title}` from the queue.**"
+            )
+            return
+
+        if ctx.author == track.requester:
+            player.queue.remove(track)
+
+            await ctx.respond(
+                f"**:outbox_tray: The song requester has removed `{track.title}` from the queue.**"
+            )
+            return
+
+        required = self.required(ctx)
+
+        remove_votes = player.fetch(key="remove_votes", default=[])
+        remove_votes.append(ctx.author)
+        player.store(key="remove_votes", value=remove_votes)
+
+        if len(remove_votes) >= required:
+            player.queue.remove(track)
+            await ctx.respond(
+                f"**:white_check_mark: Vote to remove passed. Removed `{track.title}` from the queue.**"
+            )
+        else:
+            await ctx.respond(
+                f"**:white_check_mark: {ctx.author.mention} has voted to remove `{track.title} from the queue`.**"
+            )
 
 
 def setup(bot: commands.Bot):

@@ -11,6 +11,9 @@ pymongo = {extras = ["srv"], version = "*"}
 psutil = "*"
 py-cord = {extras = ["speed", "voice"], git = "https://github.com/Pycord-Development/pycord"}
 lavalink = "*"
+aiodns = "*"
+cchardet = "*"
+async-spotify = "*"
 
 [dev-packages]
 

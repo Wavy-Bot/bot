@@ -43,3 +43,35 @@ class Uptime:
     hours: int
     minutes: int
     seconds: int
+
+
+@dataclass
+class SpotifyTrack:
+    """
+    Class that represents a Spotify track.
+
+    Takes the following arguments:
+        name => Track name.
+        artist => Artist.
+        image => Image URL.
+        url => Spotify URL.
+    """
+
+    artist: str
+    name: str
+    image: str
+    url: str
+
+
+@dataclass
+class ParsedSpotifyURL:
+    """
+    Class that represents a Spotify URL.
+
+    Takes the following arguments:
+        id => Spotify ID.
+        type => Spotify type.
+    """
+
+    id: str
+    type: str

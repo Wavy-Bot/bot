@@ -60,6 +60,7 @@ class Equalizer:
 
     @staticmethod
     def _factory(levels: list):
+        """Factory method to create a list of dicts from a list of tuples."""
         _dict = collections.defaultdict(int)
 
         _dict.update(levels)

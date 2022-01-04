@@ -10,6 +10,8 @@ Wavy is an open-source multipurpose Discord bot built with [pycord](https://gith
 <table>
   <tr>
     <td align="center"><a href="https://www.python.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/768px-Python-logo-notext.svg.png" width="100px;" alt=""/><br /><sub><b>Python 3</b></sub></a><br /></td>
+    <td align="center"><a href="https://www.mongodb.com/"><img src="https://cdn.iconscout.com/icon/free/png-256/mongodb-3629020-3030245.png" width="100px;" alt=""/><br /><sub><b>MongoDB</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/Devoxin/Lavalink.py"><img src="https://serux.pro/9e83af1581.png" width="100px;" alt=""/><br /><sub><b>Lavalink.py</b></sub></a><br /></td>
     <td align="center"><a href="https://www.jetbrains.com/pycharm/"><img src="https://i2.wp.com/clay-atlas.com/wp-content/uploads/2019/10/PyCharm_Logo.svg_.png?resize=1024%2C1024&ssl=1" width="100px;" alt=""/><br /><sub><b>PyCharm</b></sub></a><br /></td>
     <td align="center"><a href="https://deepsource.io/"><img src="https://static.crozdesk.com/web_app_library/providers/logos/000/011/711/original/deepsource-1608196869-logo.png?1608196869" width="100px;" alt=""/><br /><sub><b>Deepsource</b></sub></a><br /></td>
   </tr>
