@@ -37,9 +37,8 @@ async def fetch(url: str = None, name: str = None) -> [classes.SpotifyTrack]:
             playlist = await fetch_playlist(parsed_url.id)
             return playlist
         raise errors.SongNotFound
-    else:
-        track = await search_track(name)
-        return [track]
+    track = await search_track(name)
+    return [track]
 
 
 async def parse_url(url: str) -> classes.ParsedSpotifyURL:

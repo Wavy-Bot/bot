@@ -237,8 +237,8 @@ class Moderation(commands.Cog):
         raise commands.MissingPermissions(["manage_channels"])
 
     @commands.guild_only()
-    @timeout.command()
-    async def add(
+    @timeout.command(name="add")
+    async def timeout_add(
         self,
         ctx,
         member: discord.Member,
@@ -286,8 +286,8 @@ class Moderation(commands.Cog):
         raise commands.MissingPermissions(["moderate_members"])
 
     @commands.guild_only()
-    @timeout.command()
-    async def remove(
+    @timeout.command(name="remove")
+    async def timeout_remove(
         self,
         ctx,
         member: discord.Member,
@@ -321,8 +321,8 @@ class Moderation(commands.Cog):
         raise commands.MissingPermissions(["moderate_members"])
 
     @commands.guild_only()
-    @warn.command()
-    async def add(
+    @warn.command(name="add")
+    async def warn_add(
         self,
         ctx,
         member: discord.Member,
@@ -359,8 +359,8 @@ class Moderation(commands.Cog):
         raise commands.MissingPermissions(["kick_members"])
 
     @commands.guild_only()
-    @warn.command()
-    async def remove(self, ctx, warn_id: str):
+    @warn.command(name="remove")
+    async def warn_remove(self, ctx, warn_id: str):
         """Look mom, no warning"""
         if commands.has_permissions(kick_members=True):
             warn = await self.db.remove_warn(server_id=ctx.guild.id, warn_id=warn_id)
@@ -380,8 +380,8 @@ class Moderation(commands.Cog):
         raise commands.MissingPermissions(["kick_members"])
 
     @commands.guild_only()
-    @warn.command()
-    async def list(self, ctx, member: discord.Member = None):
+    @warn.command(name="list")
+    async def warn_list(self, ctx, member: discord.Member = None):
         """Timmy should start sweating when he sees this"""
         member = ctx.author if not member else member
 

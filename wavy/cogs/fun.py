@@ -1,11 +1,8 @@
 import os
-import secrets
 
 import discord
 
-from datetime import datetime, timedelta
-from ..utils import utils, errors, database
-from discord.commands import SlashCommandGroup
+from ..utils import database
 from discord.ext import commands
 
 
@@ -18,9 +15,9 @@ class Fun(commands.Cog):
         self.db = database.Database()
 
     @commands.guild_only()
-    @commands.slash_command(guild_ids=[710436465938530307])
+    @commands.slash_command()
     async def snipe(self, ctx):
-        """Snipe the last deleted message."""
+        """Headshot"""
         snipe = await self.db.get_snipe(
             server_id=ctx.guild.id, channel_id=ctx.channel.id
         )

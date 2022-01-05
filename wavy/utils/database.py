@@ -1,6 +1,6 @@
 import os
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from . import classes
 from motor import motor_asyncio
 
@@ -39,7 +39,7 @@ class Database:
             "reason": reason,
         }
 
-        result = await self.db.warns.insert_one(document)
+        result = await collection.insert_one(document)
 
         return result.inserted_id
 
@@ -84,6 +84,7 @@ class Database:
         """Sets a snipe."""
         collection = self.db.snipes
 
+        # Delete snipe after 30 minutes.
         await collection.create_index([("createdAt", 1)], expireAfterSeconds=1800)
 
         old_document = await collection.find_one(
@@ -99,12 +100,8 @@ class Database:
             "attachments": attachments,
         }
 
-        if not old_document:
-            result = await self.db.snipes.insert_one(document)
-
-            return result.inserted_id
-        else:
-            result = await self.db.snipes.update_many(
+        if old_document:
+            await self.db.snipes.update_many(
                 {
                     "createdAt": old_document["createdAt"],
                     "member_id": old_document["member_id"],
@@ -120,8 +117,10 @@ class Database:
                     }
                 },
             )
+        else:
+            result = await self.db.snipes.insert_one(document)
 
-            return
+            return result.inserted_id
 
     async def get_snipe(self, server_id: int, channel_id: int) -> classes.Snipe or None:
         """Gets a snipe."""
