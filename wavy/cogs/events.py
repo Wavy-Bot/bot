@@ -2,7 +2,7 @@ import os
 
 import discord
 
-from ..utils import utils, errors
+from ..utils import utils, errors, database
 from discord.ext import commands, tasks
 
 
@@ -12,6 +12,7 @@ class Events(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.emb_colour = int(os.getenv("COLOUR"), 16)
+        self.db = database.Database()
         self.change_status.start()
 
     def cog_unload(self):
@@ -52,54 +53,81 @@ class Events(commands.Cog):
         )
 
     @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        """Called when a message is deleted."""
+        if (
+            not isinstance(message.channel, discord.DMChannel)
+            and not message.author.bot
+        ):
+            await self.db.set_snipe(
+                server_id=message.guild.id,
+                channel_id=message.channel.id,
+                member_id=message.author.id,
+                content=message.content,
+                attachments=[i.url for i in message.attachments],
+            )
+
+    @commands.Cog.listener()
     async def on_application_command_error(self, ctx, error):
         """Called when a command raises an error."""
         if isinstance(error, commands.CommandNotFound):
             return
-        elif isinstance(error, commands.CommandOnCooldown):
-            description = f"**:x: You can use this command again in {error.retry_after} seconds.**"
-        elif isinstance(error, commands.MissingPermissions):
-            permission_string = ""
 
-            for i in error.missing_permissions:
-                permission_string += f"• `{i}`\n"
+        if isinstance(error, commands.NoPrivateMessage):
+            return
 
+        if isinstance(error, commands.CommandOnCooldown):
             description = (
-                f"**:x:You don't have permission to execute `{ctx.invoked_with}`."
-                f"You need the following permissions:\n{permission_string}**"
-            )
-        elif isinstance(error, commands.BotMissingPermissions):
-            permission_string = ""
-
-            for i in error.missing_permissions:
-                permission_string += f"• `{i}`\n"
-
-            description = (
-                f"**:x: I don't have permission to execute `{ctx.invoked_with}`. "
-                f"I need the following permissions:\n{permission_string}**"
+                f"You can use this command again in {error.retry_after} seconds."
             )
         elif isinstance(
-            error.original,
+            error,
             (
                 errors.IncorrectChannel,
                 errors.NoChannelProvided,
                 errors.NonExistantCategory,
                 errors.PlayerNotConnected,
-                errors.SongNotFound,
-                errors.NoVoiceChannel,
             ),
+        ):
+            description = error
+        elif isinstance(error.original, commands.MissingPermissions):
+            permission_string = ""
+
+            for i in error.original.missing_permissions:
+                permission_string += f"• `{i}`\n"
+
+            description = (
+                f"You don't have permission to execute `{ctx.command.name}`. "
+                f"You need the following permissions:\n{permission_string}"
+            )
+        elif isinstance(error.original, commands.BotMissingPermissions):
+            permission_string = ""
+
+            for i in error.original.missing_permissions:
+                permission_string += f"• `{i}`\n"
+
+            description = (
+                f"I don't have permission to execute `{ctx.command.name}`. "
+                f"I need the following permissions:\n{permission_string}"
+            )
+        elif isinstance(
+            error.original, (errors.SongNotFound, errors.Timeout, errors.WarnNotFound)
         ):
             description = error.original
         else:
             description = f"`{error}`"
 
-        embed = discord.Embed(title="Error", description=description, colour=0xE73C24)
+        embed = discord.Embed(
+            title="Error", description=f"**:x: {description}**", colour=0xE73C24
+        )
 
         embed.set_footer(
             text="Wavy • https://wavybot.com", icon_url=self.bot.user.display_avatar.url
         )
 
         await ctx.respond(embed=embed)
+
+        raise error
 
 
 def setup(bot: commands.Bot):

@@ -54,6 +54,7 @@ class Wavy(commands.AutoShardedBot):
 
         intents = discord.Intents.default()
         intents.members = True
+        intents.messages = True
 
         super().__init__(
             command_prefix=commands.when_mentioned_or("%"),

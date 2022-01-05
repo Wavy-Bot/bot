@@ -90,4 +90,25 @@ async def fetch_thumbnail(identifier: str):
 
 
 async def chop_microseconds(delta):
+    """Removes microseconds from a timedelta."""
     return delta - timedelta(microseconds=delta.microseconds)
+
+
+async def convert_time_into_timedelta(time: int, unit: str):
+    """Converts time into a timedelta."""
+    # Get first letter of unit.
+    time_format = re.sub("[^a-zA-Z]*", "", unit)[0]
+
+    # Convert to proper units.
+    if time_format == "M":
+        time = time * 60
+    elif time_format == "H":
+        time = time * 3600
+    elif time_format == "D":
+        time = time * 86400
+    elif time_format == "W":
+        time = time * 604800
+
+    time_delta = timedelta(seconds=time)
+
+    return time_delta

@@ -30,14 +30,13 @@ async def fetch(url: str = None, name: str = None) -> [classes.SpotifyTrack]:
         if parsed_url.type == "track":
             track = await fetch_track(parsed_url.id)
             return [track]
-        elif parsed_url.type == "album":
+        if parsed_url.type == "album":
             album = await fetch_album(parsed_url.id)
             return album
-        elif parsed_url.type == "playlist":
+        if parsed_url.type == "playlist":
             playlist = await fetch_playlist(parsed_url.id)
             return playlist
-        else:
-            raise errors.SongNotFound
+        raise errors.SongNotFound
     else:
         track = await search_track(name)
         return [track]

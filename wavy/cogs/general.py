@@ -16,6 +16,7 @@ class General(commands.Cog):
         self.bot = bot
         self.emb_colour = int(os.getenv("COLOUR"), 16)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def ping(self, ctx):
         """Ping pong"""
@@ -31,6 +32,7 @@ class General(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def help(
         self,
@@ -92,6 +94,7 @@ class General(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def stats(self, ctx):
         """The boring stuff"""
@@ -153,6 +156,7 @@ class General(commands.Cog):
 
         await ctx.respond(embed=embed, view=view)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def serverinfo(self, ctx):
         """Cool stats nobody's going to look at"""
@@ -196,6 +200,7 @@ class General(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def userinfo(self, ctx, member: discord.Member = None):
         """Nobody cares"""
@@ -240,6 +245,7 @@ class General(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def avatar(self, ctx, member: discord.Member = None):
         """Here's a cool avatar that you may steal now"""
@@ -275,6 +281,7 @@ class General(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def displayavatar(self, ctx, member: discord.Member = None):
         """The cooler avatar"""

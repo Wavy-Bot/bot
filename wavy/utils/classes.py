@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
@@ -75,3 +76,43 @@ class ParsedSpotifyURL:
 
     id: str
     type: str
+
+
+@dataclass
+class Warn:
+    """
+    Class that represents a warn.
+
+    Takes the following arguments:
+        server_id => ID of the Discord server.
+        member_id => ID of the server member.
+        id => ID of the warn.
+        reason => Reason for the warn.
+    """
+
+    server_id: int
+    member_id: int
+    id: str
+    reason: str
+
+
+@dataclass
+class Snipe:
+    """
+    Class that represents a snipe.
+
+    Takes the following arguments:
+        created_at => Time the message was sent.
+        server_id => ID of the Discord server.
+        channel_id => ID of the Discord channel.
+        member_id => ID of the server member.
+        content => Content of the message.
+        attachments => Attachments of the message.
+    """
+
+    created_at: datetime
+    server_id: int
+    channel_id: int
+    member_id: int
+    content: str
+    attachments: list

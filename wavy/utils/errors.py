@@ -1,10 +1,11 @@
 from discord.ext import commands
+from discord import Member, VoiceChannel
 
 
 class IncorrectChannel(commands.CommandError):
     """Error raised when commands are issued outside the players' session channel."""
 
-    def __init__(self, message_author, channel):
+    def __init__(self, message_author: Member, channel: VoiceChannel):
         self.message = f"{message_author}, you must be in {channel} for this session."
         super().__init__(self.message)
 
@@ -34,7 +35,7 @@ class PlayerNotConnected(commands.CommandError):
     """Error raised when a player is not connected."""
 
     def __init__(self):
-        self.message = "**:x: The bot is not currently playing anything.**"
+        self.message = "The bot is not currently playing anything."
         super().__init__(self.message)
 
 
@@ -42,13 +43,29 @@ class SongNotFound(commands.CommandError):
     """Error raised when a song could not be connected."""
 
     def __init__(self):
-        self.message = "**:x: No songs were found with that query. Please try again.**"
+        self.message = "No songs were found with that query. Please try again."
         super().__init__(self.message)
 
 
-class NoVoiceChannel(commands.CommandError):
-    """Error raised when a player is not connected."""
+class Timeout(commands.CommandError):
+    """Error raised when a command times out."""
 
-    def __init__(self):
-        self.message = "**:x: You must be in a voice channel to play music.**"
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
+
+
+class Bot(commands.CommandError):
+    """Error raised when a member is a bot."""
+
+    def __init__(self, message: str = "Member is a bot."):
+        self.message = message
+        super().__init__(self.message)
+
+
+class WarnNotFound(commands.CommandError):
+    """Error raised when a member is a bot."""
+
+    def __init__(self, warn_id: str):
+        self.message = f"No warning with ID `{warn_id}` found."
         super().__init__(self.message)

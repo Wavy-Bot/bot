@@ -139,10 +139,9 @@ class Music(commands.Cog):
         #  This is essentially the same as `@commands.guild_only()`
         #  except it saves us repeating ourselves (and also a few lines).
 
-        if guild_check:
-            if ctx.command.name in ("play",):
-                await self.ensure_voice(ctx)
-            #  Ensure that the bot and command author share a mutual voicechannel.
+        if guild_check and ctx.command.name in ("play",):
+            await self.ensure_voice(ctx)
+        #  Ensure that the bot and command author share a mutual voicechannel.
 
         return guild_check
 
@@ -165,7 +164,7 @@ class Music(commands.Cog):
             # Our cog_command_error handler catches this and sends it to the voicechannel.
             # Exceptions allow us to "short-circuit" command invocation via checks so the
             # execution state of the command goes no further.
-            raise errors.NoVoiceChannel
+            raise errors.NoChannelProvided(channel_type="voice")
 
         if not player.is_connected:
             if not should_connect:
@@ -236,27 +235,27 @@ class Music(commands.Cog):
         if player and before.channel:
             members = before.channel.members
 
-            if player.is_connected:
-                if len(members) == 1:
-                    text_channel = player.fetch(key="channel", default=None)
+            if player.is_connected and len(members) == 1:
+                text_channel = player.fetch(key="channel", default=None)
 
-                    guild_id = int(player.guild_id)
-                    guild = self.bot.get_guild(guild_id)
+                guild_id = int(player.guild_id)
+                guild = self.bot.get_guild(guild_id)
 
-                    # Clear the queue to ensure old tracks don't start playing
-                    # when someone else queues something.
-                    player.queue.clear()
-                    # Stop the current track so Lavalink consumes less resources.
-                    await player.stop()
-                    # Disconnect from the voice channel.
-                    await guild.voice_client.disconnect(force=True)
+                # Clear the queue to ensure old tracks don't start playing
+                # when someone else queues something.
+                player.queue.clear()
+                # Stop the current track so Lavalink consumes less resources.
+                await player.stop()
+                # Disconnect from the voice channel.
+                await guild.voice_client.disconnect(force=True)
 
-                    if text_channel:
-                        channel = self.bot.get_channel(text_channel)
-                        await channel.send(
-                            "**:white_check_mark: Disconnected from voice channel due to all members leaving.**"
-                        )
+                if text_channel:
+                    channel = self.bot.get_channel(text_channel)
+                    await channel.send(
+                        "**:white_check_mark: Disconnected from voice channel due to all members leaving.**"
+                    )
 
+    @commands.guild_only()
     @commands.slash_command()
     async def connect(self, ctx):
         """Connect to a voice channel."""
@@ -274,6 +273,7 @@ class Music(commands.Cog):
 
         await ctx.respond(f"**:robot: Joined `{channel.name}`.**")
 
+    @commands.guild_only()
     @commands.slash_command()
     async def play(
         self,
@@ -310,9 +310,17 @@ class Music(commands.Cog):
             else:
                 query = f"ytsearch:{query}"
 
+        # If the platform is Spotify, and the query is a URL, we can use the URL directly.
         if platform == "Spotify" and not spotify_query:
             spotify_query = await spotify.fetch(url=query)
             query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
+
+        # If it turns out to be a Spotify URL, but the user did not specify a platform, we can use the URL directly.
+        try:
+            spotify_query = await spotify.fetch(url=query)
+            query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
+        except errors.SongNotFound:
+            pass
 
         # Get the results for the query from Lavalink.
         results = await player.node.get_tracks(query)
@@ -407,38 +415,36 @@ class Music(commands.Cog):
                 await ctx.send(embed=embed)
 
                 return
-            else:
-                track = results["tracks"][0]
-                embed.title = "Added track to queue"
-                embed.description = (
-                    f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
-                )
 
-                thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
-                qsize = len(player.queue)
+            track = results["tracks"][0]
+            embed.title = "Added track to queue"
+            embed.description = (
+                f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
+            )
 
-                embed.add_field(
-                    name="Duration",
-                    value=str(
-                        await utils.chop_microseconds(
-                            timedelta(milliseconds=int(track["info"]["length"]))
-                        )
-                    ),
-                )
-                embed.add_field(name="Queue Length", value=str(qsize + 1))
-                embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
-                embed.add_field(name="Requested By", value=ctx.author.mention)
-                embed.add_field(name="DJ", value=dj.mention)
-                embed.add_field(name="Channel", value=f"{channel.mention}")
+            thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
+            qsize = len(player.queue)
 
-                # You can attach additional information to audiotracks through kwargs, however this involves
-                # constructing the AudioTrack class yourself.
-                track = lavalink.models.AudioTrack(
-                    track, ctx.author.id, recommended=True
-                )
-                player.add(
-                    requester=ctx.author.id, track=track, index=0 if position else None
-                )
+            embed.add_field(
+                name="Duration",
+                value=str(
+                    await utils.chop_microseconds(
+                        timedelta(milliseconds=int(track["info"]["length"]))
+                    )
+                ),
+            )
+            embed.add_field(name="Queue Length", value=str(qsize + 1))
+            embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
+            embed.add_field(name="Requested By", value=ctx.author.mention)
+            embed.add_field(name="DJ", value=dj.mention)
+            embed.add_field(name="Channel", value=f"{channel.mention}")
+
+            # You can attach additional information to audiotracks through kwargs, however this involves
+            # constructing the AudioTrack class yourself.
+            track = lavalink.models.AudioTrack(track, ctx.author.id, recommended=True)
+            player.add(
+                requester=ctx.author.id, track=track, index=0 if position else None
+            )
 
         if thumb:
             embed.set_thumbnail(url=thumb)
@@ -450,6 +456,7 @@ class Music(commands.Cog):
         if not player.is_playing:
             await player.play()
 
+    @commands.guild_only()
     @commands.slash_command()
     async def pause(self, ctx):
         """Pause the currently playing song."""
@@ -488,6 +495,7 @@ class Music(commands.Cog):
                 f"**:white_check_mark: {ctx.author.mention} has voted to pause the player.**"
             )
 
+    @commands.guild_only()
     @commands.slash_command()
     async def resume(self, ctx):
         """Resume a currently paused player."""
@@ -526,6 +534,7 @@ class Music(commands.Cog):
                 f"**:white_check_mark: {ctx.author.mention} has voted to resume the player.**"
             )
 
+    @commands.guild_only()
     @commands.slash_command()
     async def skip(self, ctx):
         """Skip the currently playing song."""
@@ -567,6 +576,7 @@ class Music(commands.Cog):
                 f"**:white_check_mark: {ctx.author.mention} has voted to skip the song.**"
             )
 
+    @commands.guild_only()
     @commands.slash_command()
     async def disconnect(self, ctx):
         """Disconnects the player from the voice channel and clears its queue."""
@@ -590,6 +600,7 @@ class Music(commands.Cog):
         await ctx.voice_client.disconnect(force=True)
         await ctx.respond("**:white_check_mark: Disconnected.**")
 
+    @commands.guild_only()
     @commands.slash_command()
     async def volume(self, ctx, vol: int = None):
         """Change the player's volume, between 1 and 100."""
@@ -615,6 +626,7 @@ class Music(commands.Cog):
         await player.set_volume(vol)
         await ctx.respond(f"**:level_slider: Set volume to {vol}%**")
 
+    @commands.guild_only()
     @commands.slash_command()
     async def shuffle(self, ctx):
         """Shuffle the player's queue."""
@@ -661,6 +673,7 @@ class Music(commands.Cog):
                 f"**:white_check_mark: {ctx.author.mention} has voted to shuffle the playlist.**"
             )
 
+    @commands.guild_only()
     @commands.slash_command()
     async def equalizer(
         self,
@@ -698,6 +711,7 @@ class Music(commands.Cog):
         )
         await player.set_gains(*eq.raw)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def nowplaying(self, ctx):
         """Sends an embed with information about the currently playing song."""
@@ -735,6 +749,7 @@ class Music(commands.Cog):
 
         await ctx.respond(embed=embed)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def seek(self, ctx, time_in_seconds: int):
         """Seeks to a certain point in the currently playing song."""
@@ -751,6 +766,7 @@ class Music(commands.Cog):
 
         await ctx.respond(f"**:left_right_arrow: Set position to `{player_position}`**")
 
+    @commands.guild_only()
     @commands.slash_command()
     async def forward(self, ctx, time_in_seconds: int):
         """Forwards by a certain amount of time in the currently playing song."""
@@ -769,6 +785,7 @@ class Music(commands.Cog):
 
         await ctx.respond(f"**:fast_forward: Set position to `{player_position}`**")
 
+    @commands.guild_only()
     @commands.slash_command()
     async def rewind(self, ctx, time_in_seconds: int):
         """Rewinds by a certain amount of time in the currently playing song."""
@@ -787,6 +804,7 @@ class Music(commands.Cog):
 
         await ctx.respond(f"**:rewind: Set position to `{player_position}`**")
 
+    @commands.guild_only()
     @commands.slash_command()
     async def swap_dj(self, ctx, member: discord.Member = None):
         """Swap the current DJ to another member in the voice channel."""
@@ -828,6 +846,7 @@ class Music(commands.Cog):
             await ctx.respond(f"**:control_knobs: {member.mention} is now the DJ.**")
             return
 
+    @commands.guild_only()
     @commands.slash_command()
     async def queue(self, ctx):
         """Display the player's queued songs."""
@@ -872,6 +891,7 @@ class Music(commands.Cog):
 
         await paginator.respond(ctx, ephemeral=False)
 
+    @commands.guild_only()
     @commands.slash_command()
     async def remove(self, ctx, track: int):
         """Removes the specified track from the queue."""
