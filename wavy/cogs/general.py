@@ -88,7 +88,7 @@ class General(commands.Cog):
                     embed.add_field(name=item, value=human_commands, inline=False)
 
                 embed.set_footer(
-                    text=f"To get more in-depth help you can run /help <category> • Wavy",
+                    text="To get more in-depth help you can run /help <category> • Wavy",
                     icon_url=self.bot.user.display_avatar.url,
                 )
 

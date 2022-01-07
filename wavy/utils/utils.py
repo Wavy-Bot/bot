@@ -77,6 +77,17 @@ async def loading_message():
     return message
 
 
+async def interaction(interaction_type: str):
+    """Picks a random interaction from the list."""
+    with open("wavy/interactions.json", "r") as f:
+        data = json.load(f)
+        interaction_list = data[interaction_type]
+
+    image = random.choice(interaction_list)
+
+    return image
+
+
 async def fetch_thumbnail(identifier: str):
     """Fetches a thumbnail from a Youtube ID."""
     ytid = identifier if re.match(r"^[a-zA-Z0-9_-]{11}$", identifier) else None
@@ -112,3 +123,11 @@ async def convert_time_into_timedelta(time: int, unit: str):
     time_delta = timedelta(seconds=time)
 
     return time_delta
+
+
+async def progress_bar(percentage: int):
+    """Creates a progress bar."""
+
+    bar = f"{int(round(percentage / 10, 0)) * '⬜'}{(10 - int(round(percentage / 10, 0))) * '⬛'}"
+
+    return bar

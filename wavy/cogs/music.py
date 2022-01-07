@@ -41,10 +41,11 @@ class LavalinkVoiceClient(discord.VoiceClient):
     This is the preferred way to handle external voice sending
     This client will be created via a cls in the connect method of the channel
     see the following documentation:
-    https://discordpy.readthedocs.io/en/latest/api.html#voiceprotocol
+    https://docs.pycord.dev/en/master/api.html#voiceprotocol
     """
 
     def __init__(self, client: discord.Client, channel: discord.abc.Connectable):
+        super().__init__(client, channel)
         self.client = client
         self.channel = channel
         # ensure there exists a client already

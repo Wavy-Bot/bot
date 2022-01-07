@@ -2,7 +2,7 @@ import os
 
 import discord
 
-from ..utils import utils, errors, database
+from ..utils import utils, errors, database, requests
 from discord.ext import commands, tasks
 
 
@@ -14,10 +14,12 @@ class Events(commands.Cog):
         self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.db = database.Database()
         self.change_status.start()
+        self.update_memes.start()
 
     def cog_unload(self):
         """Runs when the cog gets unloaded."""
         self.change_status.cancel()
+        self.update_memes.cancel()
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -51,6 +53,11 @@ class Events(commands.Cog):
             activity=discord.Game(status_message),
             status=discord.Status.online,
         )
+
+    @tasks.loop(minutes=15)
+    async def update_memes(self):
+        """Updates the memes every 15 minutes."""
+        await requests.update_memes()
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -90,30 +97,31 @@ class Events(commands.Cog):
             ),
         ):
             description = error
-        elif isinstance(error.original, commands.MissingPermissions):
-            permission_string = ""
+        elif hasattr(error, "original"):
+            if isinstance(error.original, commands.MissingPermissions):
+                permission_string = ""
 
-            for i in error.original.missing_permissions:
-                permission_string += f"• `{i}`\n"
+                for i in error.original.missing_permissions:
+                    permission_string += f"• `{i}`\n"
 
-            description = (
-                f"You don't have permission to execute `{ctx.command.name}`. "
-                f"You need the following permissions:\n{permission_string}"
-            )
-        elif isinstance(error.original, commands.BotMissingPermissions):
-            permission_string = ""
+                description = (
+                    f"You don't have permission to execute `{ctx.command.name}`. "
+                    f"You need the following permissions:\n{permission_string}"
+                )
+            elif isinstance(error.original, commands.BotMissingPermissions):
+                permission_string = ""
 
-            for i in error.original.missing_permissions:
-                permission_string += f"• `{i}`\n"
+                for i in error.original.missing_permissions:
+                    permission_string += f"• `{i}`\n"
 
-            description = (
-                f"I don't have permission to execute `{ctx.command.name}`. "
-                f"I need the following permissions:\n{permission_string}"
-            )
-        elif isinstance(
-            error.original, (errors.SongNotFound, errors.Timeout, errors.WarnNotFound)
-        ):
-            description = error.original
+                description = (
+                    f"I don't have permission to execute `{ctx.command.name}`. "
+                    f"I need the following permissions:\n{permission_string}"
+                )
+            elif isinstance(error.original, commands.NSFWChannelRequired):
+                description = "This post can only be viewed in an NSFW channel."
+            else:
+                description = error.original
         else:
             description = f"`{error}`"
 

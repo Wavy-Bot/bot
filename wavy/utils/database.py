@@ -1,4 +1,5 @@
 import os
+import random
 
 from datetime import datetime
 from . import classes
@@ -101,7 +102,7 @@ class Database:
         }
 
         if old_document:
-            await self.db.snipes.update_many(
+            await collection.update_many(
                 {
                     "createdAt": old_document["createdAt"],
                     "member_id": old_document["member_id"],
@@ -117,13 +118,15 @@ class Database:
                     }
                 },
             )
-        else:
-            result = await self.db.snipes.insert_one(document)
+            return
+        result = await collection.insert_one(document)
 
-            return result.inserted_id
+        return result.inserted_id
 
-    async def get_snipe(self, server_id: int, channel_id: int) -> classes.Snipe or None:
-        """Gets a snipe."""
+    async def fetch_snipe(
+        self, server_id: int, channel_id: int
+    ) -> classes.Snipe or None:
+        """Fetches a snipe."""
         collection = self.db.snipes
 
         document = await collection.find_one(
@@ -142,3 +145,56 @@ class Database:
 
             return snipe_class
         return
+
+    async def fetch_memes(self) -> dict:
+        """Fetches all memes."""
+        collection = self.db.memes
+
+        document = await collection.find_one()
+
+        return document
+
+    async def fetch_meme(self) -> dict:
+        """Fetches all memes."""
+        collection = self.db.memes
+
+        document = await collection.find_one()
+
+        meme = random.choice(document["memes"])
+
+        return meme
+
+    async def set_memes(self, memes: list) -> str or None:
+        """Adds memes to the database."""
+        collection = self.db.memes
+
+        # Delete memes after 15 minutes.
+        await collection.create_index([("createdAt", 1)], expireAfterSeconds=900)
+
+        old_document = await self.fetch_memes()
+
+        document = {"createdAt": datetime.utcnow(), "memes": memes}
+
+        if old_document:
+            memes = memes + old_document["memes"]
+
+            # Remove duplicates.
+            memes = [dict(t) for t in {tuple(d.items()) for d in memes}]
+
+            await collection.update_many(
+                {
+                    "createdAt": old_document["createdAt"],
+                    "memes": old_document["memes"],
+                },
+                {
+                    "$set": {
+                        "createdAt": datetime.utcnow(),
+                        "memes": memes,
+                    }
+                },
+            )
+
+            return
+        result = await collection.insert_one(document)
+
+        return result.inserted_id

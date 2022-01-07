@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "132795a49029fbc1daa38902761309ff2eed508dcd765c480f13c086ad819cca"
+            "sha256": "252045dd40fd9cd9ea167e8be44ad02afa72f7e5a8032e8f78ade53cfece4fd4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -99,7 +99,7 @@
                 "sha256:fa0ffcace9b3aa34d205d8130f7873fcfefcb6a4dd3dd705b0dab69af6712642",
                 "sha256:fc5471e1a54de15ef71c1bc6ebe80d4dc681ea600e68bfd1cbce40427f0b7578"
             ],
-            "markers": "python_version >= '3.6'",
+            "index": "pypi",
             "version": "==3.8.1"
         },
         "aiosignal": {
@@ -276,11 +276,11 @@
         },
         "charset-normalizer": {
             "hashes": [
-                "sha256:1eecaa09422db5be9e29d7fc65664e6c33bd06f9ced7838578ba40d58bdf3721",
-                "sha256:b0b883e8e874edfdece9c28f314e3dd5badf067342e42fb162203335ae61aa2c"
+                "sha256:876d180e9d7432c5d1dfd4c5d26b72f099d503e8fcc0feb7532c9289be60fcbd",
+                "sha256:cb957888737fc0bbcd78e3df769addb41fd1ff8cf950dc9e7ad7793f1bf44455"
             ],
-            "markers": "python_full_version >= '3.5.0'",
-            "version": "==2.0.9"
+            "markers": "python_version >= '3.5'",
+            "version": "==2.0.10"
         },
         "dnspython": {
             "hashes": [
@@ -372,7 +372,7 @@
                 "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff",
                 "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"
             ],
-            "markers": "python_full_version >= '3.5.0'",
+            "markers": "python_version >= '3.5'",
             "version": "==3.3"
         },
         "lavalink": {
@@ -537,7 +537,7 @@
                 "voice"
             ],
             "git": "https://github.com/Pycord-Development/pycord",
-            "ref": "128a9e97aec7bc485451bca641d40b237b154b2d"
+            "ref": "ef92c70db27df57c94e899d7d6c14f78622d5a8c"
         },
         "pycares": {
             "hashes": [

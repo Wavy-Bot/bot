@@ -14,6 +14,7 @@ lavalink = "*"
 aiodns = "*"
 cchardet = "*"
 async-spotify = "*"
+aiohttp = "*"
 
 [dev-packages]
 

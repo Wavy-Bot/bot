@@ -116,3 +116,27 @@ class Snipe:
     member_id: int
     content: str
     attachments: list
+
+
+@dataclass
+class RedditPost:
+    """
+    Class that represents a reddit post.
+
+    Takes the following arguments:
+        subreddit => The subreddit the post came from.
+        title => Title of the post.
+        over_18 => Whether the post is NSFW.
+        url => URL of the post.
+        image => Image URL of the post.
+        ups => Upvotes of the post.
+        comments => Number of comments on the post.
+    """
+
+    subreddit: str
+    title: str
+    over_18: bool
+    url: str
+    image: str
+    ups: int
+    comments: int
