@@ -61,8 +61,6 @@ class Fun(commands.Cog):
 
         await ctx.respond(embed=embed)
 
-    # TODO(Robert): Custom reddit API wrapper.
-
     @commands.guild_only()
     @commands.slash_command()
     async def meme(self, ctx):

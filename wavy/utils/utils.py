@@ -127,7 +127,6 @@ async def convert_time_into_timedelta(time: int, unit: str):
 
 async def progress_bar(percentage: int):
     """Creates a progress bar."""
-
     bar = f"{int(round(percentage / 10, 0)) * '⬜'}{(10 - int(round(percentage / 10, 0))) * '⬛'}"
 
     return bar
