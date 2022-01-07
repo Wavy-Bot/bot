@@ -7,6 +7,7 @@ import wavy
 from ..utils import utils, errors
 from discord.ext import commands
 from discord.errors import InvalidArgument
+from discord.commands.commands import SlashCommand
 
 
 class General(commands.Cog):
@@ -40,13 +41,11 @@ class General(commands.Cog):
         category: discord.Option(
             str,
             "category",
-            choices=["General", "Moderation", "Music"],
+            choices=["General", "Moderation", "Music", "Fun"],
             required=False,
         ),
     ):
         """Send help"""
-        # if category:
-        #     category = category.capitalize()
 
         categories = list(self.bot.cogs)
 
@@ -60,10 +59,11 @@ class General(commands.Cog):
                 )
 
                 for command in cog.get_commands():
-                    embed.add_field(
-                        name=command.name,
-                        value=f"`{command.description}`",
-                    )
+                    if isinstance(command, SlashCommand):
+                        embed.add_field(
+                            name=command.name,
+                            value=f"`{command.description}`",
+                        )
 
                 embed.set_footer(
                     text="Wavy • https://wavybot.com",
@@ -81,7 +81,11 @@ class General(commands.Cog):
                 cog_commands = cog.get_commands()
 
                 human_commands = ", ".join(
-                    [f"`{command.name}`" for command in cog_commands]
+                    [
+                        f"`{command.name}`"
+                        for command in cog_commands
+                        if isinstance(command, SlashCommand)
+                    ]
                 )
 
                 if human_commands:
