@@ -62,6 +62,7 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         """Called when a message is deleted."""
+        # TODO(Robert): Make this opt-in.
         if (
             not isinstance(message.channel, discord.DMChannel)
             and not message.author.bot

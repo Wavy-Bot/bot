@@ -6,7 +6,7 @@ import discord
 from datetime import datetime, timedelta
 from ..utils import utils, errors, database
 from discord.commands import SlashCommandGroup
-from discord.ext import commands
+from discord.ext import commands, pages
 
 
 class Moderation(commands.Cog):

@@ -7,7 +7,7 @@ import wavy
 from ..utils import utils, errors
 from discord.ext import commands
 from discord.errors import InvalidArgument
-from discord.commands.commands import SlashCommand
+from discord.commands import SlashCommand
 
 
 class General(commands.Cog):

@@ -9,17 +9,20 @@ uvloop = "*"
 motor = "*"
 pymongo = {extras = ["srv"], version = "*"}
 psutil = "*"
-py-cord = {extras = ["speed", "voice"], git = "https://github.com/Pycord-Development/pycord"}
 lavalink = "*"
 aiodns = "*"
 cchardet = "*"
 async-spotify = "*"
 aiohttp = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+fastapi = "*"
+py-cord = {version = "==2.0.0b4", extras = ["speed", "voice"]}
+fastapi-utils = "*"
+sentry-sdk = "*"
 
 [dev-packages]
-
-[requires]
-python_version = "3.8"
+# [requires]
+# python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
