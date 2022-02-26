@@ -231,6 +231,8 @@ class Music(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Event listener for when a user changes voice state."""
+        await self.bot.wait_until_ready()
+
         player = self.bot.lavalink.player_manager.get(member.guild.id)
 
         if player and before.channel:

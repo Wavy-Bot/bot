@@ -124,8 +124,8 @@ class Wavy(commands.AutoShardedBot, ABC):
             command_prefix=commands.when_mentioned_or("%"),
             case_insensitive=True,
             intents=intents,
-            status=discord.Status.online,
-            activity=discord.Game("https://wavybot.com"),
+            status=discord.Status.dnd,
+            activity=discord.Game("Starting..."),
             help_command=None,
             loop=event_loop,
             allowed_mentions=discord.AllowedMentions(

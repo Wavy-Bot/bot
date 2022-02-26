@@ -26,6 +26,11 @@ class Events(commands.Cog):
         """Called when the client is done preparing the data received from Discord."""
         print(f"Logged in as\n{self.bot.user.name}\n{self.bot.user.id}")
 
+        await self.bot.change_presence(
+            activity=discord.Game("https://wavybot.com"),
+            status=discord.Status.online,
+        )
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         """Called when the bot joins a new guild."""
