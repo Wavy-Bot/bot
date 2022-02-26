@@ -17,10 +17,10 @@ LAUNCH_TIME = datetime.utcnow()
 async def server_stats():
     """Gets the current server stats."""
     cpu_usage = psutil.cpu_percent()
-    ram_usage = round(psutil.virtual_memory().used / (1024.0 ** 3), 1)
-    total_ram = round(psutil.virtual_memory().total / (1024.0 ** 3), 1)
-    disk_usage = round(psutil.disk_usage("/").used / (1024.0 ** 3), 1)
-    total_disk = round(psutil.disk_usage("/").total / (1024.0 ** 3), 1)
+    ram_usage = round(psutil.virtual_memory().used / (1024.0**3), 1)
+    total_ram = round(psutil.virtual_memory().total / (1024.0**3), 1)
+    disk_usage = round(psutil.disk_usage("/").used / (1024.0**3), 1)
+    total_disk = round(psutil.disk_usage("/").total / (1024.0**3), 1)
     python_version = platform.python_version()
     pycord_version = discord.__version__
 
