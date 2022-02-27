@@ -28,7 +28,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def kick(self, ctx, member: discord.Member, reason="No reason provided."):
         """Yeetus deletus"""
-        if commands.has_permissions(kick_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.kick_members:
             await member.kick(reason=reason)
 
             embed = discord.Embed(title=f"Kicked {member}", colour=self.emb_colour)
@@ -49,7 +50,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def ban(self, ctx, member: discord.Member, reason="No reason provided."):
         """Begone, thou scurvy dog"""
-        if commands.has_permissions(ban_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.ban_members:
             await member.ban(reason=reason)
 
             embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
@@ -70,7 +72,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def unban(self, ctx, member: str):
         """Be back, thou scurvy dog"""
-        if commands.has_permissions(ban_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.ban_members:
             # NOTE(Robert): I am aware that there are numerous other ways to do this,
             #               but this just seemed like the most user-friendly one.
             banned_members = await ctx.guild.bans()
@@ -110,7 +113,8 @@ class Moderation(commands.Cog):
             """Checks if the message author is the specified member."""
             return m.author == member
 
-        if commands.has_permissions(kick_members=True, manage_messages=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.kick_members and permissions.manage_messages:
             days = datetime.utcnow() - timedelta(days=14)
 
             del_msg = await ctx.channel.purge(after=days, check=check)
@@ -139,7 +143,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def clear(self, ctx, amount: int):
         """Roomba mode activated"""
-        if commands.has_permissions(manage_messages=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.manage_messages:
             deleted = await ctx.channel.purge(limit=amount)
 
             embed = discord.Embed(
@@ -159,7 +164,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def nuke(self, ctx):
         """Kaboom? Yes Rico, kaboom."""
-        if commands.has_permissions(manage_messages=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.manage_messages:
             await ctx.channel.purge()
 
             embed = discord.Embed(title="Nuked all messages.", colour=self.emb_colour)
@@ -180,7 +186,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def lock(self, ctx, channel: discord.TextChannel = None):
         """Shut thou mouths"""
-        if commands.has_permissions(manage_channels=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.manage_channels:
             channel = channel if channel else ctx.channel
 
             role = ctx.guild.default_role
@@ -210,7 +217,8 @@ class Moderation(commands.Cog):
     @commands.slash_command()
     async def unlock(self, ctx, channel: discord.TextChannel = None):
         """Unshut thou mouths"""
-        if commands.has_permissions(manage_channels=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.manage_channels:
             channel = channel if channel else ctx.channel
 
             role = ctx.guild.default_role
@@ -252,7 +260,8 @@ class Moderation(commands.Cog):
         reason: str = "No reason provided.",
     ):
         """Be quiet, peasant"""
-        if commands.has_permissions(moderate_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.moderate_members:
             if not member.timed_out:
                 time_delta = await utils.convert_time_into_timedelta(
                     time=duration, unit=unit
@@ -294,7 +303,8 @@ class Moderation(commands.Cog):
         reason: str = "No reason provided.",
     ):
         """Talk to me, peasant"""
-        if commands.has_permissions(moderate_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.moderate_members:
             if member.timed_out:
                 await member.remove_timeout(reason=reason)
 
@@ -329,7 +339,8 @@ class Moderation(commands.Cog):
         reason: str = "No reason provided.",
     ):
         """Warning: be warned"""
-        if commands.has_permissions(kick_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.kick_members:
             if member.bot:
                 raise errors.Bot("Bots cannot get warned.")
 
@@ -362,7 +373,8 @@ class Moderation(commands.Cog):
     @warn.command(name="remove")
     async def warn_remove(self, ctx, warn_id: str):
         """Look mom, no warning"""
-        if commands.has_permissions(kick_members=True):
+        permissions = ctx.channel.permissions_for(ctx.author)
+        if permissions.kick_members:
             warn = await self.db.remove_warn(server_id=ctx.guild.id, warn_id=warn_id)
             if warn:
                 embed = discord.Embed(
