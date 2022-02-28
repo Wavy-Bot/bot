@@ -302,7 +302,7 @@ class Music(commands.Cog):
         query = query.strip("<>")
         spotify_query = None
 
-        # Check if the user input might be a URL. If it isn't, we can Lavalink do a YouTube search for it instead.
+        # Check if the user input might be a URL. If it isn't, we can make Lavalink do a YouTube search for it instead.
         # SoundCloud searching is possible by prefixing "scsearch:" instead.
         if not self.url_reg.match(query):
             if platform == "SoundCloud":
@@ -313,17 +313,20 @@ class Music(commands.Cog):
             else:
                 query = f"ytsearch:{query}"
 
-        # If the platform is Spotify, and the query is a URL, we can use the URL directly.
-        if platform == "Spotify" and not spotify_query:
-            spotify_query = await spotify.fetch(url=query)
-            query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
+        # God this is ugly, but it works for now.
+        if not spotify_query:
+            # If the platform is Spotify, and the query is a URL, we can use the URL directly.
+            if platform == "Spotify":
+                spotify_query = await spotify.fetch(url=query)
+                query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
 
-        # If it turns out to be a Spotify URL, but the user did not specify a platform, we can use the URL directly.
-        try:
-            spotify_query = await spotify.fetch(url=query)
-            query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
-        except errors.SongNotFound:
-            pass
+            # If it turns out to be a Spotify URL, but the user did not specify a platform, we can use the URL directly.
+            try:
+                spotify_query = await spotify.fetch(url=query)
+                query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
+                platform = "Spotify"
+            except errors.SongNotFound:
+                pass
 
         # Get the results for the query from Lavalink.
         results = await player.node.get_tracks(query)
@@ -375,15 +378,22 @@ class Music(commands.Cog):
             if platform == "Spotify":
                 loading_message = await utils.loading_message()
 
-                temp_embed = discord.Embed(
+                add_song_embed = discord.Embed(
                     title="Adding songs to queue...",
                     description=loading_message,
                     colour=self.emb_colour,
                 )
 
-                await ctx.respond(embed=temp_embed)
+                add_song_msg = await ctx.respond(embed=add_song_embed)
 
+                tracks_added = 0
+
+                # This will basically DoS your Lavalink if it is a remotely large playlist, so be careful.
                 for track in spotify_query:
+                    if not player.is_connected:
+                        await add_song_msg.delete_original_message()
+                        return
+
                     query = f"ytsearch:{track.name} {track.artist}"
                     results = await player.node.get_tracks(query)
 
@@ -398,7 +408,24 @@ class Music(commands.Cog):
                         index=0 if position else None,
                     )
 
+                    tracks_added += 1
+
+                    if tracks_added % 10 == 0:
+                        songs_added_embed = discord.Embed(
+                            title=f"Added {tracks_added}/{len(spotify_query)} songs to queue",
+                            description="This might take a while...\n\n(fyi: this updates at every 10 songs)",
+                            colour=self.emb_colour,
+                        )
+
+                        await add_song_msg.edit_original_message(
+                            embed=songs_added_embed
+                        )
+
+                await add_song_msg.delete_original_message()
+
                 embed.title = "Added track(s) to queue"
+
+                # I am aware that this is duplicate code.
 
                 thumb = await utils.fetch_thumbnail(
                     results["tracks"][0]["info"]["identifier"]
@@ -416,38 +443,38 @@ class Music(commands.Cog):
                     embed.set_thumbnail(url=thumb)
 
                 await ctx.send(embed=embed)
+            else:
+                track = results["tracks"][0]
+                embed.title = "Added track to queue"
+                embed.description = (
+                    f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
+                )
 
-                return
+                thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
+                qsize = len(player.queue)
 
-            track = results["tracks"][0]
-            embed.title = "Added track to queue"
-            embed.description = (
-                f'**[`{track["info"]["title"]}`]({track["info"]["uri"]})**'
-            )
+                embed.add_field(
+                    name="Duration",
+                    value=str(
+                        await utils.chop_microseconds(
+                            timedelta(milliseconds=int(track["info"]["length"]))
+                        )
+                    ),
+                )
+                embed.add_field(name="Queue Length", value=str(qsize + 1))
+                embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
+                embed.add_field(name="Requested By", value=ctx.author.mention)
+                embed.add_field(name="DJ", value=dj.mention)
+                embed.add_field(name="Channel", value=f"{channel.mention}")
 
-            thumb = await utils.fetch_thumbnail(track["info"]["identifier"])
-            qsize = len(player.queue)
-
-            embed.add_field(
-                name="Duration",
-                value=str(
-                    await utils.chop_microseconds(
-                        timedelta(milliseconds=int(track["info"]["length"]))
-                    )
-                ),
-            )
-            embed.add_field(name="Queue Length", value=str(qsize + 1))
-            embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
-            embed.add_field(name="Requested By", value=ctx.author.mention)
-            embed.add_field(name="DJ", value=dj.mention)
-            embed.add_field(name="Channel", value=f"{channel.mention}")
-
-            # You can attach additional information to audiotracks through kwargs, however this involves
-            # constructing the AudioTrack class yourself.
-            track = lavalink.models.AudioTrack(track, ctx.author.id, recommended=True)
-            player.add(
-                requester=ctx.author.id, track=track, index=0 if position else None
-            )
+                # You can attach additional information to audiotracks through kwargs, however this involves
+                # constructing the AudioTrack class yourself.
+                track = lavalink.models.AudioTrack(
+                    track, ctx.author.id, recommended=True
+                )
+                player.add(
+                    requester=ctx.author.id, track=track, index=0 if position else None
+                )
 
         if thumb:
             embed.set_thumbnail(url=thumb)
@@ -892,7 +919,7 @@ class Music(commands.Cog):
             pages=page_list, show_disabled=False, show_indicator=True
         )
 
-        await paginator.respond(ctx, ephemeral=False)
+        await paginator.respond(ctx.interaction, ephemeral=False)
 
     @commands.guild_only()
     @commands.slash_command()

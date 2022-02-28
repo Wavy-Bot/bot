@@ -106,9 +106,9 @@ class General(commands.Cog):
         uptime = await utils.uptime()
 
         uptime_text = (
-            f"{uptime.weeks} week(s),"
+            f"{uptime.weeks} week(s), "
             if uptime.weeks
-            else "" f"{uptime.days} day(s),"
+            else "" f"{uptime.days} day(s), "
             if uptime.days
             else "" f"{uptime.hours} hour(s), "
             if uptime.hours

@@ -4,9 +4,6 @@ from urllib.parse import urlparse
 from . import classes, errors
 from async_spotify import SpotifyApiClient
 from async_spotify.authentification.authorization_flows import ClientCredentialsFlow
-from dotenv import load_dotenv
-
-load_dotenv()
 
 auth_flow = ClientCredentialsFlow(
     application_id=os.environ["SPOTIFY_CLIENT_ID"],
@@ -37,7 +34,7 @@ async def fetch(url: str = None, name: str = None) -> [classes.SpotifyTrack]:
             playlist = await fetch_playlist(parsed_url.id)
             return playlist
         raise errors.SongNotFound
-    track = await search_track(name)
+    track = await search_track(track_name=name)
     return [track]
 
 
@@ -151,25 +148,32 @@ async def fetch_playlist(playlist_id: str) -> [classes.SpotifyTrack]:
         playlist_id => The ID of the playlist.
     """
     auth_token = await client.get_auth_token_with_client_credentials()
-    await client.create_new_client()
-
-    # TODO(Robert): Fix that this function only returns 100 tracks.
-    playlist = await client.playlists.get_tracks(
-        playlist_id=playlist_id, auth_token=auth_token
-    )
-    await client.close_client()
-
+    done = False
+    offset = 0
     track_list = []
 
-    for data in playlist["items"]:
-        track = data["track"]
-        track_class = classes.SpotifyTrack(
-            name=track["name"],
-            artist=track["artists"][0]["name"],
-            image=track["album"]["images"][0]["url"],
-            url=track["external_urls"]["spotify"],
-        )
+    while not done:
+        await client.create_new_client()
 
-        track_list.append(track_class)
+        playlist = await client.playlists.get_tracks(
+            playlist_id=playlist_id, auth_token=auth_token, offset=offset
+        )
+        await client.close_client()
+
+        for data in playlist["items"]:
+            track = data["track"]
+            track_class = classes.SpotifyTrack(
+                name=track["name"],
+                artist=track["artists"][0]["name"],
+                image=track["album"]["images"][0]["url"],
+                url=track["external_urls"]["spotify"],
+            )
+
+            track_list.append(track_class)
+
+        if offset + 100 < playlist["total"]:
+            offset += 100
+        else:
+            done = True
 
     return track_list
