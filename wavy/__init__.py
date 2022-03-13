@@ -55,7 +55,9 @@ async def run(event_loop: uvloop.Loop) -> None:
     # and I have no idea how to expose the bot variable to a different file.
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
-    config = Config(app=app, loop=event_loop, access_log=False, port=31088)
+    config = Config(
+        app=app, loop=event_loop, access_log=False, host="0.0.0.0", port=31088
+    )
     server = Server(config)
 
     @app.get("/")

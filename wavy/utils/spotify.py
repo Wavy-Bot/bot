@@ -73,7 +73,9 @@ async def fetch_track(track_id: str) -> classes.SpotifyTrack:
     track_class = classes.SpotifyTrack(
         name=track["name"],
         artist=track["artists"][0]["name"],
-        image=track["album"]["images"][0]["url"],
+        image=track["album"]["images"][0]["url"]
+        if track["album"]["images"]
+        else "https://dummyimage.com/480x360.jpg/000000/ffffff&text=NO+IMAGE",
         url=track["external_urls"]["spotify"],
     )
 
@@ -103,7 +105,9 @@ async def search_track(track_name: str) -> classes.SpotifyTrack:
     track_class = classes.SpotifyTrack(
         name=track["name"],
         artist=track["artists"][0]["name"],
-        image=track["album"]["images"][0]["url"],
+        image=track["album"]["images"][0]["url"]
+        if track["album"]["images"]
+        else "https://dummyimage.com/480x360.jpg/000000/ffffff&text=NO+IMAGE",
         url=track["external_urls"]["spotify"],
     )
 
@@ -131,7 +135,9 @@ async def fetch_album(album_id: str) -> [classes.SpotifyTrack]:
         track_class = classes.SpotifyTrack(
             name=track["name"],
             artist=track["artists"][0]["name"],
-            image=album["images"][0]["url"],
+            image=album["images"][0]["url"]
+            if album["images"]
+            else "https://dummyimage.com/480x360.jpg/000000/ffffff&text=NO+IMAGE",
             url=track["external_urls"]["spotify"],
         )
 
@@ -165,7 +171,9 @@ async def fetch_playlist(playlist_id: str) -> [classes.SpotifyTrack]:
             track_class = classes.SpotifyTrack(
                 name=track["name"],
                 artist=track["artists"][0]["name"],
-                image=track["album"]["images"][0]["url"],
+                image=track["album"]["images"][0]["url"]
+                if track["album"]["images"]
+                else "https://dummyimage.com/480x360.jpg/000000/ffffff&text=NO+IMAGE",
                 url=track["external_urls"]["spotify"],
             )
 
