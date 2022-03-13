@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "762665ba07f5d4bb9efa9869883dc97f40f4854c4618eaf44de6fccbd85604b6"
+            "sha256": "9e3eec292550a14149ed644f9a93e35d908040b10cb1ff339e97d32dd54a5d3c"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -300,7 +300,7 @@
                 "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597",
                 "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"
             ],
-            "markers": "python_full_version >= '3.5.0'",
+            "markers": "python_version >= '3.5'",
             "version": "==2.0.12"
         },
         "click": {
@@ -496,7 +496,7 @@
                 "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff",
                 "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"
             ],
-            "markers": "python_full_version >= '3.5.0'",
+            "markers": "python_version >= '3.5'",
             "version": "==3.3"
         },
         "lavalink": {
@@ -660,11 +660,11 @@
                 "voice"
             ],
             "hashes": [
-                "sha256:34ef313b814997d819458d5e7147b011a18b9613f02f369bb432c9ca52924173",
-                "sha256:49b216af4595781f110725660786c8d650b661c45aff4c392d74e886d0f3c4c0"
+                "sha256:0d28dcc69be6e7f94ea5094fd37e2083fa1fa37e9cb4800c05c13732510c1282",
+                "sha256:bf58363d3bade00273113b2e8ecf4eca07f6d57a8836e0882275760055b3ecc6"
             ],
             "index": "pypi",
-            "version": "==2.0.0b4"
+            "version": "==2.0.0b5"
         },
         "pycares": {
             "hashes": [
@@ -940,7 +940,7 @@
                 "sha256:471b71698eac1c2112a40ce2752bb2f4a4814c22a54a3eed3676bc0f5ca9f663",
                 "sha256:c4666eecec1d3f50960c6bdf61ab7bc350648da6c126e3cf6898d8cd4ddcd3de"
             ],
-            "markers": "python_full_version >= '3.5.0'",
+            "markers": "python_version >= '3.5'",
             "version": "==1.2.0"
         },
         "sqlalchemy": {
