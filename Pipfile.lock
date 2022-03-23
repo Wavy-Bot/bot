@@ -126,10 +126,10 @@
         },
         "async-spotify": {
             "hashes": [
-                "sha256:345b8c114f8ad89b479a1c2aa188b8081bf69dab8102f8de4efb409781af9afd"
+                "sha256:e6570ca69fb93d5e91d7575fb9cfc636c68d273b49ac7b78c7280a25371790e6"
             ],
             "index": "pypi",
-            "version": "==0.4.2"
+            "version": "==0.4.3"
         },
         "async-timeout": {
             "hashes": [
