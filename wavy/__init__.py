@@ -15,7 +15,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from uvicorn import Config, Server
 
-__VERSION__ = "0.0.1a"  # I keep forgetting to update this, whoops.
+__VERSION__ = "0.0.2a"  # I keep forgetting to update this, whoops.
 
 load_dotenv()
 
@@ -53,6 +53,7 @@ async def run(event_loop: uvloop.Loop) -> None:
     # The (quite messy) API stuff starts here,
     # I did not really have a better place to put this due to the fact that FastAPI doesn't really work in a cog,
     # and I have no idea how to expose the bot variable to a different file.
+    # Fyi, the API also makes it impossible for you to stop the bot unless you kill it.
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     config = Config(
@@ -133,6 +134,7 @@ class Wavy(commands.AutoShardedBot, ABC):
             allowed_mentions=discord.AllowedMentions(
                 everyone=False, users=True, roles=True, replied_user=True
             ),
+            chunk_guilds_at_startup=False,
         )
 
         # Loop through the cogs and load them unless the file name starts with "_".
