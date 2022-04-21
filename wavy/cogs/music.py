@@ -23,6 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+import asyncio
 import os
 import json
 import re
@@ -332,7 +333,7 @@ class Music(commands.Cog):
         results = await player.node.get_tracks(query)
 
         # Results could be None if Lavalink returns an invalid response (non-JSON/non-200 (OK)).
-        # Alternatively, resullts['tracks'] could be an empty array if the query yielded no tracks.
+        # Alternatively, results['tracks'] could be an empty array if the query yielded no tracks.
         if not results or not results["tracks"]:
             raise errors.SongNotFound
 
@@ -389,11 +390,9 @@ class Music(commands.Cog):
                 tracks_added = 0
 
                 # This will basically DoS your Lavalink if it is a remotely large playlist, so be careful.
+                # I have not found a better way to do this, but it would be a livesafer if you could request
+                # to add multiple songs at once.
                 for track in spotify_query:
-                    if not player.is_connected:
-                        await add_song_msg.delete_original_message()
-                        return
-
                     query = f"ytsearch:{track.name} {track.artist}"
                     results = await player.node.get_tracks(query)
 
@@ -408,22 +407,51 @@ class Music(commands.Cog):
                         index=0 if position else None,
                     )
 
+                    # If no song is currently playing, already play one of the songs since this could take a very
+                    # long time.
+                    if not player.is_playing:
+                        await player.play()
+
+                        await ctx.send(
+                            "I will already start playing the requested songs whilst adding them to the queue."
+                        )
+
+                        temp_embed = discord.Embed(colour=self.emb_colour)
+
+                        temp_embed.title = "Added track to queue"
+
+                        # I am aware that this is duplicate code.
+
+                        thumb = await utils.fetch_thumbnail(
+                            results["tracks"][0]["info"]["identifier"]
+                        )
+                        qsize = len(player.queue)
+
+                        temp_embed.add_field(
+                            name="Tracks", value=str(len(spotify_query))
+                        )
+                        temp_embed.add_field(
+                            name="Queue Length", value=str(qsize + len(spotify_query))
+                        )
+                        temp_embed.add_field(
+                            name="Volume", value=f"**`{player.volume}%`**"
+                        )
+                        temp_embed.add_field(
+                            name="Requested By", value=ctx.author.mention
+                        )
+                        temp_embed.add_field(name="DJ", value=dj.mention)
+                        temp_embed.add_field(name="Channel", value=f"{channel.mention}")
+
+                        if thumb:
+                            temp_embed.set_thumbnail(url=thumb)
+
+                        await ctx.send(embed=temp_embed)
+
                     tracks_added += 1
-
-                    if tracks_added % 10 == 0:
-                        songs_added_embed = discord.Embed(
-                            title=f"Added {tracks_added}/{len(spotify_query)} songs to queue",
-                            description="This might take a while...\n\n(fyi: this updates at every 10 songs)",
-                            colour=self.emb_colour,
-                        )
-
-                        await add_song_msg.edit_original_message(
-                            embed=songs_added_embed
-                        )
 
                 await add_song_msg.delete_original_message()
 
-                embed.title = "Added track(s) to queue"
+                embed.title = f"Added {tracks_added} track(s) to queue"
 
                 # I am aware that this is duplicate code.
 
@@ -432,17 +460,13 @@ class Music(commands.Cog):
                 )
                 qsize = len(player.queue)
 
-                embed.add_field(name="Tracks", value=str(len(spotify_query)))
-                embed.add_field(name="Queue Length", value=str(qsize + 1))
+                embed.add_field(name="Tracks", value=str(tracks_added))
+                embed.add_field(name="Queue Length", value=str(qsize))
                 embed.add_field(name="Volume", value=f"**`{player.volume}%`**")
                 embed.add_field(name="Requested By", value=ctx.author.mention)
                 embed.add_field(name="DJ", value=dj.mention)
                 embed.add_field(name="Channel", value=f"{channel.mention}")
 
-                if thumb:
-                    embed.set_thumbnail(url=thumb)
-
-                await ctx.send(embed=embed)
             else:
                 track = results["tracks"][0]
                 embed.title = "Added track to queue"

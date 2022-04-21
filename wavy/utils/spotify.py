@@ -22,6 +22,7 @@ async def fetch(url: str = None, name: str = None) -> [classes.SpotifyTrack]:
         url => The URL of the track, album or playlist.
         name => The name of the track.
     """
+    # A switch statement would be really nice to have now.
     if url:
         parsed_url = await parse_url(url)
         if parsed_url.type == "track":
