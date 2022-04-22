@@ -409,6 +409,8 @@ class Music(commands.Cog):
 
                     # If no song is currently playing, already play one of the songs since this could take a very
                     # long time.
+                    if not player.is_connected and not player.channel_id:
+                        break
                     if not player.is_playing:
                         await player.play()
 
