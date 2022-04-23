@@ -13,11 +13,8 @@ lavalink = "*"
 aiodns = "*"
 cchardet = "*"
 async-spotify = "*"
-aiohttp = "*"
-uvicorn = {extras = ["standard"], version = "*"}
-fastapi = "*"
+aiohttp = {extras = ["speedups"], version = "*"}
 py-cord = {version = "==2.0.0b7", extras = ["speed", "voice"]}
-fastapi-utils = "*"
 sentry-sdk = "*"
 
 [dev-packages]

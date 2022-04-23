@@ -9,7 +9,6 @@ import psutil
 
 from . import classes
 from datetime import datetime, timedelta
-from fastapi import Request, HTTPException
 
 LAUNCH_TIME = datetime.utcnow()
 
@@ -134,9 +133,8 @@ async def progress_bar(percentage: int):
     return bar
 
 
-async def validate_api_key(request: Request):
-    if "authorization" in request.headers:
-        if request.headers["authorization"] == os.environ["API_KEY"]:
-            return
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
-    raise HTTPException(status_code=403, detail="Could not validate credentials")
+async def validate_api_key(headers):
+    if "authorization" in headers:
+        if headers.get("authorization") == os.environ["API_KEY"]:
+            return True
+    return
