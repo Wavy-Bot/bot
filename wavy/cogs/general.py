@@ -20,7 +20,10 @@ class General(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def ping(self, ctx):
-        """Ping pong"""
+        """Ping pong
+
+        Sends the bot's heartbeat.
+        """
         embed = discord.Embed(
             title="Pong :ping_pong:",
             description=f"Heartbeat: {round(self.bot.latency * 1000)}ms",
@@ -38,41 +41,53 @@ class General(commands.Cog):
     async def help(
         self,
         ctx,
-        category: discord.Option(
-            str,
-            "category",
-            choices=["General", "Moderation", "Music", "Fun"],
-            required=False,
-        ),
+        command: discord.Option(str, "command", required=False),
     ):
-        """Send help"""
+        """Send help
+
+        Just your basic help command.
+
+        Options:
+            command (optional): The command to get help for.
+        """
 
         categories = list(self.bot.cogs)
 
-        if category:
-            if category in categories:
-                cog = self.bot.get_cog(category)
+        if command:
+            # Get and loop through all cogs, and if the cog contains commands loop through those
+            # and append them to the list.
+            all_commands = [
+                user_commands
+                for cog in self.bot.cogs.values()
+                if cog.get_commands()
+                for user_commands in cog.get_commands()
+            ]
 
+            # Iterate through all commands and see if the requested command exists, if not raise an error.
+            user_command = None
+
+            for bot_command in all_commands:
+                if bot_command.name == command.lower():
+                    user_command = bot_command
+
+            if user_command:
                 embed = discord.Embed(
-                    title=f"Help for category: {cog.qualified_name}",
+                    title=f"Help for command: {user_command.name}",
                     colour=self.emb_colour,
                 )
 
-                for command in cog.get_commands():
-                    if isinstance(command, SlashCommand):
-                        embed.add_field(
-                            name=command.name,
-                            value=f"`{command.description}`",
-                        )
+                # Provide both the description and the docstring.
+                embed.add_field(
+                    name=f"Description: `{user_command.description}`",
+                    value=f"Full description:\n\n```{user_command.callback.__doc__.replace('        ', '')}```",
+                )
 
                 embed.set_footer(
                     text="Wavy • https://wavybot.com",
                     icon_url=self.bot.user.display_avatar.url,
                 )
-
             else:
-                raise errors.NonExistantCategory(category)
-
+                raise errors.NonExistantCommand(command)
         else:
             embed = discord.Embed(title="Help Menu: Categories", colour=self.emb_colour)
 
@@ -80,7 +95,7 @@ class General(commands.Cog):
                 cog = self.bot.get_cog(item)
                 cog_commands = cog.get_commands()
 
-                human_commands = ", ".join(
+                user_commands = ", ".join(
                     [
                         f"`{command.name}`"
                         for command in cog_commands
@@ -88,11 +103,11 @@ class General(commands.Cog):
                     ]
                 )
 
-                if human_commands:
-                    embed.add_field(name=item, value=human_commands, inline=False)
+                if user_commands:
+                    embed.add_field(name=item, value=user_commands, inline=False)
 
                 embed.set_footer(
-                    text="To get more in-depth help you can run /help <category> • Wavy",
+                    text="To get more in-depth help you can run /help <command> • Wavy",
                     icon_url=self.bot.user.display_avatar.url,
                 )
 
@@ -101,7 +116,9 @@ class General(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def stats(self, ctx):
-        """The boring stuff"""
+        """The boring stuff
+
+        Sends some stats about the bot."""
         server_stats = await utils.server_stats()
         uptime = await utils.uptime()
 
@@ -163,7 +180,11 @@ class General(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def serverinfo(self, ctx):
-        """Cool stats nobody's going to look at"""
+        """
+        Cool stats nobody's going to look at
+
+        Sends some stats about the server.
+        """
         guild = ctx.guild
 
         embed = discord.Embed(title=f"Info on {guild.name}", colour=self.emb_colour)
@@ -207,7 +228,13 @@ class General(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def userinfo(self, ctx, member: discord.Member = None):
-        """Nobody cares"""
+        """Nobody cares
+
+        Sends some stats about a user. If no member is specified, the user will be the one who used the command.
+
+        Options:
+            member (optional): The user to get info on.
+        """
         member = ctx.author if not member else member
 
         # Make a list of roles and remove the @everyone role
@@ -252,7 +279,14 @@ class General(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def avatar(self, ctx, member: discord.Member = None):
-        """Here's a cool avatar that you may steal now"""
+        """Here's a cool avatar that you may steal now
+
+        For legal reasons the text above is a joke.
+        Sends the avatar of a user. If no member is specified, the user will be the one who used the command.
+
+        Options:
+            member (optional): The user to get the avatar from.
+        """
         member = ctx.author if not member else member
 
         # Image types (it's a bit messy, but for now it's fine)
@@ -288,7 +322,14 @@ class General(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def displayavatar(self, ctx, member: discord.Member = None):
-        """The cooler avatar"""
+        """The cooler avatar
+
+        The same as the avatar command, but instead the bot sends the server avatar of a user. If no member is
+        specified, the user will be the one who used the command.
+
+        Options:
+            member (optional): The user to get the display avatar from.
+        """
         member = ctx.author if not member else member
 
         # Image types (it's a bit messy, but for now it's fine)

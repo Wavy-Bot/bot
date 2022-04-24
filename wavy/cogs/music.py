@@ -1,5 +1,5 @@
 """
-A lot of the code here comes from the following sources (<3 to the people who made them):
+A lot of the code here is inspired by or comes from the following sources (<3 to the people who made them):
 - https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
 - https://github.com/PythonistaGuild/Wavelink/blob/master/examples/advanced.py
 
@@ -23,7 +23,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
-import asyncio
 import os
 import json
 import re
@@ -262,7 +261,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def connect(self, ctx):
-        """Connect to a voice channel."""
+        """Connect to a voice channel.
+
+        See above, this command will only work if you are connected to a voice channel and the bot isn't connected to a voice channel.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if player and player.is_connected:
@@ -296,7 +298,16 @@ class Music(commands.Cog):
             required=False,
         ),
     ):
-        """Searches and plays a song from a given query."""
+        """Searches and plays a song from a given query.
+
+        See title. Supports YouTube, SoundCloud, and Spotify, streaming from custom urls and probably more.
+
+        Options:
+            query: The query to search for.
+            platform (optional): The platform to search on. If not provided, defaults to YouTube unless it is a url.
+            position (optional): The position to put the song at in the queue. If not provided, defaults to the end.
+        """
+        # TODO(Robert): Clean up this mess.
         # Get the player for this guild from cache.
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
@@ -515,7 +526,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def pause(self, ctx):
-        """Pause the currently playing song."""
+        """Pause the currently playing song.
+
+        Nothing more, nothing less.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if player.paused:
@@ -554,7 +568,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def resume(self, ctx):
-        """Resume a currently paused player."""
+        """Resume a currently paused player.
+
+        I honestly have no idea what to put here.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.paused:
@@ -593,7 +610,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def skip(self, ctx):
-        """Skip the currently playing song."""
+        """Skip the currently playing song.
+
+        This will not skip if there is no song playing.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -635,7 +655,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def disconnect(self, ctx):
-        """Disconnects the player from the voice channel and clears its queue."""
+        """Disconnects the player from the voice channel and clears its queue.
+
+        This will not disconnect if there is no player connected.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not ctx.author.voice or (
@@ -659,7 +682,13 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def volume(self, ctx, vol: int = None):
-        """Change the player's volume, between 1 and 100."""
+        """Change the player's volume, between 1 and 1000.
+
+        If no volume is provided, the current volume will be displayed.
+
+        Options:
+            vol (option): The volume to set the player to.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -685,7 +714,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def shuffle(self, ctx):
-        """Shuffle the player's queue."""
+        """Shuffle the player's queue.
+
+        *insert interesting text here.*
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         qsize = len(player.queue)
 
@@ -738,7 +770,17 @@ class Music(commands.Cog):
             str, "profile", choices=["flat", "boost", "metal", "piano"]
         ),
     ):
-        """Changes the player's equalizer."""
+        """Changes the player's equalizer.
+
+        There are four equalizers:
+            flat: The equalizer is flat.
+            boost: The equalizer boosts bass I think.
+            metal: The equalizer boosts metal, idk how it works.
+            piano: The equalizer boosts piano stuff or something.
+
+        Options:
+            equalizer: The equalizer to change to.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -770,7 +812,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def nowplaying(self, ctx):
-        """Sends an embed with information about the currently playing song."""
+        """Sends an embed with information about the currently playing song.
+
+        Why did I decide to write very useful text here again?
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         dj = player.fetch(key="dj", default=ctx.author)
 
@@ -808,7 +853,13 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def seek(self, ctx, time_in_seconds: int):
-        """Seeks to a certain point in the currently playing song."""
+        """Seeks to a certain point in the currently playing song.
+
+        Great if you want to listen to the good part of a song.
+
+        Options:
+            time_in_seconds: The time in seconds to seek to.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -825,7 +876,13 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def forward(self, ctx, time_in_seconds: int):
-        """Forwards by a certain amount of time in the currently playing song."""
+        """Forwards by a certain amount of time in the currently playing song.
+
+        Quite simple, isn't it?
+
+        Options:
+            time_in_seconds: The time in seconds to forward by.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -844,7 +901,13 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def rewind(self, ctx, time_in_seconds: int):
-        """Rewinds by a certain amount of time in the currently playing song."""
+        """Rewinds by a certain amount of time in the currently playing song.
+
+        Same as forward, but backwards. Or was it forwards? Or backwards? I don't know.
+
+        Options:
+            time_in_seconds: The time in seconds to rewind by.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -863,7 +926,13 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def swap_dj(self, ctx, member: discord.Member = None):
-        """Swap the current DJ to another member in the voice channel."""
+        """Swap the current DJ to another member in the voice channel.
+
+        Since everyone should become a DJ at least once in their lives, right? I have no idea what I am saying.
+
+        Options:
+            member: The member to swap the DJ with.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -905,7 +974,10 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def queue(self, ctx):
-        """Display the player's queued songs."""
+        """Display the player's queued songs.
+
+        Now you can show all the fantastic songs you have queued up to your mates.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         qsize = len(player.queue)
 
@@ -950,7 +1022,13 @@ class Music(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def remove(self, ctx, track: int):
-        """Removes the specified track from the queue."""
+        """Removes the specified track from the queue.
+
+        You can use this to remove a song from the queue if you don't like it.
+
+        Options:
+            track: The number of the track to remove.
+        """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:

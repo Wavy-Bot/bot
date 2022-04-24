@@ -74,78 +74,6 @@ class Database:
 
         return result.deleted_count > 0
 
-    async def set_snipe(
-        self,
-        server_id: str,
-        channel_id: int,
-        member_id: int,
-        content: str,
-        attachments: list,
-    ) -> str or None:
-        """Sets a snipe."""
-        collection = self.db.snipes
-
-        # Delete snipe after 30 minutes.
-        await collection.create_index([("createdAt", 1)], expireAfterSeconds=1800)
-
-        old_document = await collection.find_one(
-            {"server_id": server_id, "channel_id": channel_id}
-        )
-
-        document = {
-            "createdAt": datetime.utcnow(),
-            "server_id": server_id,
-            "channel_id": channel_id,
-            "member_id": member_id,
-            "content": content,
-            "attachments": attachments,
-        }
-
-        if old_document:
-            await collection.update_many(
-                {
-                    "createdAt": old_document["createdAt"],
-                    "member_id": old_document["member_id"],
-                    "content": old_document["content"],
-                    "attachments": old_document["attachments"],
-                },
-                {
-                    "$set": {
-                        "createdAt": datetime.utcnow(),
-                        "member_id": member_id,
-                        "content": content,
-                        "attachments": attachments,
-                    }
-                },
-            )
-            return
-        result = await collection.insert_one(document)
-
-        return result.inserted_id
-
-    async def fetch_snipe(
-        self, server_id: int, channel_id: int
-    ) -> classes.Snipe or None:
-        """Fetches a snipe."""
-        collection = self.db.snipes
-
-        document = await collection.find_one(
-            {"server_id": server_id, "channel_id": channel_id}
-        )
-
-        if document:
-            snipe_class = classes.Snipe(
-                created_at=document["createdAt"],
-                server_id=document["server_id"],
-                channel_id=document["channel_id"],
-                member_id=document["member_id"],
-                content=document["content"],
-                attachments=document["attachments"],
-            )
-
-            return snipe_class
-        return
-
     async def fetch_memes(self) -> dict:
         """Fetches all memes."""
         collection = self.db.memes
@@ -154,15 +82,19 @@ class Database:
 
         return document
 
-    async def fetch_meme(self) -> dict:
+    async def fetch_meme(self) -> dict or None:
         """Fetches all memes."""
         collection = self.db.memes
 
         document = await collection.find_one()
 
-        meme = random.choice(document["memes"])
+        memes = document.get("memes", [])
 
-        return meme
+        if memes:
+            meme = random.choice(memes)
+
+            return meme
+        return
 
     async def set_memes(self, memes: list) -> str or None:
         """Adds memes to the database."""

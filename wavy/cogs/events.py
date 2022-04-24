@@ -65,22 +65,6 @@ class Events(commands.Cog):
         await requests.update_memes()
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        """Called when a message is deleted."""
-        # TODO(Robert): Make this opt-in.
-        if (
-            not isinstance(message.channel, discord.DMChannel)
-            and not message.author.bot
-        ):
-            await self.db.set_snipe(
-                server_id=message.guild.id,
-                channel_id=message.channel.id,
-                member_id=message.author.id,
-                content=message.content,
-                attachments=[i.url for i in message.attachments],
-            )
-
-    @commands.Cog.listener()
     async def on_application_command_error(self, ctx, error):
         """Called when a command raises an error."""
         if isinstance(error, commands.CommandNotFound):
@@ -98,7 +82,7 @@ class Events(commands.Cog):
             (
                 errors.IncorrectChannel,
                 errors.NoChannelProvided,
-                errors.NonExistantCategory,
+                errors.NonExistantCommand,
                 errors.PlayerNotConnected,
             ),
         ):
