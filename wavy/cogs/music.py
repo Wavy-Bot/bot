@@ -388,7 +388,7 @@ class Music(commands.Cog):
             embed.add_field(name="Channel", value=f"{channel.mention}")
         else:
             if platform == "Spotify":
-                loading_message = await utils.loading_message()
+                loading_message = await utils.message(message_type="loading")
 
                 add_song_embed = discord.Embed(
                     title="Adding songs to queue...",

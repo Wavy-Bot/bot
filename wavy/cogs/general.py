@@ -131,7 +131,7 @@ class General(commands.Cog):
             if uptime.hours
             else "" f"{uptime.minutes} minute(s) and "
             if uptime.minutes
-            else ""
+            else "" f"{uptime.seconds} second(s)\n"
         )
 
         embed = discord.Embed(
@@ -140,7 +140,6 @@ class General(commands.Cog):
             f"Pycord version: {server_stats.pycord_version}\n"
             f"Python version: {server_stats.python_version}\n"
             f"Bot uptime: {uptime_text}"
-            f"{uptime.seconds} second(s)\n"
             f"Guilds: {len(self.bot.guilds)}\n"
             f"Users: {len(list(self.bot.get_all_members()))}\n"
             f"Shards: {self.bot.shard_count}\n"
@@ -164,7 +163,7 @@ class General(commands.Cog):
         view.add_item(
             discord.ui.Button(
                 style=discord.ButtonStyle.link,
-                url="https://discord.gg/Nbcf36Fge5",
+                url="https://discord.wavybot.com",
                 label="Discord Server",
             )
         )
@@ -185,39 +184,39 @@ class General(commands.Cog):
 
         Sends some stats about the server.
         """
-        guild = ctx.guild
+        embed = discord.Embed(title=f"Info on {ctx.guild.name}", colour=self.emb_colour)
 
-        embed = discord.Embed(title=f"Info on {guild.name}", colour=self.emb_colour)
-
-        embed.add_field(name="ID", value=guild.id, inline=True)
+        embed.add_field(name="ID", value=ctx.guild.id, inline=True)
 
         embed.add_field(
             name="Created",
-            value=f"<t:{round(time.mktime(guild.created_at.utctimetuple()))}:F>",
+            value=f"<t:{round(time.mktime(ctx.guild.created_at.utctimetuple()))}:F>",
             inline=True,
         )
 
-        embed.add_field(name="Owner", value=guild.owner.name, inline=False)
+        embed.add_field(name="Owner", value=ctx.guild.owner.name, inline=False)
 
-        embed.add_field(name="Members", value=guild.member_count, inline=True)
-
-        embed.add_field(name="Channels", value=str(len(guild.channels)), inline=True)
-
-        embed.add_field(name="Roles", value=str(len(guild.roles)), inline=True)
+        embed.add_field(name="Members", value=ctx.guild.member_count, inline=True)
 
         embed.add_field(
-            name="Boosts", value=str(len(guild.premium_subscribers)), inline=True
+            name="Channels", value=str(len(ctx.guild.channels)), inline=True
+        )
+
+        embed.add_field(name="Roles", value=str(len(ctx.guild.roles)), inline=True)
+
+        embed.add_field(
+            name="Boosts", value=str(len(ctx.guild.premium_subscribers)), inline=True
         )
 
         embed.add_field(
-            name="Verification level", value=guild.verification_level, inline=True
+            name="Verification level", value=ctx.guild.verification_level, inline=True
         )
 
         # Add 1 to the guild shard ID since otherwise the integer starts at 0.
 
-        embed.add_field(name="Shard", value=guild.shard_id + 1, inline=True)
+        embed.add_field(name="Shard", value=ctx.guild.shard_id + 1, inline=True)
 
-        embed.set_thumbnail(url=guild.icon.url)
+        embed.set_thumbnail(url=ctx.guild.icon.url)
 
         embed.set_footer(
             text="Wavy • https://wavybot.com", icon_url=self.bot.user.display_avatar.url
@@ -238,12 +237,10 @@ class General(commands.Cog):
         member = ctx.author if not member else member
 
         # Make a list of roles and remove the @everyone role
-
         roles = list(member.roles)
         roles.pop(0)
 
         # Create the embed and add all fields
-
         embed = discord.Embed(title=f"Info on {member}", colour=self.emb_colour)
 
         embed.add_field(name="Display name:", value=member.display_name, inline=False)
@@ -290,7 +287,6 @@ class General(commands.Cog):
         member = ctx.author if not member else member
 
         # Image types (it's a bit messy, but for now it's fine)
-
         png = member.avatar.with_format("png").url
         jpg = member.avatar.with_format("jpg").url
         webp = member.avatar.with_format("webp").url
@@ -333,7 +329,6 @@ class General(commands.Cog):
         member = ctx.author if not member else member
 
         # Image types (it's a bit messy, but for now it's fine)
-
         png = member.display_avatar.with_format("png").url
         jpg = member.display_avatar.with_format("jpg").url
         webp = member.display_avatar.with_format("webp").url

@@ -17,9 +17,12 @@ class Moderation(commands.Cog):
         self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.db = database.Database()
 
+    # NOTE(Robert): When Discord finally releases a proper permission system for slash commands I will use that
+    #  instead of my ugly way of doing it.
+
     timeout = SlashCommandGroup(
         "timeout",
-        "Discord time out settings",
+        "Discord time-out settings",
     )
 
     warn = SlashCommandGroup("warn", "Warn settings")
@@ -92,7 +95,7 @@ class Moderation(commands.Cog):
         Unbans the specified member from the server.
 
         Options:
-            member: The user to unban.
+            member: The user to unban. (In the following format: user#1234)
         """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.ban_members:
@@ -128,13 +131,16 @@ class Moderation(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command()
-    async def softban(self, ctx, member: discord.Member, reason="No reason provided."):
-        """Yeets the specified member and deletes all their messages from the past 14 days.
+    async def softban(
+        self, ctx, member: discord.Member, days: int = 14, reason="No reason provided."
+    ):
+        """Yeets the specified member and deletes all their messages from the past x days.
 
         See text above, soft-bans the specified member from the server.
 
         Options:
             member: The user to soft-ban.
+            days (optional): The number of days to delete messages from.
             reason (optional): The reason for soft-banning the user.
         """
 
@@ -144,7 +150,7 @@ class Moderation(commands.Cog):
 
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.kick_members and permissions.manage_messages:
-            days = datetime.utcnow() - timedelta(days=14)
+            days = datetime.utcnow() - timedelta(days=days)
 
             del_msg = await ctx.channel.purge(after=days, check=check)
 
@@ -236,8 +242,10 @@ class Moderation(commands.Cog):
 
             role = ctx.guild.default_role
 
+            # Although your linter will probably say something along the lines of
+            # 'PermissionOverwrite' object attribute 'send_messages' is read-only
+            # (and the same for add_reactions), this works.
             perms = channel.overwrites_for(role)
-
             perms.send_messages = False
             perms.add_reactions = False
 
@@ -273,8 +281,10 @@ class Moderation(commands.Cog):
 
             role = ctx.guild.default_role
 
+            # Although your linter will probably say something along the lines of
+            # 'PermissionOverwrite' object attribute 'send_messages' is read-only
+            # (and the same for add_reactions), this works.
             perms = channel.overwrites_for(role)
-
             perms.send_messages = None
             perms.add_reactions = None
 

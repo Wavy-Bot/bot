@@ -52,30 +52,16 @@ async def uptime():
     )
 
     # Return class
-
     return uptime_class
 
 
-async def status_message():
-    """Picks a status message from the list."""
+async def message(message_type: str):
+    """Picks a random message from the list."""
     with open("wavy/messages.json", "r") as f:
         data = json.load(f)
-        status_list = data["status"]
+        message_list = data.get(message_type, "https://wavybot.com")
 
-    message = random.choice(status_list)
-
-    return message
-
-
-async def loading_message():
-    """Picks a random loading message from the list."""
-    with open("wavy/messages.json", "r") as f:
-        data = json.load(f)
-        loading_list = data["loading"]
-
-    message = random.choice(loading_list)
-
-    return message
+    return random.choice(message_list)
 
 
 async def interaction(interaction_type: str):

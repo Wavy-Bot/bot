@@ -21,38 +21,10 @@ class Events(commands.Cog):
         self.change_status.cancel()
         self.update_memes.cancel()
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        """Called when the client is done preparing the data received from Discord."""
-        print(f"Logged in as\n{self.bot.user.name}\n{self.bot.user.id}")
-
-        await self.bot.change_presence(
-            activity=discord.Game("https://wavybot.com"),
-            status=discord.Status.online,
-        )
-
-    @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        """Called when the bot joins a new guild."""
-        guild_channel = guild.text_channels[0]
-        message_channel = self.bot.get_channel(guild_channel.id)
-
-        message = (
-            "**Hi there, I'm Wavy** - The blazing-fast Discord bot.\n"
-            "- You can see a list of commands by typing `/help`\n"
-            "- You can set me up by going to <https://wavybot.com>\n"
-            "- If you need help, feel free to join my support server over at https://discord.wavybot.com"
-        )
-
-        try:
-            await message_channel.send(message)
-        except discord.Forbidden:
-            return
-
     @tasks.loop(hours=1)
     async def change_status(self):
         """Changes the bot's status every hour."""
-        status_message = await utils.status_message()
+        status_message = await utils.message(message_type="status")
 
         await self.bot.change_presence(
             activity=discord.Game(status_message),
@@ -65,12 +37,47 @@ class Events(commands.Cog):
         await requests.update_memes()
 
     @commands.Cog.listener()
+    async def on_ready(self):
+        """Called when the client is done preparing the data received from Discord."""
+        print(f"Logged in as\n{self.bot.user.name}\n{self.bot.user.id}")
+
+        status_message = await utils.message(message_type="status")
+
+        # I am well aware of the issues that this may cause.
+        await self.change_status()
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        """Called when the bot joins a new guild."""
+        sent = False
+        count = 0
+
+        while not sent:
+            guild_channel = guild.text_channels[count]
+            message_channel = self.bot.get_channel(guild_channel.id)
+
+            message = (
+                "**Hi there, I'm Wavy** - The blazing-fast Discord bot.\n"
+                "- You can see a list of commands by typing `/help`\n"
+                "- You can set me up by going to <https://wavybot.com>\n"
+                "- If you need help, feel free to join my support server over at https://discord.wavybot.com"
+            )
+
+            try:
+                await message_channel.send(message)
+                sent = True
+            except discord.Forbidden:
+                count += 1
+
+    @commands.Cog.listener()
+    async def on_application_command(self, ctx):
+        """Called when an application commands (e.g a slash command) is used."""
+        await self.db.update_command_stats(command=ctx.command.name)
+
+    @commands.Cog.listener()
     async def on_application_command_error(self, ctx, error):
         """Called when a command raises an error."""
-        if isinstance(error, commands.CommandNotFound):
-            return
-
-        if isinstance(error, commands.NoPrivateMessage):
+        if isinstance(error, (commands.CommandNotFound, commands.NoPrivateMessage)):
             return
 
         if isinstance(error, commands.CommandOnCooldown):

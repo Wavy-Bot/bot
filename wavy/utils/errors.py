@@ -48,7 +48,7 @@ class SongNotFound(commands.CommandError):
 
 
 class Timeout(commands.CommandError):
-    """Error raised when a command times out."""
+    """Error raised when a user is(n't) already timed out."""
 
     def __init__(self, message: str):
         self.message = message

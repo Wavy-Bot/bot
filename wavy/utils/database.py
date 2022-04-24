@@ -93,7 +93,17 @@ class Database:
         if memes:
             meme = random.choice(memes)
 
-            return meme
+            meme_class = classes.RedditPost(
+                subreddit=meme["subreddit"],
+                title=meme["title"],
+                over_18=meme["over_18"],
+                url=meme["url"],
+                image=meme["image"],
+                ups=meme["ups"],
+                comments=meme["comments"],
+            )
+
+            return meme_class
         return
 
     async def set_memes(self, memes: list) -> str or None:
@@ -130,3 +140,19 @@ class Database:
         result = await collection.insert_one(document)
 
         return result.inserted_id
+
+    async def update_command_stats(self, command: str):
+        """Updates the command stats."""
+        collection = self.db.command_stats
+
+        # Get the current stats of the command, or create a new one if it doesn't exist.
+        # Then, update or insert the stats.
+        document = await collection.find_one({"command": command})
+
+        if document:
+            await collection.update_one(
+                {"command": command},
+                {"$inc": {"count": 1}},
+            )
+        else:
+            await collection.insert_one({"command": command, "count": 1})

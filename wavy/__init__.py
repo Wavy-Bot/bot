@@ -11,7 +11,7 @@ from discord.ext import commands
 from discord.commands import permissions
 from dotenv import load_dotenv
 
-__VERSION__ = "0.0.2a"  # I keep forgetting to update this, whoops.
+__VERSION__ = "1.0.0"  # I keep forgetting to update this, whoops.
 
 load_dotenv()
 
@@ -72,7 +72,12 @@ async def run(event_loop: uvloop.Loop) -> None:
 
 
 class Wavy(commands.AutoShardedBot, ABC):
-    """The blazing-fast Discord bot."""
+    """The blazing-fast Discord bot.
+
+    Parameters:
+        event_loop => The event loop to use.
+        db => The database to use.
+    """
 
     def __init__(self, event_loop, db):
         self.db = db

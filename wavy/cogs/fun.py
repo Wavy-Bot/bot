@@ -3,7 +3,7 @@ import random
 
 import discord
 
-from ..utils import database, classes, utils
+from ..utils import database, utils
 from discord.ext import commands
 
 
@@ -22,17 +22,7 @@ class Fun(commands.Cog):
 
         Sends a random meme from r/memes, r/meme, r/dankmemes or r/memes_of_the_dank.
         """
-        post = await self.db.fetch_meme()
-
-        meme = classes.RedditPost(
-            subreddit=post["subreddit"],
-            title=post["title"],
-            over_18=post["over_18"],
-            url=post["url"],
-            image=post["image"],
-            ups=post["ups"],
-            comments=post["comments"],
-        )
+        meme = await self.db.fetch_meme()
 
         if meme.over_18:
             raise commands.NSFWChannelRequired(channel=ctx.channel)
@@ -115,6 +105,7 @@ class Fun(commands.Cog):
 
         size = random.randint(0, 20)
 
+        # This is ugly, I know.
         pp = "8" + "=" * size + "D"
 
         embed = discord.Embed(title="pp size calculator™", colour=self.emb_colour)
@@ -137,28 +128,7 @@ class Fun(commands.Cog):
         Options:
             question: The question to ask.
         """
-        responses = [
-            "It is certain",
-            "It is decidebly so.",
-            "Without a doubt",
-            "Yes - definetely.",
-            "You may rely on it.",
-            "As I see it, yes.",
-            "Most likely.",
-            "Outlook good.",
-            "Yes.",
-            "Signs point to yes.",
-            "Reply hazy, try again.",
-            "Ask again later.",
-            "Better not tell you now.",
-            "Cannot predict now.",
-            "Concentrate and ask again.",
-            "Don't count on it.",
-            "My reply is no.",
-            "My sources say no",
-            "Outlook not so good.",
-            "Very doubtful.",
-        ]
+        responses = await utils.message(message_type="eightball")
 
         embed = discord.Embed(
             title=question, description=random.choice(responses), colour=self.emb_colour
