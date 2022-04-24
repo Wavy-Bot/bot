@@ -16,17 +16,17 @@ class Api(commands.Cog):
         self.bot = bot
 
         self.runner = web.AppRunner(app)
-        self.api_host = os.environ.get("API_HOST", "0.0.0.0")
+        self.api_host = os.environ.get("API_HOST", "127.0.0.1")
         self.api_port = os.environ.get("API_PORT", 8080)
         app.add_routes([web.get("/", self.root), web.get("/guilds", self.guilds)])
-        self.api = self.bot.loop.create_task(self.run_api())
+        self.server = self.bot.loop.create_task(self.run_server())
 
     def cog_unload(self):
         """Runs when the cog is unloaded."""
         # Stop the API
-        self.api.cancel()
+        self.server.cancel()
 
-    async def run_api(self):
+    async def run_server(self):
         """Runs the API."""
         try:
             # Wait until the bot is ready

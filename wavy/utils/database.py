@@ -1,7 +1,7 @@
 import os
 import random
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from . import classes
 from motor import motor_asyncio
 
@@ -88,22 +88,23 @@ class Database:
 
         document = await collection.find_one()
 
-        memes = document.get("memes", [])
+        if document:
+            memes = document.get("memes", [])
 
-        if memes:
-            meme = random.choice(memes)
+            if memes:
+                meme = random.choice(memes)
 
-            meme_class = classes.RedditPost(
-                subreddit=meme["subreddit"],
-                title=meme["title"],
-                over_18=meme["over_18"],
-                url=meme["url"],
-                image=meme["image"],
-                ups=meme["ups"],
-                comments=meme["comments"],
-            )
+                meme_class = classes.RedditPost(
+                    subreddit=meme["subreddit"],
+                    title=meme["title"],
+                    over_18=meme["over_18"],
+                    url=meme["url"],
+                    image=meme["image"],
+                    ups=meme["ups"],
+                    comments=meme["comments"],
+                )
 
-            return meme_class
+                return meme_class
         return
 
     async def set_memes(self, memes: list) -> str or None:
@@ -118,7 +119,11 @@ class Database:
         document = {"createdAt": datetime.utcnow(), "memes": memes}
 
         if old_document:
-            memes = memes + old_document["memes"]
+            # Delete memes older than 1 hour.
+            if not old_document["createdAt"] + timedelta(hours=1) >= datetime.utcnow():
+                memes = memes + old_document["memes"]
+            else:
+                await collection.delete_one({"createdAt": old_document["createdAt"]})
 
             # Remove duplicates.
             memes = [dict(t) for t in {tuple(d.items()) for d in memes}]

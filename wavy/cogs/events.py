@@ -41,8 +41,6 @@ class Events(commands.Cog):
         """Called when the client is done preparing the data received from Discord."""
         print(f"Logged in as\n{self.bot.user.name}\n{self.bot.user.id}")
 
-        status_message = await utils.message(message_type="status")
-
         # I am well aware of the issues that this may cause.
         await self.change_status()
 

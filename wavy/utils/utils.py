@@ -120,7 +120,9 @@ async def progress_bar(percentage: int):
 
 
 async def validate_api_key(headers):
-    if "authorization" in headers:
-        if headers.get("authorization") == os.environ["API_KEY"]:
-            return True
+    if (
+        "authorization" in headers
+        and headers.get("authorization") == os.environ["API_KEY"]
+    ):
+        return True
     return

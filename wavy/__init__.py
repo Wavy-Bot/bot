@@ -6,12 +6,12 @@ import asyncio
 import uvloop
 import sentry_sdk
 
-from wavy.utils import database, utils
+from wavy.utils import database
 from discord.ext import commands
 from discord.commands import permissions
 from dotenv import load_dotenv
 
-__VERSION__ = "1.0.0"  # I keep forgetting to update this, whoops.
+__VERSION__ = "1.0.1"  # I keep forgetting to update this, whoops.
 
 load_dotenv()
 
