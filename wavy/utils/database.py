@@ -122,24 +122,26 @@ class Database:
             # Delete memes older than 1 hour.
             if not old_document["createdAt"] + timedelta(hours=1) >= datetime.utcnow():
                 memes = memes + old_document["memes"]
+
+                # Remove duplicates.
+                memes = [dict(t) for t in {tuple(d.items()) for d in memes}]
+
+                await collection.update_many(
+                    {
+                        "createdAt": old_document["createdAt"],
+                        "memes": old_document["memes"],
+                    },
+                    {
+                        "$set": {
+                            "createdAt": datetime.utcnow(),
+                            "memes": memes,
+                        }
+                    },
+                )
             else:
                 await collection.delete_one({"createdAt": old_document["createdAt"]})
 
-            # Remove duplicates.
-            memes = [dict(t) for t in {tuple(d.items()) for d in memes}]
-
-            await collection.update_many(
-                {
-                    "createdAt": old_document["createdAt"],
-                    "memes": old_document["memes"],
-                },
-                {
-                    "$set": {
-                        "createdAt": datetime.utcnow(),
-                        "memes": memes,
-                    }
-                },
-            )
+                await collection.insert_one(document)
 
             return
         result = await collection.insert_one(document)
