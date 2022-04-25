@@ -120,8 +120,8 @@ class General(commands.Cog):
 
         Sends some stats about the bot."""
         server_stats = await utils.server_stats()
-        uptime = await utils.uptime()
 
+        uptime = await utils.uptime()
         uptime_text = (
             f"{uptime.weeks} week(s), "
             if uptime.weeks
@@ -134,6 +134,12 @@ class General(commands.Cog):
             else "" f"{uptime.seconds} second(s)\n"
         )
 
+        lavalink_players = 0
+        lavalink_nodes = self.bot.lavalink.node_manager.nodes
+        for node in lavalink_nodes:
+            if node.stats:
+                lavalink_players += len(node.players)
+
         embed = discord.Embed(
             title="Bot stats",
             description=f"Bot version: {wavy.__VERSION__}\n"
@@ -144,6 +150,7 @@ class General(commands.Cog):
             f"Users: {len(list(self.bot.get_all_members()))}\n"
             f"Shards: {self.bot.shard_count}\n"
             f"Cogs: {len(self.bot.cogs)}\n"
+            f"Lavalink players: {lavalink_players}\n"
             "\n**--- System information ---**\n"
             f"CPU: {server_stats.cpu_usage}/100%\n"
             f"RAM: {server_stats.ram_usage}/{server_stats.total_ram}GB\n"
