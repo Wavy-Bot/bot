@@ -23,11 +23,11 @@ class NoChannelProvided(commands.CommandError):
         super().__init__(self.message)
 
 
-class NonExistantCategory(commands.CommandError):
-    """Error raised when a category doesn't exist."""
+class NonExistantCommand(commands.CommandError):
+    """Error raised when the requested command doesn't exist."""
 
-    def __init__(self, category: str):
-        self.message = f"The category `{category}` does not exist."
+    def __init__(self, command: str):
+        self.message = f"The command `{command}` does not exist."
         super().__init__(self.message)
 
 
@@ -48,7 +48,7 @@ class SongNotFound(commands.CommandError):
 
 
 class Timeout(commands.CommandError):
-    """Error raised when a command times out."""
+    """Error raised when a user is(n't) already timed out."""
 
     def __init__(self, message: str):
         self.message = message

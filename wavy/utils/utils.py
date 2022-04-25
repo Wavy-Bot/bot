@@ -9,7 +9,6 @@ import psutil
 
 from . import classes
 from datetime import datetime, timedelta
-from fastapi import Request, HTTPException
 
 LAUNCH_TIME = datetime.utcnow()
 
@@ -53,30 +52,16 @@ async def uptime():
     )
 
     # Return class
-
     return uptime_class
 
 
-async def status_message():
-    """Picks a status message from the list."""
+async def message(message_type: str):
+    """Picks a random message from the list."""
     with open("wavy/messages.json", "r") as f:
         data = json.load(f)
-        status_list = data["status"]
+        message_list = data.get(message_type, "https://wavybot.com")
 
-    message = random.choice(status_list)
-
-    return message
-
-
-async def loading_message():
-    """Picks a random loading message from the list."""
-    with open("wavy/messages.json", "r") as f:
-        data = json.load(f)
-        loading_list = data["loading"]
-
-    message = random.choice(loading_list)
-
-    return message
+    return random.choice(message_list)
 
 
 async def interaction(interaction_type: str):
@@ -134,9 +119,10 @@ async def progress_bar(percentage: int):
     return bar
 
 
-async def validate_api_key(request: Request):
-    if "authorization" in request.headers:
-        if request.headers["authorization"] == os.environ["API_KEY"]:
-            return
-        raise HTTPException(status_code=403, detail="Could not validate credentials")
-    raise HTTPException(status_code=403, detail="Could not validate credentials")
+async def validate_api_key(headers):
+    if (
+        "authorization" in headers
+        and headers.get("authorization") == os.environ["API_KEY"]
+    ):
+        return True
+    return
