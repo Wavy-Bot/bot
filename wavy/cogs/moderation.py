@@ -17,9 +17,12 @@ class Moderation(commands.Cog):
         self.emb_colour = int(os.getenv("COLOUR"), 16)
         self.db = database.Database()
 
+    # NOTE(Robert): When Discord finally releases a proper permission system for slash commands I will use that
+    #  instead of my ugly way of doing it.
+
     timeout = SlashCommandGroup(
         "timeout",
-        "Discord time out settings",
+        "Discord time-out settings",
     )
 
     warn = SlashCommandGroup("warn", "Warn settings")
@@ -27,7 +30,14 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def kick(self, ctx, member: discord.Member, reason="No reason provided."):
-        """Yeetus deletus"""
+        """Yeetus deletus
+
+        Kicks the specified member from the server.
+
+        Options:
+            member: The user to kick.
+            reason (optional): The reason for kicking the user.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.kick_members:
             await member.kick(reason=reason)
@@ -49,7 +59,15 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def ban(self, ctx, member: discord.Member, reason="No reason provided."):
-        """Begone, thou scurvy dog"""
+        """Begone, thou scurvy dog
+
+        GitHub Copilot decided to generate the text above for some reason.
+        Bans the specified member from the server.
+
+        Options:
+            member: The user to ban.
+            reason (optional): The reason for banning the user.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.ban_members:
             await member.ban(reason=reason)
@@ -71,7 +89,14 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def unban(self, ctx, member: str):
-        """Be back, thou scurvy dog"""
+        """Be back, thou scurvy dog
+
+        GitHub Copilot decided to generate the text above for some reason.
+        Unbans the specified member from the server.
+
+        Options:
+            member: The user to unban. (In the following format: user#1234)
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.ban_members:
             # NOTE(Robert): I am aware that there are numerous other ways to do this,
@@ -106,8 +131,18 @@ class Moderation(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command()
-    async def softban(self, ctx, member: discord.Member, reason="No reason provided."):
-        """Yeets the specified member and deletes all their messages from the past 14 days."""
+    async def softban(
+        self, ctx, member: discord.Member, days: int = 14, reason="No reason provided."
+    ):
+        """Yeets the specified member and deletes all their messages from the past x days.
+
+        See text above, soft-bans the specified member from the server.
+
+        Options:
+            member: The user to soft-ban.
+            days (optional): The number of days to delete messages from.
+            reason (optional): The reason for soft-banning the user.
+        """
 
         def check(m) -> bool:
             """Checks if the message author is the specified member."""
@@ -115,7 +150,7 @@ class Moderation(commands.Cog):
 
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.kick_members and permissions.manage_messages:
-            days = datetime.utcnow() - timedelta(days=14)
+            days = datetime.utcnow() - timedelta(days=days)
 
             del_msg = await ctx.channel.purge(after=days, check=check)
 
@@ -142,7 +177,13 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def clear(self, ctx, amount: int):
-        """Roomba mode activated"""
+        """Roomba mode activated
+
+        Clears the specified amount of messages from the current channel.
+
+        Options:
+            amount: The amount of messages to delete.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.manage_messages:
             deleted = await ctx.channel.purge(limit=amount)
@@ -163,7 +204,10 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def nuke(self, ctx):
-        """Kaboom? Yes Rico, kaboom."""
+        """Kaboom? Yes Rico, kaboom.
+
+        Clears all of the messages from the current channel.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.manage_messages:
             await ctx.channel.purge()
@@ -185,15 +229,23 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def lock(self, ctx, channel: discord.TextChannel = None):
-        """Shut thou mouths"""
+        """Shut thou mouths
+
+        Locks the specified channel.
+
+        Options:
+            channel (optional): The channel to lock.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.manage_channels:
             channel = channel if channel else ctx.channel
 
             role = ctx.guild.default_role
 
+            # Although your linter will probably say something along the lines of
+            # 'PermissionOverwrite' object attribute 'send_messages' is read-only
+            # (and the same for add_reactions), this works.
             perms = channel.overwrites_for(role)
-
             perms.send_messages = False
             perms.add_reactions = False
 
@@ -216,15 +268,23 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def unlock(self, ctx, channel: discord.TextChannel = None):
-        """Unshut thou mouths"""
+        """Unshut thou mouths
+
+        Unlocks the specified channel.
+
+        Options:
+            channel (optional): The channel to unlock.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.manage_channels:
             channel = channel if channel else ctx.channel
 
             role = ctx.guild.default_role
 
+            # Although your linter will probably say something along the lines of
+            # 'PermissionOverwrite' object attribute 'send_messages' is read-only
+            # (and the same for add_reactions), this works.
             perms = channel.overwrites_for(role)
-
             perms.send_messages = None
             perms.add_reactions = None
 
@@ -259,7 +319,16 @@ class Moderation(commands.Cog):
         ),
         reason: str = "No reason provided.",
     ):
-        """Be quiet, peasant"""
+        """Be quiet, peasant
+
+        Times out a member for a specified duration. (This uses Discord's timeout feature!)
+
+        Options:
+            member: The member to time out.
+            duration: The duration to time-out the member for.
+            unit: The unit of time to time-out the member for.
+            reason (optional): The reason for the time-out.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.moderate_members:
             if not member.timed_out:
@@ -302,7 +371,14 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "No reason provided.",
     ):
-        """Talk to me, peasant"""
+        """Talk to me, peasant
+
+        Removes a time-out from a member. (This uses Discord's timeout feature!)
+
+        Options:
+            member: The member to remove the time-out from.
+            reason (optional): The reason for the time-out removal.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.moderate_members:
             if member.timed_out:
@@ -338,7 +414,14 @@ class Moderation(commands.Cog):
         member: discord.Member,
         reason: str = "No reason provided.",
     ):
-        """Warning: be warned"""
+        """Warning: be warned
+
+        Adds a warning to a member.
+
+        Options:
+            member: The member to add a warning to.
+            reason (optional): The reason for the warning.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.kick_members:
             if member.bot:
@@ -372,7 +455,13 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @warn.command(name="remove")
     async def warn_remove(self, ctx, warn_id: str):
-        """Look mom, no warning"""
+        """Look mom, no warning
+
+        Removes a warning from a member.
+
+        Options:
+            warn_id: The ID of the warning to remove.
+        """
         permissions = ctx.channel.permissions_for(ctx.author)
         if permissions.kick_members:
             warn = await self.db.remove_warn(server_id=ctx.guild.id, warn_id=warn_id)
@@ -394,7 +483,13 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     @warn.command(name="list")
     async def warn_list(self, ctx, member: discord.Member = None):
-        """Timmy should start sweating when he sees this"""
+        """Timmy should start sweating when he sees this
+
+        Shows a list of warnings for a member.
+
+        Options:
+            member (optional): The member to show the warnings for.
+        """
         member = ctx.author if not member else member
 
         warns = await self.db.fetch_warns(member_id=member.id)

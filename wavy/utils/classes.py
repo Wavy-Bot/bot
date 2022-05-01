@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 
 
 @dataclass
@@ -94,28 +93,6 @@ class Warn:
     member_id: int
     id: str
     reason: str
-
-
-@dataclass
-class Snipe:
-    """
-    Class that represents a snipe.
-
-    Takes the following arguments:
-        created_at => Time the message was sent.
-        server_id => ID of the Discord server.
-        channel_id => ID of the Discord channel.
-        member_id => ID of the server member.
-        content => Content of the message.
-        attachments => Attachments of the message.
-    """
-
-    created_at: datetime
-    server_id: int
-    channel_id: int
-    member_id: int
-    content: str
-    attachments: list
 
 
 @dataclass

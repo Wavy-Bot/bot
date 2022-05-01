@@ -3,7 +3,7 @@ import random
 
 import discord
 
-from ..utils import database, classes, utils
+from ..utils import database, utils
 from discord.ext import commands
 
 
@@ -17,65 +17,12 @@ class Fun(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command()
-    async def snipe(self, ctx):
-        """Headshot"""
-        snipe = await self.db.fetch_snipe(
-            server_id=ctx.guild.id, channel_id=ctx.channel.id
-        )
-
-        if snipe:
-            embed = discord.Embed(
-                title="Snipe",
-                colour=self.emb_colour,
-            )
-
-            embed.add_field(
-                name="Author",
-                value=f"<@{snipe.member_id}> ({snipe.member_id})",
-                inline=False,
-            )
-            embed.add_field(
-                name="Message",
-                value=f"```{snipe.content}```"
-                if not snipe.content.startswith("`") and not snipe.content.endswith("`")
-                else snipe.content,
-                inline=False,
-            )
-
-            if snipe.attachments:
-                embed.add_field(
-                    name="Attachments",
-                    value="\n".join(snipe.attachments),
-                    inline=False,
-                )
-        else:
-            embed = discord.Embed(
-                title="Snipe",
-                description="No deleted messages for this channel could be found.",
-                colour=self.emb_colour,
-            )
-
-        embed.set_footer(
-            text="Wavy • https://wavybot.com", icon_url=self.bot.user.display_avatar.url
-        )
-
-        await ctx.respond(embed=embed)
-
-    @commands.guild_only()
-    @commands.slash_command()
     async def meme(self, ctx):
-        """Funny meme, monke approves"""
-        post = await self.db.fetch_meme()
+        """Funny meme, monke approves
 
-        meme = classes.RedditPost(
-            subreddit=post["subreddit"],
-            title=post["title"],
-            over_18=post["over_18"],
-            url=post["url"],
-            image=post["image"],
-            ups=post["ups"],
-            comments=post["comments"],
-        )
+        Sends a random meme from r/memes, r/meme, r/dankmemes or r/memes_of_the_dank.
+        """
+        meme = await self.db.fetch_meme()
 
         if meme.over_18:
             raise commands.NSFWChannelRequired(channel=ctx.channel)
@@ -91,7 +38,14 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def ship(self, ctx, first: str, second: str):
-        """😳"""
+        """😳
+
+        Ships 2 users or things together.
+
+        Options:
+            first: The first thing to ship.
+            second: The second thing to ship.
+        """
         percentage = random.randint(0, 100)
         bar = await utils.progress_bar(percentage=percentage)
 
@@ -112,7 +66,14 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def howgay(self, ctx, member: discord.Member = None):
-        """🏳‍🌈 gay detection machine 🏳‍🌈"""
+        """🏳‍🌈 gay detection machine 🏳‍🌈
+
+        Detects how gay someone is. TAKE THIS WITH A GRAIN OF SALT,
+        THIS IS OBVIOUSLY A JOKE AND I DO NOT WANT TO HURT ANYONE WITH THIS.
+
+        Options:
+            member (optional): The member to detect the gay of.
+        """
         member = ctx.author if not member else member
 
         percentage = random.randint(0, 100)
@@ -133,11 +94,18 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command()
     async def pp(self, ctx, member: discord.Member = None):
-        """pp size calculator™"""
+        """pp size calculator™
+
+        Calculates the size of someone's fellow uhm... member.
+
+        Options:
+            member: The member to calculate the pp size of.
+        """
         member = ctx.author if not member else member
 
         size = random.randint(0, 20)
 
+        # This is ugly, I know.
         pp = "8" + "=" * size + "D"
 
         embed = discord.Embed(title="pp size calculator™", colour=self.emb_colour)
@@ -153,29 +121,14 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="8ball")
     async def eightball(self, ctx, *, question: str):
-        """Woah, magic."""
-        responses = [
-            "It is certain",
-            "It is decidebly so.",
-            "Without a doubt",
-            "Yes - definetely.",
-            "You may rely on it.",
-            "As I see it, yes.",
-            "Most likely.",
-            "Outlook good.",
-            "Yes.",
-            "Signs point to yes.",
-            "Reply hazy, try again.",
-            "Ask again later.",
-            "Better not tell you now.",
-            "Cannot predict now.",
-            "Concentrate and ask again.",
-            "Don't count on it.",
-            "My reply is no.",
-            "My sources say no",
-            "Outlook not so good.",
-            "Very doubtful.",
-        ]
+        """Woah, magic.
+
+        Ask a yes/no question and I'll answer it.
+
+        Options:
+            question: The question to ask.
+        """
+        responses = await utils.message(message_type="eightball")
 
         embed = discord.Embed(
             title=question, description=random.choice(responses), colour=self.emb_colour
@@ -190,7 +143,13 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="slap")
     async def slash_slap(self, ctx, member: discord.Member = None):
-        """b-baka"""
+        """b-baka
+
+        Slaps someone.
+
+        Options:
+            member (optional): The member to slap.
+        """
         member = ctx.author if not member else member
 
         image = await utils.interaction(interaction_type="slap")
@@ -210,7 +169,7 @@ class Fun(commands.Cog):
 
     @commands.guild_only()
     @commands.user_command(name="Slap")
-    async def user_slap(self, ctx, member: discord.Member = None):
+    async def user_slap(self, ctx, member: discord.Member):
         """b-baka"""
         member = ctx.author if not member else member
 
@@ -231,8 +190,14 @@ class Fun(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command(name="kiss")
-    async def slash_kiss(self, ctx, member: discord.Member = None):
-        """🤪"""
+    async def slash_kiss(self, ctx, member: discord.Member):
+        """🤪
+
+        Kisses someone.
+
+        Options:
+            member (optional): The member to kiss.
+        """
         member = ctx.author if not member else member
 
         image = await utils.interaction(interaction_type="kiss")
@@ -252,7 +217,7 @@ class Fun(commands.Cog):
 
     @commands.guild_only()
     @commands.user_command(name="Kiss")
-    async def user_kiss(self, ctx, member: discord.Member = None):
+    async def user_kiss(self, ctx, member: discord.Member):
         """🤪"""
         member = ctx.author if not member else member
 
@@ -274,7 +239,13 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="lick")
     async def slash_lick(self, ctx, member: discord.Member = None):
-        """woah woah woah, you actually gonna do this?"""
+        """woah woah woah, you actually gonna do this?
+
+        Licks someone. You guys have weird fetishes smh my head.
+
+        Options:
+            member (optional): The member to lick.
+        """
         member = ctx.author if not member else member
 
         image = await utils.interaction(interaction_type="lick")
@@ -294,7 +265,7 @@ class Fun(commands.Cog):
 
     @commands.guild_only()
     @commands.user_command(name="Lick")
-    async def user_lick(self, ctx, member: discord.Member = None):
+    async def user_lick(self, ctx, member: discord.Member):
         """woah woah woah, you actually gonna do this?"""
         member = ctx.author if not member else member
 
@@ -316,7 +287,13 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="laugh")
     async def slash_laugh(self, ctx, member: discord.Member = None):
-        """funniest laugh ever"""
+        """funniest laugh ever
+
+        Laughs at someone. Yeah, I also don't know why I added this.
+
+        Options:
+            member (optional): The member to laugh at.
+        """
         member = ctx.author if not member else member
 
         image = await utils.interaction(interaction_type="laugh")
@@ -358,7 +335,13 @@ class Fun(commands.Cog):
     @commands.guild_only()
     @commands.slash_command(name="pocky")
     async def slash_pocky(self, ctx, member: discord.Member = None):
-        """kewl pockers"""
+        """kewl pockers
+
+        Does the pocky challenge with someone. Such wow.
+
+        Options:
+            member (optional): The member to do the pocky challenge with.
+        """
         member = ctx.author if not member else member
 
         image = await utils.interaction(interaction_type="pocky")

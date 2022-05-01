@@ -4,10 +4,10 @@
 
 # Wavy
 
-Wavy is an open-source multipurpose Discord bot built with [Pycord](https://github.com/Pycord-Development/pycord). Wavy is still in development, so use it at your own risk.
+Wavy is an open-source multipurpose Discord bot built with [Pycord](https://github.com/Pycord-Development/pycord). Wavy is still in development, so a lot of stuff could change without notice.
 
 ## Feature requests
-Want a new feature you think is missing? Please [open an issue](https://github.com/Wavy-Bot/bot/issues/new) or join [Wavy's Discord server](https://discord.gg/Nbcf36Fge5)!
+Want a new feature you think is missing? Please [open an issue](https://github.com/Wavy-Bot/bot/issues/new) or join [Wavy's Discord server](https://discord.wavybot.com)!
 
 ## Tools and services used
 
@@ -23,7 +23,7 @@ Want a new feature you think is missing? Please [open an issue](https://github.c
 </table>
 
 ## How to use
-This is yet to be added, for now you can use [Wavy's Discord server](https://discord.gg/Nbcf36Fge5) to ask for help.
+This is yet to be added, for now you can use [Wavy's Discord server](https://discord.wavybot.com) to ask for help.
 
 ## To-do list
 Please look at the [GitHub Projects page](https://github.com/Wavy-Bot/bot/projects/2).

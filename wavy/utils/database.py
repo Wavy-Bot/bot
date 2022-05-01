@@ -1,7 +1,7 @@
 import os
 import random
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from . import classes
 from motor import motor_asyncio
 
@@ -74,78 +74,6 @@ class Database:
 
         return result.deleted_count > 0
 
-    async def set_snipe(
-        self,
-        server_id: str,
-        channel_id: int,
-        member_id: int,
-        content: str,
-        attachments: list,
-    ) -> str or None:
-        """Sets a snipe."""
-        collection = self.db.snipes
-
-        # Delete snipe after 30 minutes.
-        await collection.create_index([("createdAt", 1)], expireAfterSeconds=1800)
-
-        old_document = await collection.find_one(
-            {"server_id": server_id, "channel_id": channel_id}
-        )
-
-        document = {
-            "createdAt": datetime.utcnow(),
-            "server_id": server_id,
-            "channel_id": channel_id,
-            "member_id": member_id,
-            "content": content,
-            "attachments": attachments,
-        }
-
-        if old_document:
-            await collection.update_many(
-                {
-                    "createdAt": old_document["createdAt"],
-                    "member_id": old_document["member_id"],
-                    "content": old_document["content"],
-                    "attachments": old_document["attachments"],
-                },
-                {
-                    "$set": {
-                        "createdAt": datetime.utcnow(),
-                        "member_id": member_id,
-                        "content": content,
-                        "attachments": attachments,
-                    }
-                },
-            )
-            return
-        result = await collection.insert_one(document)
-
-        return result.inserted_id
-
-    async def fetch_snipe(
-        self, server_id: int, channel_id: int
-    ) -> classes.Snipe or None:
-        """Fetches a snipe."""
-        collection = self.db.snipes
-
-        document = await collection.find_one(
-            {"server_id": server_id, "channel_id": channel_id}
-        )
-
-        if document:
-            snipe_class = classes.Snipe(
-                created_at=document["createdAt"],
-                server_id=document["server_id"],
-                channel_id=document["channel_id"],
-                member_id=document["member_id"],
-                content=document["content"],
-                attachments=document["attachments"],
-            )
-
-            return snipe_class
-        return
-
     async def fetch_memes(self) -> dict:
         """Fetches all memes."""
         collection = self.db.memes
@@ -154,15 +82,30 @@ class Database:
 
         return document
 
-    async def fetch_meme(self) -> dict:
+    async def fetch_meme(self) -> dict or None:
         """Fetches all memes."""
         collection = self.db.memes
 
         document = await collection.find_one()
 
-        meme = random.choice(document["memes"])
+        if document:
+            memes = document.get("memes", [])
 
-        return meme
+            if memes:
+                meme = random.choice(memes)
+
+                meme_class = classes.RedditPost(
+                    subreddit=meme["subreddit"],
+                    title=meme["title"],
+                    over_18=meme["over_18"],
+                    url=meme["url"],
+                    image=meme["image"],
+                    ups=meme["ups"],
+                    comments=meme["comments"],
+                )
+
+                return meme_class
+        return
 
     async def set_memes(self, memes: list) -> str or None:
         """Adds memes to the database."""
@@ -176,25 +119,47 @@ class Database:
         document = {"createdAt": datetime.utcnow(), "memes": memes}
 
         if old_document:
-            memes = memes + old_document["memes"]
+            # Delete memes older than 1 hour.
+            if not old_document["createdAt"] + timedelta(hours=1) >= datetime.utcnow():
+                memes = memes + old_document["memes"]
 
-            # Remove duplicates.
-            memes = [dict(t) for t in {tuple(d.items()) for d in memes}]
+                # Remove duplicates.
+                memes = [dict(t) for t in {tuple(d.items()) for d in memes}]
 
-            await collection.update_many(
-                {
-                    "createdAt": old_document["createdAt"],
-                    "memes": old_document["memes"],
-                },
-                {
-                    "$set": {
-                        "createdAt": datetime.utcnow(),
-                        "memes": memes,
-                    }
-                },
-            )
+                await collection.update_many(
+                    {
+                        "createdAt": old_document["createdAt"],
+                        "memes": old_document["memes"],
+                    },
+                    {
+                        "$set": {
+                            "createdAt": datetime.utcnow(),
+                            "memes": memes,
+                        }
+                    },
+                )
+            else:
+                await collection.delete_one({"createdAt": old_document["createdAt"]})
+
+                await collection.insert_one(document)
 
             return
         result = await collection.insert_one(document)
 
         return result.inserted_id
+
+    async def update_command_stats(self, command: str):
+        """Updates the command stats."""
+        collection = self.db.command_stats
+
+        # Get the current stats of the command, or create a new one if it doesn't exist.
+        # Then, update or insert the stats.
+        document = await collection.find_one({"command": command})
+
+        if document:
+            await collection.update_one(
+                {"command": command},
+                {"$inc": {"count": 1}},
+            )
+        else:
+            await collection.insert_one({"command": command, "count": 1})
