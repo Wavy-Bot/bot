@@ -51,6 +51,7 @@ class General(commands.Cog):
             command (optional): The command to get help for.
         """
 
+        permissions = ctx.channel.permissions_for(ctx.author)
         categories = list(self.bot.cogs)
 
         if command:
@@ -70,7 +71,11 @@ class General(commands.Cog):
                 if bot_command.name == command.lower():
                     user_command = bot_command
 
-            if user_command:
+            if user_command and permissions > (
+                user_command.default_member_permissions
+                if user_command.default_member_permissions
+                else discord.Permissions.none()
+            ):
                 embed = discord.Embed(
                     title=f"Help for command: {user_command.name}",
                     colour=self.emb_colour,
@@ -100,6 +105,12 @@ class General(commands.Cog):
                         f"`{command.name}`"
                         for command in cog_commands
                         if isinstance(command, SlashCommand)
+                        and permissions
+                        > (
+                            command.default_member_permissions
+                            if command.default_member_permissions
+                            else discord.Permissions.none()
+                        )
                     ]
                 )
 
