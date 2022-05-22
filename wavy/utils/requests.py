@@ -58,8 +58,7 @@ async def fetch_subreddit(
 
 async def update_memes() -> list:
     """Fetches memes from Reddit and adds them to the database."""
-    # We don't want to combine subreddits in this case so we can get the most amount of memes.
-    # We also don't want to append the memes to the database in case they already exist.
+    # We don't want to combine subreddits in this case so we can get the most amount of memes. (400)
     r_memes = await fetch_subreddit(subreddit="memes", limit=100)
     r_meme = await fetch_subreddit(subreddit="meme", limit=100)
     r_dankmemes = await fetch_subreddit(subreddit="dankmemes", limit=100)

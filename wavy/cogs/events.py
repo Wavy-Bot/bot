@@ -94,6 +94,7 @@ class Events(commands.Cog):
                 errors.NoChannelProvided,
                 errors.NonExistantCommand,
                 errors.PlayerNotConnected,
+                discord.ext.commands.NotOwner,
             ),
         ):
             description = error

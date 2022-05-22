@@ -5,13 +5,14 @@ import uvloop
 
 if __name__ == "__main__":
     print(
-        r"""
+        rf"""
  _       __                        
 | |     / /  ____ _ _   __   __  __
 | | /| / /  / __ `/| | / /  / / / /
 | |/ |/ /  / /_/ / | |/ /  / /_/ / 
 |__/|__/   \__,_/  |___/   \__, /  
                           /____/   
+Version {wavy.__VERSION__}
                           """
     )
     # Create new uvloop event loop, set it as the default, and run the bot.

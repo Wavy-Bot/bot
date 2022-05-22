@@ -81,7 +81,7 @@ class Api(commands.Cog):
     ) -> list or web.Response:
         async with aiohttp.ClientSession() as cs:
             # Get the user's guilds
-            user_guilds = self.guilds.get(token, None)
+            user_guilds = self.guilds.get(token)
             if not user_guilds:
                 resp = await cs.get(
                     "https://discord.com/api/users/@me/guilds",
@@ -262,7 +262,7 @@ class Api(commands.Cog):
             guild = [i for i in guilds if i["id"] == guild_id][0]
 
             if not guild["has_bot"]:
-                raise web.HTTPFound(f"https://invite.wavybot.com")
+                raise web.HTTPFound("https://invite.wavybot.com")
 
             bot_guild = self.bot.get_guild(int(guild["id"]))
 

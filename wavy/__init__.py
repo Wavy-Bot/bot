@@ -7,10 +7,10 @@ import uvloop
 import sentry_sdk
 
 from wavy.utils import database
-from discord.commands import permissions
+from discord.ext import commands
 from dotenv import load_dotenv
 
-__VERSION__ = "1.0.2"  # I keep forgetting to update this, whoops.
+__VERSION__ = "1.0.3"
 
 load_dotenv()
 
@@ -44,21 +44,21 @@ async def run(event_loop: uvloop.Loop) -> None:
     bot = Wavy(event_loop=event_loop, db=db)
 
     @bot.slash_command(guild_ids=[admin_guild])
-    @permissions.is_owner()
+    @commands.is_owner()
     async def load(ctx, extension: str):
         """Loads a cog."""
         bot.load_extension(f"wavy.cogs.{extension}")
         await ctx.respond(f"Loaded `{extension}`.")
 
     @bot.slash_command(guild_ids=[admin_guild])
-    @permissions.is_owner()
+    @commands.is_owner()
     async def unload(ctx, extension: str):
         """Unloads a cog."""
         bot.unload_extension(f"wavy.cogs.{extension}")
         await ctx.respond(f"Unloaded `{extension}`.")
 
     @bot.slash_command(guild_ids=[admin_guild])
-    @permissions.is_owner()
+    @commands.is_owner()
     async def reload(ctx, extension: str):
         """Reloads a cog."""
         bot.reload_extension(f"wavy.cogs.{extension}")

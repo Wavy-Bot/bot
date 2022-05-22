@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from ..utils import utils, errors, database
 from discord.commands import SlashCommandGroup
 from discord.ext import commands
+from discord import default_permissions
 
 
 class Moderation(commands.Cog):
@@ -28,6 +29,7 @@ class Moderation(commands.Cog):
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, reason="No reason provided."):
         """Yeetus deletus
 
@@ -37,26 +39,24 @@ class Moderation(commands.Cog):
             member: The user to kick.
             reason (optional): The reason for kicking the user.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.kick_members:
-            await member.kick(reason=reason)
+        await member.kick(reason=reason)
 
-            embed = discord.Embed(title=f"Kicked {member}", colour=self.emb_colour)
+        embed = discord.Embed(title=f"Kicked {member}", colour=self.emb_colour)
 
-            embed.add_field(name="Reason", value=reason, inline=False)
+        embed.add_field(name="Reason", value=reason, inline=False)
 
-            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+        embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["kick_members"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, reason="No reason provided."):
         """Begone, thou scurvy dog
 
@@ -67,26 +67,24 @@ class Moderation(commands.Cog):
             member: The user to ban.
             reason (optional): The reason for banning the user.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.ban_members:
-            await member.ban(reason=reason)
+        await member.ban(reason=reason)
 
-            embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
+        embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
 
-            embed.add_field(name="Reason", value=reason, inline=False)
+        embed.add_field(name="Reason", value=reason, inline=False)
 
-            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+        embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["ban_members"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(ban_members=True)
     async def unban(self, ctx, member: str):
         """Be back, thou scurvy dog
 
@@ -96,40 +94,38 @@ class Moderation(commands.Cog):
         Options:
             member: The user to unban. (In the following format: user#1234)
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.ban_members:
-            # NOTE(Robert): I am aware that there are numerous other ways to do this,
-            #               but this just seemed like the most user-friendly one.
-            banned_members = await ctx.guild.bans()
+        # NOTE(Robert): I am aware that there are numerous other ways to do this,
+        #               but this just seemed like the most user-friendly one.
+        banned_members = await ctx.guild.bans()
 
-            member_name, member_discriminator = member.split("#")
+        member_name, member_discriminator = member.split("#")
 
-            for entry in banned_members:
-                member = entry.user
+        for entry in banned_members:
+            member = entry.user
 
-                if (member.name, member.discriminator) == (
-                    member_name,
-                    member_discriminator,
-                ):
-                    await ctx.guild.unban(member)
+            if (member.name, member.discriminator) == (
+                member_name,
+                member_discriminator,
+            ):
+                await ctx.guild.unban(member)
 
-                    embed = discord.Embed(
-                        title=f"Unbanned {member}", colour=self.emb_colour
-                    )
+                embed = discord.Embed(
+                    title=f"Unbanned {member}", colour=self.emb_colour
+                )
 
-                    embed.add_field(name="Moderator", value=ctx.author, inline=False)
+                embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-                    embed.set_footer(
-                        text="Wavy • https://wavybot.com",
-                        icon_url=self.bot.user.display_avatar.url,
-                    )
+                embed.set_footer(
+                    text="Wavy • https://wavybot.com",
+                    icon_url=self.bot.user.display_avatar.url,
+                )
 
-                    await ctx.respond(embed=embed)
-                    break
-        raise commands.MissingPermissions(["ban_members"])
+                await ctx.respond(embed=embed)
+                break
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(kick_members=True, manage_messages=True)
     async def softban(
         self, ctx, member: discord.Member, days: int = 14, reason="No reason provided."
     ):
@@ -147,34 +143,30 @@ class Moderation(commands.Cog):
             """Checks if the message author is the specified member."""
             return m.author == member
 
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.kick_members and permissions.manage_messages:
-            days = datetime.utcnow() - timedelta(days=days)
+        days = datetime.utcnow() - timedelta(days=days)
 
-            del_msg = await ctx.channel.purge(after=days, check=check)
+        del_msg = await ctx.channel.purge(after=days, check=check)
 
-            await member.kick(reason=reason)
+        await member.kick(reason=reason)
 
-            embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
+        embed = discord.Embed(title=f"Banned {member}", colour=self.emb_colour)
 
-            embed.add_field(name="Reason", value=reason, inline=False)
+        embed.add_field(name="Reason", value=reason, inline=False)
 
-            embed.add_field(
-                name="Messages removed", value=str(len(del_msg)), inline=False
-            )
+        embed.add_field(name="Messages removed", value=str(len(del_msg)), inline=False)
 
-            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+        embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["kick_members", "manage_messages"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int):
         """Roomba mode activated
 
@@ -183,50 +175,46 @@ class Moderation(commands.Cog):
         Options:
             amount: The amount of messages to delete.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.manage_messages:
-            deleted = await ctx.channel.purge(limit=amount)
+        deleted = await ctx.channel.purge(limit=amount)
 
-            embed = discord.Embed(
-                title=f"{len(deleted) - 1} messages have been deleted.",
-                colour=self.emb_colour,
-            )
+        embed = discord.Embed(
+            title=f"{len(deleted) - 1} messages have been deleted.",
+            colour=self.emb_colour,
+        )
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["manage_messages"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(manage_messages=True)
     async def nuke(self, ctx):
         """Kaboom? Yes Rico, kaboom.
 
         Clears all of the messages from the current channel.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.manage_messages:
-            await ctx.channel.purge()
+        await ctx.channel.purge()
 
-            embed = discord.Embed(title="Nuked all messages.", colour=self.emb_colour)
+        embed = discord.Embed(title="Nuked all messages.", colour=self.emb_colour)
 
-            embed.set_image(
-                url="https://media1.tenor.com/images/5b0fcef4b070f5316093ab591e3995a8/tenor.gif?itemid=17383346"
-            )
+        embed.set_image(
+            url="https://media1.tenor.com/images/5b0fcef4b070f5316093ab591e3995a8/tenor.gif?itemid=17383346"
+        )
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["manage_messages"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(manage_channels=True)
     async def lock(self, ctx, channel: discord.TextChannel = None):
         """Shut thou mouths
 
@@ -235,37 +223,33 @@ class Moderation(commands.Cog):
         Options:
             channel (optional): The channel to lock.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.manage_channels:
-            channel = channel if channel else ctx.channel
+        channel = channel if channel else ctx.channel
 
-            role = ctx.guild.default_role
+        role = ctx.guild.default_role
 
-            # Although your linter will probably say something along the lines of
-            # 'PermissionOverwrite' object attribute 'send_messages' is read-only
-            # (and the same for add_reactions), this works.
-            perms = channel.overwrites_for(role)
-            perms.send_messages = False
-            perms.add_reactions = False
+        # Although your linter will probably say something along the lines of
+        # 'PermissionOverwrite' object attribute 'send_messages' is read-only
+        # (and the same for add_reactions), this works.
+        perms = channel.overwrites_for(role)
+        perms.send_messages = False
+        perms.add_reactions = False
 
-            await channel.set_permissions(role, overwrite=perms)
+        await channel.set_permissions(role, overwrite=perms)
 
-            embed = discord.Embed(
-                title=f"Locked channel {channel}", colour=self.emb_colour
-            )
+        embed = discord.Embed(title=f"Locked channel {channel}", colour=self.emb_colour)
 
-            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+        embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["manage_channels"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
+    @default_permissions(manage_channels=True)
     async def unlock(self, ctx, channel: discord.TextChannel = None):
         """Unshut thou mouths
 
@@ -274,37 +258,35 @@ class Moderation(commands.Cog):
         Options:
             channel (optional): The channel to unlock.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.manage_channels:
-            channel = channel if channel else ctx.channel
+        channel = channel if channel else ctx.channel
 
-            role = ctx.guild.default_role
+        role = ctx.guild.default_role
 
-            # Although your linter will probably say something along the lines of
-            # 'PermissionOverwrite' object attribute 'send_messages' is read-only
-            # (and the same for add_reactions), this works.
-            perms = channel.overwrites_for(role)
-            perms.send_messages = None
-            perms.add_reactions = None
+        # Although your linter will probably say something along the lines of
+        # 'PermissionOverwrite' object attribute 'send_messages' is read-only
+        # (and the same for add_reactions), this works.
+        perms = channel.overwrites_for(role)
+        perms.send_messages = None
+        perms.add_reactions = None
 
-            await channel.set_permissions(role, overwrite=perms)
+        await channel.set_permissions(role, overwrite=perms)
 
-            embed = discord.Embed(
-                title=f"Unlocked channel {channel}", colour=self.emb_colour
-            )
+        embed = discord.Embed(
+            title=f"Unlocked channel {channel}", colour=self.emb_colour
+        )
 
-            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+        embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["manage_channels"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @timeout.command(name="add")
+    @default_permissions(moderate_members=True)
     async def timeout_add(
         self,
         ctx,
@@ -328,42 +310,40 @@ class Moderation(commands.Cog):
             unit: The unit of time to time-out the member for.
             reason (optional): The reason for the time-out.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.moderate_members:
-            if not member.timed_out:
-                time_delta = await utils.convert_time_into_timedelta(
-                    time=duration, unit=unit
-                )
-                await member.timeout_for(duration=time_delta, reason=reason)
-
-                embed = discord.Embed(
-                    title=f"Timed out {member}",
-                    colour=self.emb_colour,
-                )
-
-                embed.add_field(
-                    name="Duration", value=f"{duration} {unit.lower()}", inline=False
-                )
-
-                embed.add_field(name="Reason", value=reason, inline=False)
-
-                embed.add_field(name="Moderator", value=ctx.author, inline=False)
-
-                embed.set_footer(
-                    text="Wavy • https://wavybot.com",
-                    icon_url=self.bot.user.display_avatar.url,
-                )
-
-                await ctx.respond(embed=embed)
-
-                return
-            raise errors.Timeout(
-                "That member is already timed out. Use `/timeout remove` to remove the timeout."
+        if not member.timed_out:
+            time_delta = await utils.convert_time_into_timedelta(
+                time=duration, unit=unit
             )
-        raise commands.MissingPermissions(["moderate_members"])
+            await member.timeout_for(duration=time_delta, reason=reason)
+
+            embed = discord.Embed(
+                title=f"Timed out {member}",
+                colour=self.emb_colour,
+            )
+
+            embed.add_field(
+                name="Duration", value=f"{duration} {unit.lower()}", inline=False
+            )
+
+            embed.add_field(name="Reason", value=reason, inline=False)
+
+            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+
+            embed.set_footer(
+                text="Wavy • https://wavybot.com",
+                icon_url=self.bot.user.display_avatar.url,
+            )
+
+            await ctx.respond(embed=embed)
+
+            return
+        raise errors.Timeout(
+            "That member is already timed out. Use `/timeout remove` to remove the timeout."
+        )
 
     @commands.guild_only()
     @timeout.command(name="remove")
+    @default_permissions(moderate_members=True)
     async def timeout_remove(
         self,
         ctx,
@@ -378,35 +358,33 @@ class Moderation(commands.Cog):
             member: The member to remove the time-out from.
             reason (optional): The reason for the time-out removal.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.moderate_members:
-            if member.timed_out:
-                await member.remove_timeout(reason=reason)
+        if member.timed_out:
+            await member.remove_timeout(reason=reason)
 
-                embed = discord.Embed(
-                    title=f"Removed timeout from {member}",
-                    colour=self.emb_colour,
-                )
-
-                embed.add_field(name="Reason", value=reason, inline=False)
-
-                embed.add_field(name="Moderator", value=ctx.author, inline=False)
-
-                embed.set_footer(
-                    text="Wavy • https://wavybot.com",
-                    icon_url=self.bot.user.display_avatar.url,
-                )
-
-                await ctx.respond(embed=embed)
-
-                return
-            raise errors.Timeout(
-                "That member is not timed out. Use `/timeout add` to add a timeout."
+            embed = discord.Embed(
+                title=f"Removed timeout from {member}",
+                colour=self.emb_colour,
             )
-        raise commands.MissingPermissions(["moderate_members"])
+
+            embed.add_field(name="Reason", value=reason, inline=False)
+
+            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+
+            embed.set_footer(
+                text="Wavy • https://wavybot.com",
+                icon_url=self.bot.user.display_avatar.url,
+            )
+
+            await ctx.respond(embed=embed)
+
+            return
+        raise errors.Timeout(
+            "That member is not timed out. Use `/timeout add` to add a timeout."
+        )
 
     @commands.guild_only()
     @warn.command(name="add")
+    @default_permissions(kick_members=True)
     async def warn_add(
         self,
         ctx,
@@ -421,38 +399,36 @@ class Moderation(commands.Cog):
             member: The member to add a warning to.
             reason (optional): The reason for the warning.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.kick_members:
-            if member.bot:
-                raise errors.Bot("Bots cannot get warned.")
+        if member.bot:
+            raise errors.Bot("Bots cannot get warned.")
 
-            warn_id = await utils.gen_id()
+        warn_id = await utils.gen_id()
 
-            await self.db.set_warn(
-                server_id=ctx.guild.id,
-                member_id=member.id,
-                warn_id=warn_id,
-                reason=reason,
-            )
+        await self.db.set_warn(
+            server_id=ctx.guild.id,
+            member_id=member.id,
+            warn_id=warn_id,
+            reason=reason,
+        )
 
-            embed = discord.Embed(title=f"Warned {member}", colour=self.emb_colour)
+        embed = discord.Embed(title=f"Warned {member}", colour=self.emb_colour)
 
-            embed.add_field(name="Reason", value=reason, inline=False)
+        embed.add_field(name="Reason", value=reason, inline=False)
 
-            embed.add_field(name="Moderator", value=ctx.author, inline=False)
+        embed.add_field(name="Moderator", value=ctx.author, inline=False)
 
-            embed.add_field(name="Warn ID", value=f"`{warn_id}`", inline=False)
+        embed.add_field(name="Warn ID", value=f"`{warn_id}`", inline=False)
 
-            embed.set_footer(
-                text="Wavy • https://wavybot.com",
-                icon_url=self.bot.user.display_avatar.url,
-            )
+        embed.set_footer(
+            text="Wavy • https://wavybot.com",
+            icon_url=self.bot.user.display_avatar.url,
+        )
 
-            await ctx.respond(embed=embed)
-        raise commands.MissingPermissions(["kick_members"])
+        await ctx.respond(embed=embed)
 
     @commands.guild_only()
     @warn.command(name="remove")
+    @default_permissions(kick_members=True)
     async def warn_remove(self, ctx, warn_id: str):
         """Look mom, no warning
 
@@ -461,23 +437,20 @@ class Moderation(commands.Cog):
         Options:
             warn_id: The ID of the warning to remove.
         """
-        permissions = ctx.channel.permissions_for(ctx.author)
-        if permissions.kick_members:
-            warn = await self.db.remove_warn(server_id=ctx.guild.id, warn_id=warn_id)
-            if warn:
-                embed = discord.Embed(
-                    title=f"Removed warning `{warn_id}`", colour=self.emb_colour
-                )
+        warn = await self.db.remove_warn(server_id=ctx.guild.id, warn_id=warn_id)
+        if warn:
+            embed = discord.Embed(
+                title=f"Removed warning `{warn_id}`", colour=self.emb_colour
+            )
 
-                embed.set_footer(
-                    text="Wavy • https://wavybot.com",
-                    icon_url=self.bot.user.display_avatar.url,
-                )
+            embed.set_footer(
+                text="Wavy • https://wavybot.com",
+                icon_url=self.bot.user.display_avatar.url,
+            )
 
-                await ctx.respond(embed=embed)
-            else:
-                raise errors.WarnNotFound(warn_id=warn_id)
-        raise commands.MissingPermissions(["kick_members"])
+            await ctx.respond(embed=embed)
+        else:
+            raise errors.WarnNotFound(warn_id=warn_id)
 
     @commands.guild_only()
     @warn.command(name="list")
