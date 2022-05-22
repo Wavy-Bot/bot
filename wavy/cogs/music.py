@@ -674,7 +674,7 @@ class Music(commands.Cog):
         # Stop the current track so Lavalink consumes less resources.
         await player.stop()
 
-        if not ctx.bot.voice_client:
+        if not ctx.voice_client:
             # If the bot isn't in a voice channel, then we can't disconnect it.
             # The reason I put this here is since the bot may still have stuff in the queue
             # whilst not being connected.
