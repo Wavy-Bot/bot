@@ -201,7 +201,11 @@ class General(commands.Cog):
             inline=True,
         )
 
-        embed.add_field(name="Owner", value=ctx.guild.owner.name, inline=False)
+        embed.add_field(
+            name="Owner",
+            value=ctx.guild.owner.name if ctx.guild.owner else "Unknown",
+            inline=False,
+        )
 
         embed.add_field(name="Members", value=ctx.guild.member_count, inline=True)
 
@@ -220,7 +224,6 @@ class General(commands.Cog):
         )
 
         # Add 1 to the guild shard ID since otherwise the integer starts at 0.
-
         embed.add_field(name="Shard", value=ctx.guild.shard_id + 1, inline=True)
 
         embed.set_thumbnail(url=ctx.guild.icon.url)

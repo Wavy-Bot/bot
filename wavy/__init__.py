@@ -7,11 +7,10 @@ import uvloop
 import sentry_sdk
 
 from wavy.utils import database
-from discord.ext import commands
 from discord.commands import permissions
 from dotenv import load_dotenv
 
-__VERSION__ = "1.0.1"  # I keep forgetting to update this, whoops.
+__VERSION__ = "1.0.2"  # I keep forgetting to update this, whoops.
 
 load_dotenv()
 
@@ -71,7 +70,7 @@ async def run(event_loop: uvloop.Loop) -> None:
         await bot.close()
 
 
-class Wavy(commands.AutoShardedBot, ABC):
+class Wavy(discord.AutoShardedBot, ABC):
     """The blazing-fast Discord bot.
 
     Parameters:
@@ -83,14 +82,11 @@ class Wavy(commands.AutoShardedBot, ABC):
         self.db = db
 
         # Although your linter will probably say something along the lines of
-        # 'Intents' object attribute 'members' is read-only (and the same for messages), this works.
+        # 'Intents' object attribute 'members' is read-only, this works.
         intents = discord.Intents.default()
         intents.members = True
-        intents.messages = True
 
         super().__init__(
-            command_prefix=commands.when_mentioned_or("%"),
-            case_insensitive=True,
             intents=intents,
             status=discord.Status.dnd,
             activity=discord.Game("Starting..."),

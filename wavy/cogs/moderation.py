@@ -1,5 +1,4 @@
 import os
-import secrets
 
 import discord
 
@@ -427,7 +426,7 @@ class Moderation(commands.Cog):
             if member.bot:
                 raise errors.Bot("Bots cannot get warned.")
 
-            warn_id = secrets.token_urlsafe(8)
+            warn_id = await utils.gen_id()
 
             await self.db.set_warn(
                 server_id=ctx.guild.id,

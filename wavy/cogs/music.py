@@ -314,6 +314,9 @@ class Music(commands.Cog):
         query = query.strip("<>")
         spotify_query = None
 
+        # Fix timeout errors.
+        await ctx.respond(f"**:mag_right: Searching for songs with query `{query}`.**")
+
         # Check if the user input might be a URL. If it isn't, we can make Lavalink do a YouTube search for it instead.
         # SoundCloud searching is possible by prefixing "scsearch:" instead.
         if not self.url_reg.match(query):
@@ -327,11 +330,6 @@ class Music(commands.Cog):
 
         # God this is ugly, but it works for now.
         if not spotify_query:
-            # If the platform is Spotify, and the query is a URL, we can use the URL directly.
-            if platform == "Spotify":
-                spotify_query = await spotify.fetch(url=query)
-                query = f"ytsearch:{spotify_query[0].name} {spotify_query[0].artist}"
-
             # If it turns out to be a Spotify URL, but the user did not specify a platform, we can use the URL directly.
             try:
                 spotify_query = await spotify.fetch(url=query)
@@ -396,7 +394,7 @@ class Music(commands.Cog):
                     colour=self.emb_colour,
                 )
 
-                add_song_msg = await ctx.respond(embed=add_song_embed)
+                add_song_msg = await ctx.send(embed=add_song_embed)
 
                 tracks_added = 0
 
@@ -458,11 +456,11 @@ class Music(commands.Cog):
                         if thumb:
                             temp_embed.set_thumbnail(url=thumb)
 
-                        await ctx.send(embed=temp_embed)
+                        temp_msg = await ctx.send(embed=temp_embed)
 
                     tracks_added += 1
-
-                await add_song_msg.delete_original_message()
+                await temp_msg.delete()
+                await add_song_msg.delete()
 
                 embed.title = f"Added {tracks_added} track(s) to queue"
 
@@ -516,7 +514,7 @@ class Music(commands.Cog):
         if thumb:
             embed.set_thumbnail(url=thumb)
 
-        await ctx.respond(embed=embed)
+        await ctx.send(embed=embed)
 
         # We don't want to call .play() if the player is playing as that will effectively skip
         # the current track.
@@ -667,7 +665,7 @@ class Music(commands.Cog):
         ):
             # Abuse prevention. Users not in voice channels, or not in the same voice channel as the bot
             # may not disconnect the bot.
-            await ctx.respond("You're not in my voicechannel!")
+            await ctx.respond("**:x: You're not in my voicechannel!**")
             return
 
         # Clear the queue to ensure old tracks don't start playing
@@ -675,6 +673,14 @@ class Music(commands.Cog):
         player.queue.clear()
         # Stop the current track so Lavalink consumes less resources.
         await player.stop()
+
+        if not ctx.bot.voice_client:
+            # If the bot isn't in a voice channel, then we can't disconnect it.
+            # The reason I put this here is since the bot may still have stuff in the queue
+            # whilst not being connected.
+            await ctx.respond("**:x: I'm not connected to a voice channel.**")
+            return
+
         # Disconnect from the voice channel.
         await ctx.voice_client.disconnect(force=True)
         await ctx.respond("**:white_check_mark: Disconnected.**")

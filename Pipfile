@@ -14,8 +14,9 @@ aiodns = "*"
 cchardet = "*"
 async-spotify = "*"
 aiohttp = {extras = ["speedups"], version = "*"}
-py-cord = {version = "==2.0.0b7", extras = ["speed", "voice"]}
+py-cord = {version = "==2.0.0rc1", extras = ["speed", "voice"]}
 sentry-sdk = "*"
+aiohttp-cors = "*"
 
 [dev-packages]
 # [requires]

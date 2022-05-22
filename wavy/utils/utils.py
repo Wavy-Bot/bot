@@ -1,6 +1,6 @@
-import os
 import platform
 import random
+import secrets
 import json
 import re
 
@@ -119,10 +119,6 @@ async def progress_bar(percentage: int):
     return bar
 
 
-async def validate_api_key(headers):
-    if (
-        "authorization" in headers
-        and headers.get("authorization") == os.environ["API_KEY"]
-    ):
-        return True
-    return
+async def gen_id(nbytes: int = 8):
+    """Generates a random ID."""
+    return secrets.token_urlsafe(nbytes)

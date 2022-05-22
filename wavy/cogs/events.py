@@ -70,6 +70,11 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     async def on_application_command(self, ctx):
         """Called when an application commands (e.g a slash command) is used."""
+        # This is just so I can see what features people use most
+        # since I quite honestly have no idea what features people want in a bot,
+        # and since I personally don't really use Discord bots anymore it's hard for me
+        # to make an "ideal bot" for myself. I will not share this data with ANYONE,
+        # and I will be removing this as soon as possible.
         await self.db.update_command_stats(command=ctx.command.name)
 
     @commands.Cog.listener()
