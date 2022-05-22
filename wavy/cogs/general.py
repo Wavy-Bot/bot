@@ -133,35 +133,17 @@ class General(commands.Cog):
         server_stats = await utils.server_stats()
 
         uptime = await utils.uptime()
-        uptime_text = (
-            f"{uptime.weeks} week(s), "
-            if uptime.weeks
-            else "" f"{uptime.days} day(s), "
-            if uptime.days
-            else "" f"{uptime.hours} hour(s), "
-            if uptime.hours
-            else "" f"{uptime.minutes} minute(s) and "
-            if uptime.minutes
-            else "" f"{uptime.seconds} second(s)\n"
-        )
-
-        lavalink_players = 0
-        lavalink_nodes = self.bot.lavalink.node_manager.nodes
-        for node in lavalink_nodes:
-            if node.stats:
-                lavalink_players += len(node.players)
+        uptime_text = f"{f'{uptime.weeks} week(s), ' if uptime.weeks else ''} {f'{uptime.days} day(s), ' if uptime.days else ''} {f'{uptime.hours} hour(s), ' if uptime.hours else ''} {f'{uptime.minutes} minute(s) and ' if uptime.minutes else ''} {f'{uptime.seconds} second(s)' if uptime.seconds else '0 second(s)'}"
 
         embed = discord.Embed(
             title="Bot stats",
             description=f"Bot version: {wavy.__VERSION__}\n"
             f"Pycord version: {server_stats.pycord_version}\n"
             f"Python version: {server_stats.python_version}\n"
-            f"Bot uptime: {uptime_text}"
+            f"Bot uptime: {uptime_text}\n"
             f"Guilds: {len(self.bot.guilds)}\n"
-            f"Users: {len(list(self.bot.get_all_members()))}\n"
             f"Shards: {self.bot.shard_count}\n"
             f"Cogs: {len(self.bot.cogs)}\n"
-            f"Lavalink players: {lavalink_players}\n"
             "\n**--- System information ---**\n"
             f"CPU: {server_stats.cpu_usage}/100%\n"
             f"RAM: {server_stats.ram_usage}/{server_stats.total_ram}GB\n"
