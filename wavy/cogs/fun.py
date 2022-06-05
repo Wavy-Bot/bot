@@ -131,7 +131,7 @@ class Fun(commands.Cog):
         responses = await utils.message(message_type="eightball")
 
         embed = discord.Embed(
-            title=question, description=random.choice(responses), colour=self.emb_colour
+            title=question, description=responses, colour=self.emb_colour
         )
 
         embed.set_footer(

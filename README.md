@@ -4,7 +4,7 @@
 
 # Wavy
 
-Wavy is an open-source multipurpose Discord bot built with [Pycord](https://github.com/Pycord-Development/pycord). Wavy is still in development, so a lot of stuff could change without notice.
+Wavy is an open-source Discord bot built with [Pycord](https://github.com/Pycord-Development/pycord). Wavy is still in development, so a lot of stuff could change without notice.
 
 ## Feature requests
 Want a new feature you think is missing? Please [open an issue](https://github.com/Wavy-Bot/bot/issues/new) or join [Wavy's Discord server](https://discord.wavybot.com)!
@@ -21,6 +21,15 @@ Want a new feature you think is missing? Please [open an issue](https://github.c
     <td align="center"><a href="https://sentry.io/"><img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmedia-exp1.licdn.com%2Fdms%2Fimage%2FC4D0BAQHke-g6rQfT6w%2Fcompany-logo_200_200%2F0%3Fe%3D2159024400%26v%3Dbeta%26t%3Daylls3BhohFGOtGX_opiZqRkxF9ZO91EIF3CEnm-xEQ&f=1&nofb=1" width="100px;" alt="Sentry"/><br /><sub><b>Sentry</b></sub></a><br /></td>
   </tr>
 </table>
+
+## Community Standards
+Please refer to the list of community standards below.
+- [README](https://github.com/Wavy-Bot/bot/blob/main/README.md) (this file)
+- [Code of Conduct](https://github.com/Wavy-Bot/bot/blob/main/CODE_OF_CONDUCT.md)
+- [License](https://github.com/Wavy-Bot/bot/blob/main/LICENSE.md)
+- Contributing guidelines (to be added)
+- Issue templates (to be added)
+- Pull request templates (to be added)
 
 ## How to use
 This is yet to be added, for now you can use [Wavy's Discord server](https://discord.wavybot.com) to ask for help.

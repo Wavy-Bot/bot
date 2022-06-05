@@ -456,10 +456,9 @@ class Music(commands.Cog):
                         if thumb:
                             temp_embed.set_thumbnail(url=thumb)
 
-                        temp_msg = await ctx.send(embed=temp_embed)
+                        temp_msg = await ctx.send(embed=temp_embed, delete_after=5)
 
                     tracks_added += 1
-                await temp_msg.delete()
                 await add_song_msg.delete()
 
                 embed.title = f"Added {tracks_added} track(s) to queue"
