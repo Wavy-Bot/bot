@@ -2,7 +2,7 @@ import os
 
 import discord
 
-from ..utils import database, utils
+from ..utils import utils
 from discord.ext import commands
 
 
