@@ -84,7 +84,7 @@ class General(commands.Cog):
                 # Provide both the description and the docstring.
                 embed.add_field(
                     name=f"Description: `{user_command.description}`",
-                    value=f"Full description:\n\n```{user_command.callback.__doc__.replace('        ', '')}```",
+                    value=f"Full description:\n```{user_command.callback.__doc__.replace('        ', '')}```",
                 )
 
                 embed.set_footer(

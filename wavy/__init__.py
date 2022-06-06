@@ -10,7 +10,7 @@ from wavy.utils import database
 from discord.ext import commands
 from dotenv import load_dotenv
 
-__VERSION__ = "1.0.3"
+__VERSION__ = "1.1.0"
 
 load_dotenv()
 
@@ -43,6 +43,7 @@ async def run(event_loop: uvloop.Loop) -> None:
     db = database.Database()
     bot = Wavy(event_loop=event_loop, db=db)
 
+    @commands.guild_only()
     @bot.slash_command(guild_ids=[admin_guild])
     @commands.is_owner()
     async def load(ctx, extension: str):
@@ -50,6 +51,7 @@ async def run(event_loop: uvloop.Loop) -> None:
         bot.load_extension(f"wavy.cogs.{extension}")
         await ctx.respond(f"Loaded `{extension}`.")
 
+    @commands.guild_only()
     @bot.slash_command(guild_ids=[admin_guild])
     @commands.is_owner()
     async def unload(ctx, extension: str):
@@ -57,6 +59,7 @@ async def run(event_loop: uvloop.Loop) -> None:
         bot.unload_extension(f"wavy.cogs.{extension}")
         await ctx.respond(f"Unloaded `{extension}`.")
 
+    @commands.guild_only()
     @bot.slash_command(guild_ids=[admin_guild])
     @commands.is_owner()
     async def reload(ctx, extension: str):

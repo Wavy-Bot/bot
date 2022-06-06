@@ -31,6 +31,14 @@ Please refer to the list of community standards below.
 - Issue templates (to be added)
 - Pull request templates (to be added)
 
+## Versioning
+Wavy uses the following versioning pattern:
+
+**major.minor.patch**
+- **Major**: Breaking changes, the bot is no longer compatible with previous versions.
+- **Minor**: New features, no breaking changes.
+- **Patch**: Bug fixes and small improvements.
+
 ## How to use
 This is yet to be added, for now you can use [Wavy's Discord server](https://discord.wavybot.com) to ask for help.
 

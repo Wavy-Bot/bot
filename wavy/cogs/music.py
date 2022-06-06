@@ -23,6 +23,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+# TODO(Robert): Switch to Wavelink, deduplicate and clean up code and fix bugs.
 import os
 import json
 import re
@@ -227,6 +228,15 @@ class Music(commands.Cog):
         )
 
         return player_position
+
+    @staticmethod
+    async def in_voice_channel(author, player) -> bool:
+        """Method which checks whether the author is in the voice channel."""
+        if not author.voice or (
+            player.is_connected and author.voice.channel.id != int(player.channel_id)
+        ):
+            return True
+        return False
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -456,7 +466,7 @@ class Music(commands.Cog):
                         if thumb:
                             temp_embed.set_thumbnail(url=thumb)
 
-                        temp_msg = await ctx.send(embed=temp_embed, delete_after=5)
+                        await ctx.send(embed=temp_embed, delete_after=5)
 
                     tracks_added += 1
                 await add_song_msg.delete()
@@ -536,6 +546,12 @@ class Music(commands.Cog):
         if not player.is_connected:
             raise errors.PlayerNotConnected
 
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if not author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
+
         if self.is_privileged(ctx):
             await ctx.respond(
                 "**:pause_button: An admin or DJ has paused the player.**"
@@ -578,6 +594,12 @@ class Music(commands.Cog):
         if not player.is_connected:
             raise errors.PlayerNotConnected
 
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
+
         if self.is_privileged(ctx):
             await ctx.respond(
                 "**:arrow_forward: An admin or DJ has resumed the player.**"
@@ -615,6 +637,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         if self.is_privileged(ctx):
             await ctx.respond("**:track_next: An admin or DJ has skipped the song.**")
@@ -658,12 +686,9 @@ class Music(commands.Cog):
         """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
-        if not ctx.author.voice or (
-            player.is_connected
-            and ctx.author.voice.channel.id != int(player.channel_id)
-        ):
-            # Abuse prevention. Users not in voice channels, or not in the same voice channel as the bot
-            # may not disconnect the bot.
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
             await ctx.respond("**:x: You're not in my voicechannel!**")
             return
 
@@ -699,6 +724,12 @@ class Music(commands.Cog):
         if not player.is_connected:
             raise errors.PlayerNotConnected
 
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
+
         if not vol:
             await ctx.respond(
                 f"**:loud_sound: The volume is currently set to {player.volume}%**"
@@ -728,6 +759,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         if qsize < 3:
             await ctx.respond("**:x: Add more songs to the queue before shuffling.**")
@@ -791,6 +828,12 @@ class Music(commands.Cog):
         if not player.is_connected:
             raise errors.PlayerNotConnected
 
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
+
         if not self.is_privileged(ctx):
             await ctx.respond("**:x: Only the DJ or admins may change the equalizer.**")
             return
@@ -826,6 +869,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         channel = self.bot.get_channel(int(player.channel_id))
         qsize = len(player.queue)
@@ -870,6 +919,12 @@ class Music(commands.Cog):
         if not player.is_connected:
             raise errors.PlayerNotConnected
 
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
+
         time = time_in_seconds * 1000
 
         await player.seek(position=time)
@@ -892,6 +947,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         player_position = await self.position(player.position)
 
@@ -918,6 +979,12 @@ class Music(commands.Cog):
         if not player.is_connected:
             raise errors.PlayerNotConnected
 
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
+
         player_position = await self.position(player.position)
 
         time = (player_position.seconds - time_in_seconds) * 1000
@@ -942,6 +1009,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         if not self.is_privileged(ctx):
             await ctx.respond("**:x: Only admins and the DJ may use this command.**")
@@ -988,6 +1061,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         if qsize == 0:
             await ctx.respond("**:x: There are no more songs in the queue.**")
@@ -1038,6 +1117,12 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             raise errors.PlayerNotConnected
+
+        author_in_voice_channel = await self.in_voice_channel(ctx.author, player)
+
+        if author_in_voice_channel:
+            await ctx.respond("**:x: You're not in my voicechannel!**")
+            return
 
         # Due to how indexing works, we need to subtract 1 from the song number
         track_index = track - 1
