@@ -23,7 +23,9 @@
             "version": "==3.0.0"
         },
         "aiohttp": {
-            "extras": [],
+            "extras": [
+                "speedups"
+            ],
             "hashes": [
                 "sha256:01d7bdb774a9acc838e6b8f1d114f45303841b89b95984cbb7d80ea41172a9e3",
                 "sha256:03a6d5349c9ee8f79ab3ff3694d6ce1cfc3ced1c9d36200cb8f08ba06bd3b782",
@@ -795,11 +797,11 @@
         },
         "wavelink": {
             "hashes": [
-                "sha256:6e16ba463dddc86378a12cba5c6bd29dd10d383445a0705fe819b33f3aae8ec7",
-                "sha256:8ba9ee3310eee4d83c5d602311e18b1daaa8063430df67d009a7449744e5c20a"
+                "sha256:cb8574ed57fbc33601310ab57bacb87608371fe4184f1bdb815759adde886cc0",
+                "sha256:deda11bff332fbae052aa1c617eb1bd0d59525411fd35de6c6a33bb408d47e38"
             ],
             "index": "pypi",
-            "version": "==1.2.5"
+            "version": "==1.3.1"
         },
         "yarl": {
             "hashes": [

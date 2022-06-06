@@ -236,6 +236,8 @@ class Music(commands.Cog):
         else:
             vc: Player = ctx.voice_client
 
+        track_title = None
+
         # If the query is not a URL, try to search for it on YouTube.
         if not self.url_reg.match(query):
             try:
@@ -243,6 +245,7 @@ class Music(commands.Cog):
                     query=query, return_first=True
                 )
                 await vc.put_in_queue(track, position)
+                track_title = track.title
             except IndexError:
                 raise errors.SongNotFound
         else:
@@ -256,11 +259,13 @@ class Music(commands.Cog):
                             query=decoded["id"], return_first=True
                         )
                         await vc.put_in_queue(track, position)
+                        track_title = track.title
                     elif decoded["type"] == spotify.SpotifySearchType.playlist:
                         async for track in spotify.SpotifyTrack.iterator(
                             query=decoded["id"], partial_tracks=True
                         ):
                             await vc.put_in_queue(track, position)
+                            track_title = query
                     elif decoded["type"] == spotify.SpotifySearchType.album:
                         async for track in spotify.SpotifyTrack.iterator(
                             query=decoded["id"],
@@ -268,6 +273,7 @@ class Music(commands.Cog):
                             partial_tracks=True,
                         ):
                             await vc.put_in_queue(track, position)
+                            track_title = query
                     # If it's something like an artist, return an error.
                     elif decoded["type"] == spotify.SpotifySearchType.unusable:
                         return await ctx.send("**:x: Invalid Spotify URL type.**")
@@ -279,6 +285,7 @@ class Music(commands.Cog):
                         )
                         for track in playlist.tracks:
                             await vc.put_in_queue(track, position)
+                        track_title = playlist.title
                     else:
                         # If it's not a playlist, just add the song.
                         track = await vc.node.get_tracks(
@@ -286,14 +293,15 @@ class Music(commands.Cog):
                         )
                         track = track[0]
                         await vc.put_in_queue(track, position)
+                        track_title = track.title
             except (wavelink.LoadTrackError, wavelink.LavalinkException):
                 raise errors.SongNotFound
 
         if not vc.is_playing():
             await vc.do_next()
-            await ctx.send(f"**Now playing:** `{track.title}`")
+            await ctx.send(f"**Now playing: `{track_title}`**")
         else:
-            await ctx.send(f"**Added to queue:** `{track.title}`")
+            await ctx.send(f"**Added to queue: `{track_title}`**")
 
     @commands.guild_only()
     @commands.slash_command()
@@ -639,6 +647,8 @@ class Music(commands.Cog):
                 description="\n".join(
                     [
                         f"{idx + count}. **[`{track.title}`]({track.uri})**\n"
+                        if hasattr(track, "uri")
+                        else f"{idx + count}. **`{track.title}`**\n"
                         for idx, track in enumerate(tracks, start=1)
                     ]
                 ),
@@ -720,7 +730,7 @@ class Music(commands.Cog):
 
             embed.add_field(
                 name="Playing for",
-                value=f"`{vc.position}/{vc.track.duration}`",
+                value=f"`{round(vc.position)}/{round(vc.track.duration)}`",
             )
             embed.add_field(name="Author", value=str(vc.track.author))
             embed.add_field(name="Queue Length", value=str(vc.queue.count))
