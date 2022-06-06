@@ -151,9 +151,11 @@ class Music(commands.Cog):
             )
             if player:
                 # If everyone left the channel, stop the player and leave too.
-                if len(after.channel.members if after.channel else 1) <= 1:
-                    if player.is_playing():
-                        await player.teardown()
+                if (
+                    len(after.channel.members if after.channel else 1) <= 1
+                    and player.is_playing()
+                ):
+                    await player.teardown()
                 # If the DJ left the channel, assign a new DJ.
                 if player.dj == member:
                     new_member = None
@@ -188,8 +190,7 @@ class Music(commands.Cog):
 
         return required
 
-    @staticmethod
-    async def cog_before_invoke(ctx: commands.Context) -> None or discord.Message:
+    async def cog_before_invoke(self, ctx: commands.Context) -> None or discord.Message:
         """Coroutine called before command invocation."""
         if ctx.command.name in ["play", "connect"]:
             return
@@ -285,7 +286,7 @@ class Music(commands.Cog):
                         )
                         track = track[0]
                         await vc.put_in_queue(track, position)
-            except wavelink.LoadTrackError or wavelink.LavalinkException:
+            except (wavelink.LoadTrackError, wavelink.LavalinkException):
                 raise errors.SongNotFound
 
         if not vc.is_playing():
@@ -685,7 +686,7 @@ class Music(commands.Cog):
             vc.queue.__delitem__(track_index)
 
             return await ctx.respond(
-                f"**:outbox_tray: An admin or DJ has removed a track from the queue.**"
+                f"**:outbox_tray: An admin or DJ has removed `{track.title}` from the queue.**"
             )
 
         required = self.required(ctx)
@@ -695,11 +696,11 @@ class Music(commands.Cog):
         if len(vc.remove_votes) >= required:
             vc.queue.__delitem__(track_index)
             await ctx.respond(
-                f"**:white_check_mark: Vote to remove passed. Removed the track from the queue.**"
+                f"**:white_check_mark: Vote to remove passed. Removed `{track.title}` from the queue.**"
             )
         else:
             await ctx.respond(
-                f"**:white_check_mark: {ctx.author.mention} has voted to remove a track from the queue.**"
+                f"**:white_check_mark: {ctx.author.mention} has voted to remove `{track.title}` from the queue.**"
             )
 
     @commands.guild_only()
