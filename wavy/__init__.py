@@ -10,7 +10,7 @@ from wavy.utils import database
 from discord.ext import commands
 from dotenv import load_dotenv
 
-__VERSION__ = "1.1.0"
+__VERSION__ = "1.2.0"
 
 load_dotenv()
 

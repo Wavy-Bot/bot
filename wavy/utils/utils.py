@@ -75,23 +75,6 @@ async def interaction(interaction_type: str):
     return image
 
 
-async def fetch_thumbnail(identifier: str):
-    """Fetches a thumbnail from a Youtube ID."""
-    ytid = identifier if re.match(r"^[a-zA-Z0-9_-]{11}$", identifier) else None
-
-    if ytid:
-        thumb = f"https://img.youtube.com/vi/{ytid}/hqdefault.jpg"
-    else:
-        thumb = None
-
-    return thumb
-
-
-async def chop_microseconds(delta):
-    """Removes microseconds from a timedelta."""
-    return delta - timedelta(microseconds=delta.microseconds)
-
-
 async def convert_time_into_timedelta(time: int, unit: str):
     """Converts time into a timedelta."""
     # Get first letter of unit.

@@ -6,7 +6,7 @@ class IncorrectChannel(commands.CommandError):
     """Error raised when commands are issued outside the players' session channel."""
 
     def __init__(self, message_author: Member, channel: VoiceChannel):
-        self.message = f"{message_author}, you must be in {channel} for this session."
+        self.message = f"{message_author.mention}, you must be in {channel.mention} for this session."
         super().__init__(self.message)
 
 
