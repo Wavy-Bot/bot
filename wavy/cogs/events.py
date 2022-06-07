@@ -15,11 +15,13 @@ class Events(commands.Cog):
         self.db = database.Database()
         self.change_status.start()
         self.update_memes.start()
+        self.post_botlist_data.start()
 
     def cog_unload(self):
         """Runs when the cog gets unloaded."""
         self.change_status.cancel()
         self.update_memes.cancel()
+        self.post_botlist_data.cancel()
 
     @tasks.loop(hours=1)
     async def change_status(self):
@@ -29,6 +31,16 @@ class Events(commands.Cog):
         await self.bot.change_presence(
             activity=discord.Game(status_message),
             status=discord.Status.online,
+        )
+
+    @tasks.loop(minutes=30)
+    async def post_botlist_data(self):
+        """Posts data to botlists."""
+        await self.bot.wait_until_ready()
+        await requests.post_botlist_data(
+            bot_id=self.bot.user.id,
+            server_count=len(self.bot.guilds),
+            shards=self.bot.shard_count,
         )
 
     @tasks.loop(minutes=15)

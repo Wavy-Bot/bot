@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 import wavy
 import aiohttp
@@ -71,3 +72,52 @@ async def update_memes() -> list:
     await db.set_memes(memes)
 
     return memes
+
+
+async def post_botlist_data(bot_id: int, server_count: int, shards: int) -> None:
+    """Makes a request to all the bot lists Wavy is listed on."""
+    botlist_list = [
+        {
+            "url": f"https://top.gg/api/bots/{bot_id}/stats",
+            "headers": {
+                "Authorization": os.environ["TOPGG_API_KEY"],
+                "Content-Type": "application/json",
+            },
+            "data": {"server_count": server_count, "shard_count": shards},
+        },
+        {
+            "url": f"https://discord.bots.gg/api/v1/bots/{bot_id}/stats",
+            "headers": {
+                "Authorization": os.environ["BOTSGG_API_KEY"],
+                "Content-Type": "application/json",
+            },
+            "data": {"guildCount": server_count, "shardCount": shards},
+        },
+        {
+            "url": f"https://discordbotlist.com/api/v1/bots/{bot_id}/stats",
+            "headers": {
+                "Authorization": os.environ["DISCORDBOTLIST_API_KEY"],
+                "Content-Type": "application/json",
+            },
+            "data": {"guilds": server_count},
+        },
+        {
+            "url": f"https://discords.com/bots/api/bot/{bot_id}",
+            "headers": {
+                "Authorization": os.environ["DISCORDS_API_KEY"],
+                "Content-Type": "application/json",
+            },
+            "data": {"server_count": server_count},
+        },
+    ]
+
+    async with aiohttp.ClientSession() as cs:
+        await asyncio.gather(
+            *[
+                cs.post(
+                    url=botlist["url"], headers=botlist["headers"], json=botlist["data"]
+                )
+                for botlist in botlist_list
+            ],
+            return_exceptions=False,
+        )
