@@ -87,7 +87,7 @@ class Music(commands.Cog):
 
         # URL and YouTube playlist regex
         self.url_reg = re.compile(r"https?://(?:www\.)?.+")
-        self.yt_playlist_reg = re.compile(r"^.*(youtu.be|list=)([^#]*).*")
+        self.yt_playlist_reg = re.compile(r"^.*(youtu\.be|youtube\.com)(?=.*list=).*")
 
         bot.loop.create_task(self.connect_nodes())
 
@@ -279,13 +279,14 @@ class Music(commands.Cog):
                         return await ctx.send("**:x: Invalid Spotify URL type.**")
                 else:
                     # If the query is a YouTube playlist, add all the songs.
+                    print(self.yt_playlist_reg.match(query))
                     if self.yt_playlist_reg.match(query):
                         playlist = await vc.node.get_playlist(
                             wavelink.YouTubePlaylist, query
                         )
                         for track in playlist.tracks:
                             await vc.put_in_queue(track, position)
-                        track_title = playlist.title
+                        track_title = playlist.name
                     else:
                         # If it's not a playlist, just add the song.
                         track = await vc.node.get_tracks(
