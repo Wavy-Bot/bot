@@ -279,7 +279,6 @@ class Music(commands.Cog):
                         return await ctx.send("**:x: Invalid Spotify URL type.**")
                 else:
                     # If the query is a YouTube playlist, add all the songs.
-                    print(self.yt_playlist_reg.match(query))
                     if self.yt_playlist_reg.match(query):
                         playlist = await vc.node.get_playlist(
                             wavelink.YouTubePlaylist, query
