@@ -85,9 +85,15 @@ class Music(commands.Cog):
         self.bot = bot
         self.emb_colour = int(os.getenv("COLOUR"), 16)
 
-        # URL and YouTube playlist regex
+        # Regex
         self.url_reg = re.compile(r"https?://(?:www\.)?.+")
+        self.yt_url_reg = re.compile(
+            r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
+        )
         self.yt_playlist_reg = re.compile(r"^.*(youtu\.be|youtube\.com)(?=.*list=).*")
+        self.sc_url_reg = re.compile(
+            r"^((?:https?:)?\/\/)?((?:www)\.)?((?:soundcloud?\.com))"
+        )
 
         bot.loop.create_task(self.connect_nodes())
 
@@ -151,20 +157,17 @@ class Music(commands.Cog):
             )
             if player:
                 # If everyone left the channel, stop the player and leave too.
-                if (
-                    len(after.channel.members if after.channel else 1) <= 1
-                    and player.is_playing()
-                ):
+                if len(player.channel.members) == 1:
                     await player.teardown()
+
                 # If the DJ left the channel, assign a new DJ.
-                if player.dj == member:
-                    new_member = None
-                    while not new_member:
-                        new_member = random.choice(after.channel.members)
-                        if new_member.bot:
-                            new_member = None
+                if member.id == player.dj.id and after.channel is not player.channel:
+                    for m in player.channel.members:
+                        if m.bot:
                             continue
-                    player.dj = new_member
+                        else:
+                            player.dj = m
+                            return
 
     @staticmethod
     def is_privileged(ctx: commands.Context):
@@ -185,7 +188,7 @@ class Music(commands.Cog):
         required = (
             math.ceil((len(channel.members) - 1) / 2.5)
             if len(channel.members) != 3
-            else 2
+            else 1
         )
 
         return required
@@ -278,22 +281,43 @@ class Music(commands.Cog):
                     elif decoded["type"] == spotify.SpotifySearchType.unusable:
                         return await ctx.send("**:x: Invalid Spotify URL type.**")
                 else:
-                    # If the query is a YouTube playlist, add all the songs.
-                    if self.yt_playlist_reg.match(query):
-                        playlist = await vc.node.get_playlist(
-                            wavelink.YouTubePlaylist, query
-                        )
-                        for track in playlist.tracks:
+                    # If the query is a YouTube URL, take the appropriate action(s).
+                    if self.yt_url_reg.match(query):
+                        # If the query is a YouTube playlist, add all the songs.
+                        if self.yt_playlist_reg.match(query):
+                            playlist = await vc.node.get_playlist(
+                                wavelink.YouTubePlaylist, query
+                            )
+                            for track in playlist.tracks:
+                                await vc.put_in_queue(track, position)
+                            track_title = playlist.name
+                        # Else, it is a song. Just add it.
+                        else:
+                            # Just add the song.
+                            track = await vc.node.get_tracks(
+                                query=query, cls=wavelink.YouTubeTrack
+                            )
+                            track = track[0]
                             await vc.put_in_queue(track, position)
-                        track_title = playlist.name
-                    else:
-                        # If it's not a playlist, just add the song.
+                            track_title = track.title
+                    # If the query is a Soundcloud song, add it. Playlists are not supported.
+                    elif self.sc_url_reg.match(query):
+                        # Just add the song.
                         track = await vc.node.get_tracks(
-                            query=query, cls=wavelink.Track
+                            query=query, cls=wavelink.SoundCloudTrack
                         )
                         track = track[0]
                         await vc.put_in_queue(track, position)
                         track_title = track.title
+                    # The query is from a different website, load all the tracks and add them.
+                    else:
+                        # If it's not a playlist, just add the song(s).
+                        tracks = await vc.node.get_tracks(
+                            query=query, cls=wavelink.Track
+                        )
+                        for track in tracks:
+                            await vc.put_in_queue(track, position)
+                        track_title = query
             except (wavelink.LoadTrackError, wavelink.LavalinkException):
                 raise errors.SongNotFound
 
@@ -450,7 +474,11 @@ class Music(commands.Cog):
         if not 0 < vol <= 100:
             return await ctx.respond("**:x: Please enter a value between 1 and 100.**")
 
-        await vc.set_volume(vol)
+        # Undocumented breaking set_volume change, see https://github.com/PythonistaGuild/Wavelink/issues/165
+        # For now I will use this workaround.
+        vol_filter = wavelink.Filter(volume=vol / 100)
+        await vc.set_filter(vol_filter)
+        vc.volume = vol
         await ctx.respond(f"**:level_slider: Set volume to {vol}%**")
 
     @commands.guild_only()
@@ -656,7 +684,7 @@ class Music(commands.Cog):
             )
 
             embed.set_footer(
-                text=f"Page {page_number + 1}/{vc.queue.count}",
+                text=f"Page {page_number + 1}/{len(queue)}",
                 icon_url=self.bot.user.display_avatar.url,
             )
 
@@ -725,14 +753,24 @@ class Music(commands.Cog):
         if vc.is_playing:
             # Create embed
             embed = discord.Embed(title="Now playing", colour=self.emb_colour)
-            embed.description = f"**[`{vc.track.title}`]({vc.track.uri})**\n\n"
-            embed.set_thumbnail(url=vc.track.thumbnail)
+            embed.description = (
+                f"**[`{vc.track.title}`]({vc.track.uri})**\n\n"
+                if vc.track.uri
+                else f"**`{vc.track.title}`**\n\n"
+            )
+            try:
+                embed.set_thumbnail(url=vc.track.thumbnail)
+            except AttributeError:
+                pass
 
             embed.add_field(
                 name="Playing for",
-                value=f"`{round(vc.position)}/{round(vc.track.duration)}`",
+                value=f"{round(vc.position)}s/{round(vc.track.duration)}s",
             )
-            embed.add_field(name="Author", value=str(vc.track.author))
+            embed.add_field(
+                name="Author",
+                value=f"`{vc.track.author if vc.track.author else 'Unknown'}`",
+            )
             embed.add_field(name="Queue Length", value=str(vc.queue.count))
             embed.add_field(name="Volume", value=f"**`{vc.volume}%`**")
             embed.add_field(name="DJ", value=vc.dj.mention)
