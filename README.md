@@ -1,16 +1,17 @@
 ![GitHub](https://img.shields.io/github/license/Wavy-Bot/bot?color=A42E2B&logo=gnu&logoColor=white&style=for-the-badge)
 [![Discord](https://img.shields.io/discord/710436465938530307?color=%235865F2&label=Discord&logo=discord&logoColor=white&style=for-the-badge)](https://discord.wavybot.com)
 ![Python version](https://img.shields.io/badge/Python-3.8-blue?style=for-the-badge&logo=python&logoColor=ffce3d&color=376f9e)
+![GitHub Stars](https://img.shields.io/github/stars/Wavy-Bot/bot?color=%23ffce3d&logo=github&style=for-the-badge)
+
+[![Logo Image](https://repository-images.githubusercontent.com/376505145/389bce00-cc35-11eb-8aab-bb86194ee165)](https://wavybot.com)
 
 # Wavy
-
-Wavy is an open-source Discord bot built with [Pycord](https://github.com/Pycord-Development/pycord). Wavy is still in development, so a lot of stuff could change without notice.
+Wavy is an open-source Discord bot built with [Pycord](https://github.com/Pycord-Development/pycord). We are actively looking for contributors and beta testers, if you wish to participate please join [Wavy's Discord server](https://discord.wavybot.com)!
 
 ## Feature requests
 Want a new feature you think is missing? Please [open an issue](https://github.com/Wavy-Bot/bot/issues/new) or join [Wavy's Discord server](https://discord.wavybot.com)!
 
 ## Tools and services used
-
 <table>
   <tr>
     <td align="center"><a href="https://www.python.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/768px-Python-logo-notext.svg.png" width="100px;" alt="Python"/><br /><sub><b>Python 3</b></sub></a><br /></td>
@@ -27,6 +28,8 @@ Please refer to the list of community standards below.
 - [README](https://github.com/Wavy-Bot/bot/blob/main/README.md) (this file)
 - [Code of Conduct](https://github.com/Wavy-Bot/bot/blob/main/CODE_OF_CONDUCT.md)
 - [License](https://github.com/Wavy-Bot/bot/blob/main/LICENSE.md)
+- [To-do list](https://github.com/Wavy-Bot/bot/projects/2)
+- Clear roadmap (to be added)
 - Contributing guidelines (to be added)
 - Issue templates (to be added)
 - Pull request templates (to be added)
@@ -40,14 +43,41 @@ Wavy uses the following versioning pattern:
 - **Patch**: Bug fixes and small improvements.
 
 ## How to use
-This is yet to be added, for now you can use [Wavy's Discord server](https://discord.wavybot.com) to ask for help.
+The following has been tested on Ubuntu 20.04 and Alpine linux 3.16.x.
 
-## To-do list
-Please look at the [GitHub Projects page](https://github.com/Wavy-Bot/bot/projects/2).
+### Prerequisites:
+- A terminal emulator or CMD (if on Windows).
+- [git](https://git-scm.com/downloads)
+- [Python >= 3.8, tested on 3.8.](https://www.python.org/downloads/)
+- [An app on Discord](https://discord.com/developers/applications) with bot usage enabled
+- [A Lavalink instance](https://github.com/freyacodes/Lavalink)
+- [A MongoDB instance](https://www.mongodb.com/)
+- [A Sentry application](https://sentry.io)
+- [A Reddit application](https://www.reddit.com/prefs/apps)
+- [A Spotify application](https://developer.spotify.com/dashboard/applications)
+- [Top.gg API key (optional)](https://top.gg/)
+- [Discord Bots API key (optional)](https://discord.bots.gg/)
+- [Discord Bot List API key (optional)](https://discordbotlist.com/)
+- [Discords API key (optional)](https://discords.com/)
 
-## Where is the old version?
-The old, now depreciated version of Wavy that used Discord.py can be found [here](https://github.com/Wavy-Bot/bot/tree/depreciated). Please do keep in mind that the old and new versions are **not** compatible with each other, nor is the database (the new version uses MongoDB instead of Postgres).
+```bash
+git clone https://github.com/Wavy-Bot/bot.git
+cd bot
+```
+Then copy the `.env.example` file to `.env` and edit it using your preferred text editor.
+
+Afterwards, rename the `lavalink.example.json` file to `lavalink.json` and also edit that.
+
+Finally, start the bot with the following commands:
+```bash
+# You may need to use the python, pip3 or pip command(s) instead of python3
+# depending on your platform and/or linux distribution.
+python3 -m pip install pipenv
+pipenv install
+python3 main.py
+```
+
+Need more help? Join [Wavy's Discord server](https://discord.wavybot.com)!
 
 ## License
-
 See [LICENSE.MD](https://github.com/Wavy-Bot/bot/blob/main/LICENSE.md).
