@@ -15,6 +15,7 @@ Want a new feature you think is missing? Please [open an issue](https://github.c
 <table>
   <tr>
     <td align="center"><a href="https://www.python.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/768px-Python-logo-notext.svg.png" width="100px;" alt="Python"/><br /><sub><b>Python 3</b></sub></a><br /></td>
+    <td align="center"><a href="https://pycord.dev/"><img src="https://pycord.dev/static/img/logo.png?size=100" width="100px;" alt="Pycord"/><br /><sub><b>Pycord</b></sub></a><br /></td>
     <td align="center"><a href="https://www.mongodb.com/"><img src="https://cdn.iconscout.com/icon/free/png-256/mongodb-3629020-3030245.png" width="100px;" alt="MongoDB"/><br /><sub><b>MongoDB</b></sub></a><br /></td>
     <td align="center"><a href="https://github.com/Devoxin/Lavalink.py"><img src="https://serux.pro/9e83af1581.png" width="100px;" alt="Lavalink.py"/><br /><sub><b>Lavalink.py</b></sub></a><br /></td>
     <td align="center"><a href="https://www.jetbrains.com/pycharm/"><img src="https://i2.wp.com/clay-atlas.com/wp-content/uploads/2019/10/PyCharm_Logo.svg_.png?resize=1024%2C1024&ssl=1" width="100px;" alt="PyCharm"/><br /><sub><b>PyCharm</b></sub></a><br /></td>
