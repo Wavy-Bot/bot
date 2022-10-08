@@ -334,7 +334,7 @@ class Music(commands.Cog):
                         for track in tracks:
                             await vc.put_in_queue(track, position)
                         track_title = query
-            except (wavelink.LoadTrackError, wavelink.LavalinkException):
+            except wavelink.LoadTrackError:
                 raise errors.SongNotFound
 
         if not vc.is_playing():
