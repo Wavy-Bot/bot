@@ -130,15 +130,31 @@ class Music(commands.Cog):
     async def on_wavelink_track_stuck(
         self, player: Player, track: wavelink.Track, reason: str
     ) -> None:
-        """Event fired when a track ends."""
+        """Event fired when a track is stuck."""
+        await player.ctx.send(
+            "**:disappointed_relieved: Uh-oh! The track seems to have gotten stuck for some reason."
+            + (
+                " I'm going to attempt to play the next song.**"
+                if not player.queue.is_empty
+                else "**"
+            )
+        )
+
         await player.do_next()
 
     @commands.Cog.listener()
     async def on_wavelink_track_exception(
-        self, player: Player, track: wavelink.Track, reason: str
+        self, player: Player, track: wavelink.Track, error: any
     ) -> None:
-        """Event fired when a track ends."""
-        await player.do_next()
+        """Event fired when a track exception occurs."""
+        await player.ctx.send(
+            "**:disappointed_relieved: Uh-oh! Something broke while playing the track."
+            + (
+                " I'm going to attempt to play the next song.**"
+                if not player.queue.is_empty
+                else "**"
+            )
+        )
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -318,7 +334,7 @@ class Music(commands.Cog):
                         for track in tracks:
                             await vc.put_in_queue(track, position)
                         track_title = query
-            except (wavelink.LoadTrackError, wavelink.LavalinkException):
+            except wavelink.LoadTrackError:
                 raise errors.SongNotFound
 
         if not vc.is_playing():
@@ -474,11 +490,8 @@ class Music(commands.Cog):
         if not 0 < vol <= 100:
             return await ctx.respond("**:x: Please enter a value between 1 and 100.**")
 
-        # Undocumented breaking set_volume change, see https://github.com/PythonistaGuild/Wavelink/issues/165
-        # For now I will use this workaround.
-        vol_filter = wavelink.Filter(volume=vol / 100)
-        await vc.set_filter(vol_filter)
-        vc.volume = vol
+        # Set the volume and respond.
+        await vc.set_volume(vol)
         await ctx.respond(f"**:level_slider: Set volume to {vol}%**")
 
     @commands.guild_only()

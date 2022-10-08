@@ -1,5 +1,3 @@
-## We are actively looking for feedback and suggestions for Wavy, if you have any feedback or suggestions, please let us know in [Wavy's Discord server](https://discord.wavybot.com) or by opening an [issue](https://github.com/Wavy-Bot/bot/issues/new)!
-
 ![GitHub](https://img.shields.io/github/license/Wavy-Bot/bot?color=A42E2B&logo=gnu&logoColor=white&style=for-the-badge)
 [![Discord](https://img.shields.io/discord/710436465938530307?color=%235865F2&label=Discord&logo=discord&logoColor=white&style=for-the-badge)](https://discord.wavybot.com)
 ![Python version](https://img.shields.io/badge/Python-3.8-blue?style=for-the-badge&logo=python&logoColor=ffce3d&color=376f9e)
