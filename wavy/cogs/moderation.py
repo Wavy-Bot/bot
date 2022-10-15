@@ -178,7 +178,7 @@ class Moderation(commands.Cog):
         deleted = await ctx.channel.purge(limit=amount)
 
         embed = discord.Embed(
-            title=f"{len(deleted) - 1} messages have been deleted.",
+            title=f"{len(deleted)} messages have been deleted.",
             colour=self.emb_colour,
         )
 

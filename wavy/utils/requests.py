@@ -76,7 +76,7 @@ async def update_memes() -> list:
 
 async def post_botlist_data(bot_id: int, server_count: int, shards: int) -> None:
     """Makes a request to all the bot lists Wavy is listed on."""
-    botlist_list = [
+    botlists = [
         {
             "url": f"https://top.gg/api/bots/{bot_id}/stats",
             "headers": {
@@ -84,7 +84,9 @@ async def post_botlist_data(bot_id: int, server_count: int, shards: int) -> None
                 "Content-Type": "application/json",
             },
             "data": {"server_count": server_count, "shard_count": shards},
-        },
+        }
+        if os.getenv("TOPGG_API_KEY")
+        else None,
         {
             "url": f"https://discord.bots.gg/api/v1/bots/{bot_id}/stats",
             "headers": {
@@ -92,7 +94,9 @@ async def post_botlist_data(bot_id: int, server_count: int, shards: int) -> None
                 "Content-Type": "application/json",
             },
             "data": {"guildCount": server_count, "shardCount": shards},
-        },
+        }
+        if os.getenv("BOTSGG_API_KEY")
+        else None,
         {
             "url": f"https://discordbotlist.com/api/v1/bots/{bot_id}/stats",
             "headers": {
@@ -100,7 +104,9 @@ async def post_botlist_data(bot_id: int, server_count: int, shards: int) -> None
                 "Content-Type": "application/json",
             },
             "data": {"guilds": server_count},
-        },
+        }
+        if os.getenv("DISCORDBOTLIST_API_KEY")
+        else None,
         {
             "url": f"https://discords.com/bots/api/bot/{bot_id}",
             "headers": {
@@ -108,16 +114,27 @@ async def post_botlist_data(bot_id: int, server_count: int, shards: int) -> None
                 "Content-Type": "application/json",
             },
             "data": {"server_count": server_count},
-        },
+        }
+        if os.getenv("DISCORDS_API_KEY")
+        else None,
     ]
+
+    # See if there are any None values in the list and remove them.
+    botlists = [i for i in botlists if i is not None]
+
+    # If there are no items left in the list, return.
+    if not botlists:
+        return
 
     async with aiohttp.ClientSession() as cs:
         await asyncio.gather(
             *[
                 cs.post(
-                    url=botlist["url"], headers=botlist["headers"], json=botlist["data"]
+                    url=botlist["url"],
+                    headers=botlist["headers"],
+                    json=botlist["data"],
                 )
-                for botlist in botlist_list
+                for botlist in botlists
             ],
             return_exceptions=False,
         )

@@ -191,6 +191,7 @@ celerybeat.pid
 
 # Environments
 .env
+.env.bak
 .venv
 env/
 venv/
@@ -227,3 +228,4 @@ cython_debug/
 
 # Wavelink
 lavalink.json
+lavalink.json.bak

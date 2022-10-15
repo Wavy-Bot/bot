@@ -10,7 +10,7 @@ from wavy.utils import database
 from discord.ext import commands
 from dotenv import load_dotenv
 
-__VERSION__ = "1.2.6"
+__VERSION__ = "1.2.7"
 
 load_dotenv()
 
@@ -107,6 +107,13 @@ class Wavy(discord.AutoShardedBot, ABC):
                 try:
                     cog = f"wavy.cogs.{cog.replace('.py', '')}"
                     self.load_extension(cog)
-                except Exception as e:
-                    print(f"{cog} cannot be loaded.")
-                    raise e
+                except (
+                    discord.ExtensionNotFound,
+                    discord.ExtensionAlreadyLoaded,
+                    discord.NoEntryPointError,
+                    discord.ExtensionFailed,
+                ) as e:
+                    print(
+                        f"{cog} cannot be loaded."
+                        f" See the full exception below:\n{e}"
+                    )
