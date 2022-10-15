@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import json
@@ -105,14 +106,20 @@ class Music(commands.Cog):
             nodes = json.load(f)
 
         for node in nodes.values():
-            await wavelink.NodePool.create_node(
-                bot=self.bot,
-                **node,
-                spotify_client=spotify.SpotifyClient(
-                    client_id=os.environ["SPOTIFY_CLIENT_ID"],
-                    client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
-                ),
-            )
+            try:
+                await wavelink.NodePool.create_node(
+                    bot=self.bot,
+                    **node,
+                    spotify_client=spotify.SpotifyClient(
+                        client_id=os.environ["SPOTIFY_CLIENT_ID"],
+                        client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
+                    ),
+                )
+            except wavelink.errors.AuthorizationFailure as e:
+                print(
+                    "Failed to connect to Lavalink node due to an authorization failure."
+                    f" See the full exception below:\n{e}"
+                )
 
     @commands.Cog.listener()
     async def on_wavelink_node_ready(self, node: wavelink.Node) -> None:
@@ -813,4 +820,10 @@ class Music(commands.Cog):
 
 def setup(bot: commands.Bot):
     """Add cog to bot"""
+    if not os.path.exists("lavalink.json"):
+        raise discord.ApplicationCommandError(
+            "Lavalink configuration file could not be found."
+            " Please create a file called `lavalink.json` in the root directory of your bot"
+            " and fill it out with the correct information."
+        )
     bot.add_cog(Music(bot))

@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  bot:
+    build: .
+    volumes:
+        - wavy_data:/app
+    depends_on:
+      - mongo
+#      - lavalink
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodb_data:/data/db
+# Removed due to issues with setting the config.
+#  lavalink:
+#    image: fredboat/lavalink:latest
+#    ports:
+#      - "2333:8080" # Without an application.yml, the port is 8080
+#    volumes:
+#        - lavalink_data:/opt/Lavalink
+volumes:
+  wavy_data:
+  mongodb_data:
+#  lavalink_data:
