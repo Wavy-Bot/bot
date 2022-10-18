@@ -6,7 +6,7 @@ services:
         - wavy_data:/app
     depends_on:
       - mongo
-#      - lavalink
+      - lavalink
   mongo:
     image: mongo:latest
     restart: always
@@ -17,14 +17,13 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
       - mongodb_data:/data/db
-# Removed due to issues with setting the config.
-#  lavalink:
-#    image: fredboat/lavalink:latest
-#    ports:
-#      - "2333:8080" # Without an application.yml, the port is 8080
-#    volumes:
-#        - lavalink_data:/opt/Lavalink
+  lavalink:
+    image: ghcr.io/wavy-bot/lavalink:main
+    ports:
+      - "2333:2333"
+    volumes:
+        - lavalink_data:/opt/Lavalink
 volumes:
   wavy_data:
   mongodb_data:
-#  lavalink_data:
+  lavalink_data:

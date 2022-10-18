@@ -89,7 +89,7 @@ python3 main.py
 If you want to use Docker instead, you can use the following commands:
 ```bash
 docker volume create wavy-data
-docker run -d --name wavy -v wavy-data:/app ghcr.io/wavy-bot/bot
+docker run -d --name wavy -v wavy-data:/app ghcr.io/wavy-bot/bot:release
 ```
 
 Need more help? Join [Wavy's Discord server](https://discord.wavybot.com)!
