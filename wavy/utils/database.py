@@ -1,6 +1,7 @@
 import os
 import random
 
+from typing import List, Union, Optional
 from datetime import datetime, timedelta
 from . import classes
 from motor import motor_asyncio
@@ -9,28 +10,40 @@ from motor import motor_asyncio
 class Database:
     """Class that contains database-related functions."""
 
-    def __init__(self):
-        database = self.connect()
+    # TODO(Robert): Rewrite this, especially the meme-related functions.
 
-        self.client = database[0]
-        self.db = database[1]
+    def __init__(self):
+        self.client = self.connect()
+        self.db = self.client.wavy
+
+    def __del__(self):
+        self.client.close()
 
     @staticmethod
     def connect() -> motor_asyncio.AsyncIOMotorClient:
-        """Connects to the db."""
+        """Connects to the db.
+
+        :rtype:  motor_asyncio.AsyncIOMotorClient
+        """
         conn_str = os.environ["DB_CONN_STR"]
         client = motor_asyncio.AsyncIOMotorClient(
             conn_str, serverSelectionTimeoutMS=5000
         )
 
-        db = client.wavy
-
-        return client, db
+        return client
 
     async def set_warn(
         self, server_id: int, member_id: int, warn_id: str, reason: str
-    ) -> str:
-        """Sets a warn for a member."""
+    ) -> None:
+        """Sets a warn for a member.
+
+        :param int server_id: The ID of the server.
+        :param int member_id: The ID of the member.
+        :param str warn_id: The ID of the warn.
+        :param str reason: The reason for the warn.
+
+        :rtype:  None
+        """
         collection = self.db.warns
 
         document = {
@@ -40,12 +53,16 @@ class Database:
             "reason": reason,
         }
 
-        result = await collection.insert_one(document)
+        await collection.insert_one(document)
 
-        return result.inserted_id
+    async def fetch_warns(self, member_id: int) -> List[classes.Warn]:
+        """Fetches all warns for a member.
 
-    async def fetch_warns(self, member_id: int) -> list:
-        """Fetches all warns for a member."""
+        :param int member_id: The ID of the member.
+
+        :return:      A list of classes.Warn
+        :rtype:  List[Warn]
+        """
         collection = self.db.warns
 
         cursor = collection.find({"member_id": member_id})
@@ -65,7 +82,14 @@ class Database:
         return warns
 
     async def remove_warn(self, server_id: int, warn_id: str) -> bool:
-        """Removes a warn."""
+        """Removes a warn.
+
+        :param int server_id: The ID of the server.
+        :param str warn_id: The ID of the warn.
+
+        :return: Wether or not the warn could be removed.
+        :rtype:  bool
+        """
         collection = self.db.warns
 
         result = await collection.delete_one(
@@ -82,8 +106,12 @@ class Database:
 
         return document
 
-    async def fetch_meme(self) -> dict or None:
-        """Fetches all memes."""
+    async def fetch_meme(self) -> Optional[classes.RedditPost]:
+        """Fetches all memes.
+
+        :return: A random meme.
+        :rtype:  dict or None
+        """
         collection = self.db.memes
 
         document = await collection.find_one()
@@ -107,8 +135,14 @@ class Database:
                 return meme_class
         return
 
-    async def set_memes(self, memes: list) -> str or None:
-        """Adds memes to the database."""
+    async def set_memes(self, memes: List[dict]) -> Optional[int]:
+        """Adds memes to the database.
+
+        :param list memes: A list of RedditPost objects.
+
+        :return: The memes that were added.
+        :rtype:  int or None
+        """
         collection = self.db.memes
 
         # Delete memes after 15 minutes.
@@ -142,14 +176,18 @@ class Database:
                 await collection.delete_one({"createdAt": old_document["createdAt"]})
 
                 await collection.insert_one(document)
-
             return
         result = await collection.insert_one(document)
 
         return result.inserted_id
 
-    async def update_command_stats(self, command: str):
-        """Updates the command stats."""
+    async def update_command_stats(self, command: str) -> None:
+        """Updates the command stats.
+
+        :param str command: The command to update.
+
+        :rtype:  None
+        """
         collection = self.db.command_stats
 
         # Get the current stats of the command, or create a new one if it doesn't exist.

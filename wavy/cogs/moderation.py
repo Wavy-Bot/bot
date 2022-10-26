@@ -175,6 +175,9 @@ class Moderation(commands.Cog):
         Options:
             amount: The amount of messages to delete.
         """
+        # Send message notifying the user that the messages are being deleted
+        await ctx.respond(f"Clearing {amount} messages, please wait...", ephemeral=True)
+
         deleted = await ctx.channel.purge(limit=amount)
 
         embed = discord.Embed(
@@ -187,7 +190,7 @@ class Moderation(commands.Cog):
             icon_url=self.bot.user.display_avatar.url,
         )
 
-        await ctx.respond(embed=embed)
+        await ctx.send(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
@@ -197,6 +200,9 @@ class Moderation(commands.Cog):
 
         Clears all of the messages from the current channel.
         """
+        # Send message notifying the user that the messages are being deleted
+        await ctx.respond("Nuking all messages, please wait...", ephemeral=True)
+
         await ctx.channel.purge()
 
         embed = discord.Embed(title="Nuked all messages.", colour=self.emb_colour)
@@ -210,7 +216,7 @@ class Moderation(commands.Cog):
             icon_url=self.bot.user.display_avatar.url,
         )
 
-        await ctx.respond(embed=embed)
+        await ctx.send(embed=embed)
 
     @commands.guild_only()
     @commands.slash_command()
