@@ -20,6 +20,7 @@ wavelink = "*"
 [dev-packages]
 # [requires]
 # python_version = "3.8"
+mypy = "*"
 
 [pipenv]
 allow_prereleases = true
