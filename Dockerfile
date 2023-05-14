@@ -15,7 +15,6 @@ ENV EMB_ERR_COLOUR=16399360
 
 ENV SUPPORT_SERVER_URL="https://discord.wavybot.com"
 
-RUN go get -d -v . && \
-    go build -o wavy cmd/wavy/main.go
+RUN go build -o wavy cmd/wavy/main.go
 
-CMD ["/app/wavy"]
+CMD ["./wavy"]
