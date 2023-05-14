@@ -1,9 +1,0 @@
-{
-  "node_1": {
-    "host": "lavalink",
-    "port": 2333,
-    "password": "youshallnotpass",
-    "identifier": "node_1",
-    "region": "europe"
-  }
-}

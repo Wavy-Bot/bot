@@ -1,16 +1,18 @@
 {
-  "node_1": {
-    "host": "0.0.0.0",
-    "port": 2333,
-    "password": "",
-    "identifier": "node_1",
-    "region": "europe"
-  },
-  "node_2": {
-    "host": "0.0.0.0",
-    "port": 2333,
-    "password": "",
-    "identifier": "node_2",
-    "region": "us_east"
-  }
+  "nodes":[
+    {
+      "name": "node_1",
+      "address": "localhost:2333",
+      "password": "password",
+      "secure": false,
+      "session_id": ""
+    },
+    {
+      "name": "node_2",
+      "address": "localhost:443",
+      "password": "password",
+      "secure": true,
+      "session_id": ""
+    }
+  ]
 }
