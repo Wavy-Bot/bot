@@ -4,9 +4,9 @@ go 1.20
 
 require (
 	github.com/caarlos0/env/v8 v8.0.0
-	github.com/disgoorg/disgo v0.16.5-0.20230511205658-3eb45b614935
+	github.com/disgoorg/disgo v0.16.5
 	github.com/disgoorg/disgolink/v2 v2.0.1
-	github.com/disgoorg/json v1.0.0
+	github.com/disgoorg/json v1.1.0
 	github.com/disgoorg/paginator v0.0.0-20230104145353-f988d828ede9
 	github.com/disgoorg/snowflake/v2 v2.0.1
 	github.com/getsentry/sentry-go v0.20.0
