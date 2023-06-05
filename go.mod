@@ -12,7 +12,7 @@ require (
 	github.com/getsentry/sentry-go v0.20.0
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/makasim/sentryhook v0.4.2
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
