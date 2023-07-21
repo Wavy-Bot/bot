@@ -3,15 +3,12 @@ package main
 import (
 	"context"
 	"github.com/disgoorg/disgo/bot"
-	"github.com/disgoorg/disgolink/v2/disgolink"
 	"github.com/disgoorg/paginator"
-	"github.com/disgoorg/snowflake/v2"
 	"github.com/getsentry/sentry-go"
 	"github.com/makasim/sentryhook"
 	log "github.com/sirupsen/logrus"
 	"github.com/wavy-bot/bot/commands"
 	"github.com/wavy-bot/bot/dbot"
-	"github.com/wavy-bot/bot/models"
 	"os"
 	"os/signal"
 	"runtime"
@@ -21,7 +18,7 @@ import (
 )
 
 // Version of the bot.
-const Version = "2.0.0-alpha.1"
+const Version = "2.0.0-alpha.2"
 
 func init() {
 	// Set the logger
@@ -81,24 +78,8 @@ func main() {
 	dbot.B.Paginator = p
 
 	// Set up the bot
-	if err := dbot.B.Setup(h, dbot.B.Paginator, bot.NewListenerFunc(dbot.B.OnReady), bot.NewListenerFunc(dbot.B.OnVoiceStateUpdate), bot.NewListenerFunc(dbot.B.OnVoiceServerUpdate)); err != nil {
+	if err := dbot.B.Setup(h, dbot.B.Paginator, bot.NewListenerFunc(dbot.B.OnReady)); err != nil {
 		dbot.B.Logger.Fatal("error while setting up wavy: ", err)
-	}
-
-	// Create Lavalink client
-	dbot.B.Lavalink.Client = disgolink.New(dbot.B.Client.ID(),
-		disgolink.WithListenerFunc(dbot.B.OnPlayerPause),
-		disgolink.WithListenerFunc(dbot.B.OnPlayerResume),
-		disgolink.WithListenerFunc(dbot.B.OnTrackStart),
-		disgolink.WithListenerFunc(dbot.B.OnTrackEnd),
-		disgolink.WithListenerFunc(dbot.B.OnTrackException),
-		disgolink.WithListenerFunc(dbot.B.OnTrackStuck),
-		disgolink.WithListenerFunc(dbot.B.OnWebSocketClosed),
-	)
-
-	// Create Lavalink queues map
-	dbot.B.Lavalink.Queues = &models.LavalinkQueueManager{
-		Queues: make(map[snowflake.ID]*models.LavalinkQueue),
 	}
 
 	// Sync commands
@@ -121,12 +102,6 @@ func main() {
 	}
 	// Defer closing the client
 	defer dbot.B.Client.Close(context.TODO())
-
-	// Connect to Lavalink
-	_, err = dbot.B.AddLavalinkNodes(ctx)
-	if err != nil {
-		dbot.B.Logger.Fatal("[DisGoLink] Error while adding Lavalink nodes: ", err)
-	}
 
 	// Wait for CTRL-C to exit
 	dbot.B.Logger.Info("Wavy is now running. Press CTRL-C to exit.")

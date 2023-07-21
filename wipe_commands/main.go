@@ -102,5 +102,5 @@ func main() {
 	defer client.Close(context.TODO())
 
 	// Quit the program
-	os.Exit(0)
+	return
 }

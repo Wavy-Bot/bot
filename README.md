@@ -1,4 +1,4 @@
-<h4 align="center">Wavy is currently in alpha. This means that the bot is not yet ready for public use and things <i>will</i> break. ⚠️</h4>
+<h4 align="center">⚠️ Wavy is currently in alpha. This means that the bot is not yet ready for public use and things <i>will</i> break. ⚠️</h4>
 
 <p align="center">
     <a href="https://wavybot.com">
@@ -13,7 +13,7 @@
     <a href="https://discord.wavybot.com">
         <img src="https://img.shields.io/discord/710436465938530307?color=%235865F2&labelColor=%235865F2&label=Discord&logo=discord&logoColor=white&style=for-the-badge" alt="Wavy's Discord support server member count">
     </a>
-    <a href="go.mod.old">
+    <a href="go.mod">
         <img src="https://img.shields.io/github/go-mod/go-version/Wavy-Bot/bot?style=for-the-badge" alt="Go version">
     </a>
     <a href="https://github.com/Wavy-Bot/bot/stargazers">
@@ -79,7 +79,6 @@ The following has been tested on Alpine linux 3.17.x.
 - [git](https://git-scm.com/downloads)
 - [Go, tested on 1.20.3](https://www.python.org/downloads/)
 - [An app on Discord](https://discord.com/developers/applications) with bot usage enabled
-- [A Lavalink instance](https://github.com/freyacodes/Lavalink)
 - [A Sentry application](https://sentry.io)
 
 ```bash
@@ -88,11 +87,8 @@ cd bot
 ```
 Then copy the `.env.example` file to `.env` and edit it using your preferred text editor.
 
-Afterwards, rename the `lavalink.example.json` file to `lavalink.json` and also edit that.
-
-Finally, start the bot with the following commands:
+Afterwards, start the bot with the following commands:
 ```bash
-go get
 go build -o wavy cmd/wavy/main.go
 ./wavy
 ```

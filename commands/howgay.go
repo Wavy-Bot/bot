@@ -6,7 +6,6 @@ import (
 	"github.com/disgoorg/disgo/handler"
 	"github.com/wavy-bot/bot/dbot"
 	"github.com/wavy-bot/bot/utils"
-	"math/rand"
 )
 
 // HowGayHandler is the handler for the howgay command.
@@ -23,8 +22,11 @@ func HowGayHandler(e *handler.CommandEvent) error {
 		member = *e.Member()
 	}
 
-	// Get a random size
-	percentage := rand.Intn(100)
+	// Get a random percentage
+	percentage, err := utils.RandomNumber(100)
+	if err != nil {
+		return err
+	}
 	bar := utils.ProgressBar(percentage)
 
 	return e.CreateMessage(discord.NewMessageCreateBuilder().

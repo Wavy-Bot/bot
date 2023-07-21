@@ -6,7 +6,6 @@ import (
 	"github.com/disgoorg/disgo/handler"
 	"github.com/wavy-bot/bot/dbot"
 	"github.com/wavy-bot/bot/utils"
-	"math/rand"
 )
 
 // PPHandler is the handler for the pp command.
@@ -23,7 +22,10 @@ func PPHandler(e *handler.CommandEvent) error {
 	}
 
 	// Get a random size
-	size := rand.Intn(20)
+	size, err := utils.RandomNumber(20)
+	if err != nil {
+		return err
+	}
 	pp := utils.PP(size)
 
 	return e.CreateMessage(discord.NewMessageCreateBuilder().

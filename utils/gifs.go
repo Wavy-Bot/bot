@@ -1,6 +1,9 @@
 package utils
 
-import "math/rand"
+import (
+	"crypto/rand"
+	"math/big"
+)
 
 var KissGIFs = []string{
 	"https://media1.tenor.com/images/4b5d5afd747fe053ed79317628aac106/tenor.gif",
@@ -60,15 +63,30 @@ var SlapGIFs = []string{
 
 // KissGIF returns a random kiss gif.
 func KissGIF() string {
-	return KissGIFs[rand.Intn(len(KissGIFs))]
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(KissGIFs))))
+	if err != nil {
+		return ""
+	}
+	n := nBig.Int64()
+	return KissGIFs[n]
 }
 
 // HugGIF returns a random hug gif.
 func HugGIF() string {
-	return HugGIFs[rand.Intn(len(HugGIFs))]
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(HugGIFs))))
+	if err != nil {
+		return ""
+	}
+	n := nBig.Int64()
+	return HugGIFs[n]
 }
 
 // SlapGIF returns a random slap gif.
 func SlapGIF() string {
-	return SlapGIFs[rand.Intn(len(SlapGIFs))]
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(SlapGIFs))))
+	if err != nil {
+		return ""
+	}
+	n := nBig.Int64()
+	return SlapGIFs[n]
 }

@@ -45,10 +45,6 @@ func CreateHandler() *handler.Mux {
 	// Register the slap command
 	h.Command("/slap", SlapHandler)
 
-	// Music commands
-	// Register the play command
-	h.Command("/play", PlayHandler)
-
 	// User commands //
 
 	// General commands

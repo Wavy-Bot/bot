@@ -66,7 +66,7 @@ func UserInfoHandler(e *handler.CommandEvent) error {
 				},
 				{
 					Name:  "Roles",
-					Value: fmt.Sprintf("%s", strings.Join(roles, ", ")),
+					Value: strings.Join(roles, ", "),
 				},
 			}...).
 			SetThumbnail(member.User.EffectiveAvatarURL(discord.WithSize(4096))).

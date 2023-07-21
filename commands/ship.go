@@ -6,7 +6,6 @@ import (
 	"github.com/disgoorg/disgo/handler"
 	"github.com/wavy-bot/bot/dbot"
 	"github.com/wavy-bot/bot/utils"
-	"math/rand"
 )
 
 // ShipHandler is the handler for the ship command.
@@ -19,8 +18,11 @@ func ShipHandler(e *handler.CommandEvent) error {
 	first := data.Member("first")
 	second := data.Member("second")
 
-	// Get a random size
-	percentage := rand.Intn(100)
+	// Get a random percentage
+	percentage, err := utils.RandomNumber(100)
+	if err != nil {
+		return err
+	}
 	bar := utils.ProgressBar(percentage)
 
 	return e.CreateMessage(discord.NewMessageCreateBuilder().

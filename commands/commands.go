@@ -19,7 +19,6 @@ var CommandCategories = []CommandCategory{
 	GeneralCommands,
 	FunCommands,
 	InteractionCommands,
-	MusicCommands,
 }
 
 // Commands contains all commands.
@@ -229,40 +228,6 @@ var InteractionCommands = CommandCategory{
 		},
 		discord.UserCommandCreate{
 			Name:         "Slap",
-			DMPermission: utils.NewFalse(),
-		},
-	},
-}
-
-// MusicCommands contains all music commands.
-var MusicCommands = CommandCategory{
-	Name: "Music",
-	Commands: []discord.ApplicationCommandCreate{
-		discord.SlashCommandCreate{
-			Name:        "play",
-			Description: "🎶 Play music from your favorite sites. Supports URLs and search queries.",
-			Options: []discord.ApplicationCommandOption{
-				discord.ApplicationCommandOptionString{
-					Name:        "query",
-					Description: "The song to play. Can be a link or a search query.",
-					Required:    true,
-				},
-				discord.ApplicationCommandOptionString{
-					Name:        "position",
-					Description: "The position in the queue to play the song at. Defaults to the end of the queue.",
-					Required:    false,
-					Choices: []discord.ApplicationCommandOptionChoiceString{
-						{
-							Name:  "Start",
-							Value: "Start",
-						},
-						{
-							Name:  "End",
-							Value: "End",
-						},
-					},
-				},
-			},
 			DMPermission: utils.NewFalse(),
 		},
 	},

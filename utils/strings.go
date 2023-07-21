@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"strings"
 )
 
@@ -41,7 +42,12 @@ func PP(size int) string {
 
 // EightBallMessage returns a random 8ball message.
 func EightBallMessage() string {
-	return EightBallMessages[rand.Intn(len(EightBallMessages))]
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(EightBallMessages))))
+	if err != nil {
+		return ""
+	}
+	n := nBig.Int64()
+	return EightBallMessages[n]
 }
 
 // StringBasedOnPercentage returns a string based on the percentage provided.
