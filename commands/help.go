@@ -58,12 +58,6 @@ func HelpHandler(e *handler.CommandEvent) error {
 		if err != nil {
 			return err
 		}
-	case "Music":
-		// Create the fields for the Music category
-		fields, err = CreateEmbedFieldsForCategory(MusicCommands)
-		if err != nil {
-			return err
-		}
 	}
 
 	// Create a new paginator.Pages
