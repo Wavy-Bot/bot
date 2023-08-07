@@ -9,7 +9,7 @@ require (
 	github.com/disgoorg/json v1.0.0
 	github.com/disgoorg/paginator v0.0.0-20230104145353-f988d828ede9
 	github.com/disgoorg/snowflake/v2 v2.0.1
-	github.com/getsentry/sentry-go v0.20.0
+	github.com/getsentry/sentry-go v0.23.0
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/makasim/sentryhook v0.4.2
 	github.com/sirupsen/logrus v1.9.0
